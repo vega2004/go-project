@@ -27,13 +27,13 @@ type TemplateRenderer struct {
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	// En producción, menos logs (puedes dejarlos para debug)
 	if os.Getenv("RAILWAY_ENVIRONMENT") == "" {
-		fmt.Printf("\n🎨 [RENDERER] Renderizando template: '%s'\n", name)
+		fmt.Printf("\n [RENDERER] Renderizando template: '%s'\n", name)
 	}
 
 	// Buscar el template
 	tmpl := t.templates.Lookup(name)
 	if tmpl == nil {
-		fmt.Printf("❌ ERROR: Template '%s' no encontrado!\n", name)
+		fmt.Printf(" ERROR: Template '%s' no encontrado!\n", name)
 		return fmt.Errorf("template '%s' not found", name)
 	}
 
@@ -41,7 +41,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	buf := new(strings.Builder)
 	err := tmpl.Execute(buf, data)
 	if err != nil {
-		fmt.Printf("❌ ERROR ejecutando template: %v\n", err)
+		fmt.Printf(" ERROR ejecutando template: %v\n", err)
 		return err
 	}
 
@@ -58,16 +58,16 @@ func main() {
 	if port == "" {
 		port = "8080" // Default para desarrollo local
 	}
-	fmt.Printf("🚀 Puerto: %s\n", port)
+	fmt.Printf(" Puerto: %s\n", port)
 
 	// Conexión a la base de datos
 	fmt.Println("1. Conectando a PostgreSQL...")
 	db, err := config.ConnectDB()
 	if err != nil {
-		log.Fatal("❌ Error conectando a la base de datos:", err)
+		log.Fatal(" Error conectando a la base de datos:", err)
 	}
 	defer db.Close()
-	fmt.Println("✅ Conexión a DB exitosa")
+	fmt.Println(" Conexión a DB exitosa")
 
 	// Inicializar Echo
 	fmt.Println("\n2. Inicializando Echo...")
@@ -82,7 +82,7 @@ func main() {
 	}))
 	e.Use(middleware.Secure()) // Middleware de seguridad para producción
 	e.Use(middleware.Gzip())   // Compresión GZIP para mejor performance
-	fmt.Println("✅ Middlewares configurados")
+	fmt.Println(" Middlewares configurados")
 
 	// *** CONFIGURAR TEMPLATE RENDERER ***
 	fmt.Println("\n3. Configurando templates...")
@@ -90,7 +90,7 @@ func main() {
 	// Usar path relativo que funcione en cualquier entorno
 	cwd, err := os.Getwd()
 	if err != nil {
-		log.Fatal("❌ Error obteniendo directorio actual:", err)
+		log.Fatal(" Error obteniendo directorio actual:", err)
 	}
 
 	// Para debug: mostrar estructura de directorios
@@ -108,13 +108,13 @@ func main() {
 
 	// Verificar si existe la carpeta templates
 	if _, err := os.Stat(templatesDir); os.IsNotExist(err) {
-		log.Fatalf("❌ Carpeta 'templates' no encontrada en: %s", templatesDir)
+		log.Fatalf(" Carpeta 'templates' no encontrada en: %s", templatesDir)
 	}
 
 	// Cargar templates
 	templates, err := template.ParseGlob(filepath.Join(templatesDir, "*.html"))
 	if err != nil {
-		log.Fatal("❌ Error cargando templates:", err)
+		log.Fatal(" Error cargando templates:", err)
 	}
 
 	renderer := &TemplateRenderer{
@@ -123,48 +123,48 @@ func main() {
 	e.Renderer = renderer
 
 	// Verificar templates cargados
-	fmt.Printf("   ✅ Templates cargados: %d\n", len(renderer.templates.Templates()))
+	fmt.Printf("    Templates cargados: %d\n", len(renderer.templates.Templates()))
 	for i, t := range renderer.templates.Templates() {
 		fmt.Printf("   %d. %s\n", i+1, t.Name())
 	}
 
 	// Servir archivos estáticos - IMPORTANTE para Railway
 	staticDir := filepath.Join(cwd, "static")
-	fmt.Printf("   📁 Serviendo archivos estáticos desde: %s\n", staticDir)
+	fmt.Printf("    Serviendo archivos estáticos desde: %s\n", staticDir)
 
 	// Verificar si existe la carpeta static
 	if _, err := os.Stat(staticDir); os.IsNotExist(err) {
-		fmt.Printf("   ⚠️  Carpeta 'static' no encontrada, creando...\n")
+		fmt.Printf("     Carpeta 'static' no encontrada, creando...\n")
 		os.MkdirAll(staticDir, 0755)
 	}
 
 	e.Static("/static", staticDir)
-	fmt.Println("✅ Archivos estáticos configurados")
+	fmt.Println(" Archivos estáticos configurados")
 
 	// *** MIDDLEWARE DE BREADCRUMBS ***
 	fmt.Println("\n4. Configurando middleware de breadcrumbs...")
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			breadcrumbs := []map[string]string{
-				{"name": "🏠 Inicio", "url": "/"},
+				{"name": " Inicio", "url": "/"},
 			}
 
 			currentPath := c.Path()
 
 			// Solo log en desarrollo
 			if os.Getenv("RAILWAY_ENVIRONMENT") == "" {
-				fmt.Printf("   🍞 [MIDDLEWARE] Path actual: %s\n", currentPath)
+				fmt.Printf("    [MIDDLEWARE] Path actual: %s\n", currentPath)
 			}
 
 			if currentPath == "/form" {
 				breadcrumbs = append(breadcrumbs, map[string]string{
-					"name": "📝 Registro",
+					"name": " Registro",
 					"url":  "/form",
 				})
 			} else if currentPath == "/success" {
 				breadcrumbs = append(breadcrumbs,
-					map[string]string{"name": "📝 Registro", "url": "/form"},
-					map[string]string{"name": "✅ Éxito", "url": "/success"},
+					map[string]string{"name": " Registro", "url": "/form"},
+					map[string]string{"name": " Éxito", "url": "/success"},
 				)
 			} else if currentPath == "/maintenance" {
 				breadcrumbs = append(breadcrumbs, map[string]string{
@@ -183,7 +183,7 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
-	fmt.Println("✅ Capas inicializadas")
+	fmt.Println(" Capas inicializadas")
 
 	// *** RUTAS ***
 	fmt.Println("\n6. Configurando rutas...")
@@ -213,7 +213,7 @@ func main() {
 	e.GET("/success", userHandler.ShowSuccess)
 	e.GET("/maintenance", userHandler.Maintenance)
 
-	fmt.Println("✅ Rutas configuradas")
+	fmt.Println(" Rutas configuradas")
 
 	// Health check para Railway
 	e.GET("/health", func(c echo.Context) error {
@@ -227,20 +227,20 @@ func main() {
 
 	// Iniciar servidor
 	fmt.Println("\n" + strings.Repeat("=", 50))
-	fmt.Printf("🚀 Servidor iniciado en puerto %s\n", port)
+	fmt.Printf(" Servidor iniciado en puerto %s\n", port)
 	if os.Getenv("RAILWAY_ENVIRONMENT") != "" {
-		fmt.Println("✅ Entorno: Railway (Producción)")
+		fmt.Println(" Entorno: Railway (Producción)")
 	} else {
-		fmt.Println("✅ Entorno: Desarrollo Local")
+		fmt.Println(" Entorno: Desarrollo Local")
 	}
-	fmt.Println("📌 Presiona Ctrl+C para detener el servidor")
+	fmt.Println(" Presiona Ctrl+C para detener el servidor")
 	fmt.Println(strings.Repeat("=", 50))
 
 	// IMPORTANTE: Usar el puerto de Railway
 	serverAddr := ":" + port
-	fmt.Printf("🎯 Escuchando en: %s\n", serverAddr)
+	fmt.Printf(" Escuchando en: %s\n", serverAddr)
 
 	if err := e.Start(serverAddr); err != nil && err != http.ErrServerClosed {
-		log.Fatal("❌ Error iniciando servidor:", err)
+		log.Fatal(" Error iniciando servidor:", err)
 	}
 }
