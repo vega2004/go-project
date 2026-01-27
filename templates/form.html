@@ -76,6 +76,8 @@
                             <!-- reCAPTCHA -->
                             <div class="mb-4">
                                 <div class="g-recaptcha" data-sitekey="{{.RecaptchaKey}}"></div>
+                                <!-- CAMPO HIDDEN PARA EL TOKEN (AÑADIDO) -->
+                                <input type="hidden" name="recaptchaToken" id="recaptchaToken">
                             </div>
                             
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -98,18 +100,28 @@
     
     <script>
     document.getElementById('userForm').addEventListener('submit', function(e) {
+        // Prevenir envío inmediato
+        e.preventDefault();
+        
         const recaptchaResponse = grecaptcha.getResponse();
         
         if (!recaptchaResponse) {
-            e.preventDefault();
             alert('Por favor, complete la verificación reCAPTCHA');
             return false;
         }
         
+        // Colocar el token en el campo hidden
+        document.getElementById('recaptchaToken').value = recaptchaResponse;
+        
         // Deshabilitar botón para evitar múltiples envíos
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerHTML = 
-            '<i class="bi bi-hourglass-split"></i> Procesando...';
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+        
+        // Enviar el formulario después de 500ms (para que el usuario vea el cambio)
+        setTimeout(() => {
+            this.submit();
+        }, 500);
         
         return true;
     });
