@@ -15,6 +15,20 @@ func ConnectDB() (*sql.DB, error) {
 	// Railway proporciona DATABASE_URL automáticamente
 	dbURL := os.Getenv("DATABASE_URL")
 
+	// DEBUG: Mostrar info de DATABASE_URL
+	fmt.Printf("🔍 DEBUG: DATABASE_URL length: %d\n", len(dbURL))
+	if dbURL != "" {
+		fmt.Println("✅ DATABASE_URL encontrada - usando Railway")
+		fmt.Printf("🔍 DEBUG: Primeros 50 chars: %s...\n", func() string {
+			if len(dbURL) > 50 {
+				return dbURL[:50]
+			}
+			return dbURL
+		}())
+	} else {
+		fmt.Println("⚠️  DATABASE_URL NO encontrada - usando local")
+	}
+
 	var connStr string
 	var environment string
 
@@ -28,11 +42,14 @@ func ConnectDB() (*sql.DB, error) {
 		environment = "RAILWAY (PRODUCCIÓN)"
 		fmt.Println("📌 [CONFIG] Usando DATABASE_URL de Railway")
 
-		// Asegurar formato correcto para Go
+		// Tu URL ya está en formato postgresql://, está CORRECTO
+		// NO necesitas convertir postgres:// a postgresql://
+		connStr = dbURL
+
+		// Solo convertir si empieza con postgres:// (pero Railway usa postgresql://)
 		if strings.HasPrefix(dbURL, "postgres://") {
+			fmt.Println("⚠️  Convirtiendo postgres:// a postgresql://")
 			connStr = strings.Replace(dbURL, "postgres://", "postgresql://", 1)
-		} else {
-			connStr = dbURL
 		}
 	}
 
@@ -46,34 +63,25 @@ func ConnectDB() (*sql.DB, error) {
 	}
 
 	// Configurar pool de conexiones (IMPORTANTE para producción)
-	db.SetMaxOpenConns(25)             // Máximo de conexiones abiertas
-	db.SetMaxIdleConns(5)              // Conexiones inactivas en pool
+	db.SetMaxOpenConns(10)             // REDUCIDO para Railway (25 era mucho)
+	db.SetMaxIdleConns(3)              // REDUCIDO
 	db.SetConnMaxLifetime(5 * 60 * 60) // 5 horas máximo por conexión
 	db.SetConnMaxIdleTime(30 * 60)     // 30 minutos máximo inactiva
 
-	// Verificar conexión
+	// Verificar conexión con mejor mensaje de error
 	err = db.Ping()
 	if err != nil {
-		return nil, fmt.Errorf("❌ Error al conectar con la base de datos: %v", err)
+		// Mostrar error más detallado
+		errorMsg := fmt.Sprintf("❌ Error al conectar con la base de datos: %v\n", err)
+		errorMsg += fmt.Sprintf("   Environment: %s\n", environment)
+		errorMsg += fmt.Sprintf("   Connection string: %s\n", logSafeConnectionForError(connStr))
+		return nil, fmt.Errorf(errorMsg)
 	}
 
-	// Crear tabla si no existe (solo en desarrollo o primera vez)
-	if environment == "DESARROLLO LOCAL" {
-		err = createTableIfNotExists(db)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		// En producción, solo verificar que la tabla existe
-		err = verifyTableExists(db)
-		if err != nil {
-			log.Printf("⚠️  Advertencia: %v", err)
-			log.Println("📌 Creando tabla en producción...")
-			err = createTableIfNotExists(db)
-			if err != nil {
-				return nil, fmt.Errorf("❌ Error creando tabla en producción: %v", err)
-			}
-		}
+	// SIEMPRE crear tabla si no existe (tanto en desarrollo como producción)
+	err = createTableIfNotExists(db)
+	if err != nil {
+		return nil, fmt.Errorf("❌ Error creando/verificando tabla: %v", err)
 	}
 
 	log.Printf("✅ Conexión a PostgreSQL establecida exitosamente (%s)", environment)
@@ -102,6 +110,17 @@ func logSafeConnection(connStr string, environment string) {
 	log.Printf("🔗 [%s] Conectando a: %s", environment, safeStr)
 }
 
+// Versión para errores (muestra host y puerto)
+func logSafeConnectionForError(connStr string) string {
+	if strings.Contains(connStr, "@") {
+		parts := strings.SplitN(connStr, "@", 2)
+		if len(parts) == 2 {
+			return "postgresql://****@" + parts[1]
+		}
+	}
+	return connStr
+}
+
 func createTableIfNotExists(db *sql.DB) error {
 	query := `
 	CREATE TABLE IF NOT EXISTS users (
@@ -126,28 +145,5 @@ func createTableIfNotExists(db *sql.DB) error {
 	}
 
 	log.Println("✅ Tabla 'users' verificada/creada exitosamente")
-	return nil
-}
-
-func verifyTableExists(db *sql.DB) error {
-	query := `
-	SELECT EXISTS (
-		SELECT FROM information_schema.tables 
-		WHERE table_schema = 'public' 
-		AND table_name = 'users'
-	);
-	`
-
-	var exists bool
-	err := db.QueryRow(query).Scan(&exists)
-	if err != nil {
-		return fmt.Errorf("error verificando tabla: %v", err)
-	}
-
-	if !exists {
-		return fmt.Errorf("la tabla 'users' no existe en la base de datos")
-	}
-
-	log.Println("✅ Tabla 'users' existe en la base de datos")
 	return nil
 }
