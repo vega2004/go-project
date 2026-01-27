@@ -1,0 +1,35 @@
+# Binarios Go
+main
+*.exe
+*.out
+*.app
+
+# Dependencias
+vendor/
+
+# Environment variables
+.env
+*.env
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backup
+*.bak
+*.backup
+*.tmp
+
+# Go test files
+*_test.go
+*.test
