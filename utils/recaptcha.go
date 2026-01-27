@@ -9,7 +9,7 @@ import (
 
 const (
 	// Tus claves de reCAPTCHA
-	recaptchaSecret = "6LddJFgsAAAAAKsLLPWpniGgD2D-LBA_pCVuLZiT"
+	recaptchaSecret = "6LftWVgsAAAAAIY8dnCGeNusvTivj6NRQRCmpZiO"
 	recaptchaURL    = "https://www.google.com/recaptcha/api/siteverify"
 )
 
