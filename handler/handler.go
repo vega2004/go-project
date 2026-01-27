@@ -67,7 +67,7 @@ func (h *UserHandler) ShowForm(c echo.Context) error {
 
 	data := map[string]interface{}{
 		"Title":        "Registro de Usuario",
-		"RecaptchaKey": "6LddJFgsAAAAAH0KIs5RQBMr0dFVleZGPguJ6g9_",
+		"RecaptchaKey": "6LftWVgsAAAAAKvCVA9-nB5KxAxCOSscbqquW78n",
 		"Error":        errorMsg,
 		"breadcrumbs":  breadcrumbs,
 	}
