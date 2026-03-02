@@ -141,9 +141,9 @@ func createTableIfNotExists(db *sql.DB) error {
 
 	_, err := db.Exec(query)
 	if err != nil {
-		return fmt.Errorf("❌ Error al crear tabla: %v", err)
+		return fmt.Errorf("Error al crear tabla: %v", err)
 	}
 
-	log.Println("✅ Tabla 'users' verificada/creada exitosamente")
+	log.Println("Tabla 'users' verificada/creada exitosamente")
 	return nil
 }
