@@ -175,7 +175,7 @@ func main() {
 
 	// *** RUTAS PROTEGIDAS (requieren autenticación) ***
 	protected := e.Group("")
-	protected.Use(handler.AuthMiddleware(sessionManager))
+	protected.Use(handler.AuthMiddleware(sessionManager, authRepo))
 
 	// Dashboard
 	protected.GET("/dashboard", dashboardHandler.ShowDashboard)

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"tu-proyecto/repository"
 	"tu-proyecto/utils"
 
 	"github.com/labstack/echo/v4"
@@ -89,8 +90,22 @@ func BreadcrumbMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// AuthMiddleware maneja la autenticación de usuarios
-func AuthMiddleware(sm *utils.SessionManager) echo.MiddlewareFunc {
+// getRolNombre - Función auxiliar para obtener nombre del rol
+func getRolNombre(roleID int) string {
+	switch roleID {
+	case 1:
+		return "admin"
+	case 2:
+		return "user"
+	case 3:
+		return "editor"
+	default:
+		return "user"
+	}
+}
+
+// AuthMiddleware maneja la autenticación de usuarios y verifica rol actualizado
+func AuthMiddleware(sm *utils.SessionManager, authRepo repository.AuthRepository) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// Lista de rutas públicas (no requieren autenticación)
@@ -119,6 +134,24 @@ func AuthMiddleware(sm *utils.SessionManager) echo.MiddlewareFunc {
 				// No hay sesión, redirigir al login
 				return c.Redirect(http.StatusSeeOther, "/login?error=Por favor inicie sesión para continuar")
 			}
+
+			// --- NUEVA VERIFICACIÓN: Obtener usuario actualizado de BD ---
+			userActualizado, err := authRepo.FindByID(session.UserID)
+			if err == nil && userActualizado.RoleID != session.RoleID {
+				// El rol cambió en BD, actualizar sesión
+				log.Printf("🔄 Rol actualizado para usuario %d: %d → %d",
+					session.UserID, session.RoleID, userActualizado.RoleID)
+
+				session.RoleID = userActualizado.RoleID
+				session.RoleNombre = getRolNombre(userActualizado.RoleID)
+
+				// Actualizar la sesión en el contexto
+				c.Set("user_session", session)
+
+				// También podrías actualizar la cookie si es necesario
+				// sm.UpdateSession(c, session)
+			}
+			// ----------------------------------------------------------
 
 			// Actualizar última actividad de la sesión
 			session.LastActivity = time.Now()
