@@ -95,3 +95,21 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 	h.sessionManager.ClearSession(c)
 	return c.Redirect(http.StatusSeeOther, "/login")
 }
+
+// Maintenance - Página de mantenimiento
+func (h *AuthHandler) Maintenance(c echo.Context) error {
+	data := map[string]interface{}{
+		"Title":       "🔧 Sitio en Mantenimiento",
+		"breadcrumbs": c.Get("breadcrumbs"),
+	}
+	return c.Render(http.StatusOK, "maintenance.html", data)
+}
+
+// ShowSuccess - Página de éxito
+func (h *AuthHandler) ShowSuccess(c echo.Context) error {
+	data := map[string]interface{}{
+		"Title":       "Operación Exitosa",
+		"breadcrumbs": c.Get("breadcrumbs"),
+	}
+	return c.Render(http.StatusOK, "success.html", data)
+}

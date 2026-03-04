@@ -48,7 +48,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 }
 
 func main() {
-	fmt.Println("=== INICIANDO SISTEMA ===")
+	fmt.Println("=== INICIANDO SISTEMA VERSIÓN 2.0 ===")
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -76,7 +76,7 @@ func main() {
 	}))
 	e.Use(middleware.Secure())
 	e.Use(middleware.Gzip())
-	e.Use(handler.ErrorHandler) // Middleware de errores global
+	e.Use(handler.ErrorHandler)
 	fmt.Println(" Middlewares configurados")
 
 	// *** CONFIGURAR TEMPLATE RENDERER ***
@@ -85,15 +85,6 @@ func main() {
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(" Error obteniendo directorio actual:", err)
-	}
-
-	if os.Getenv("RAILWAY_ENVIRONMENT") == "" {
-		fmt.Printf("   Directorio actual: %s\n", cwd)
-		files, _ := os.ReadDir(".")
-		fmt.Println("   Archivos en directorio raíz:")
-		for _, f := range files {
-			fmt.Printf("   - %s\n", f.Name())
-		}
 	}
 
 	templatesDir := filepath.Join(cwd, "templates")
@@ -141,43 +132,46 @@ func main() {
 	authRepo := repository.NewAuthRepository(db)
 	crudRepo := repository.NewCrudRepository(db)
 	imagenRepo := repository.NewImagenRepository(db)
-	perfilRepo := repository.NewPerfilRepository(db) // ← NUEVO
+	perfilRepo := repository.NewPerfilRepository(db)
 
 	// Servicios
 	userService := service.NewUserService(userRepo, authRepo)
 	authService := service.NewAuthService(authRepo)
 	crudService := service.NewCrudService(crudRepo)
 	imagenService := service.NewImagenService(imagenRepo)
-	perfilService := service.NewPerfilService(perfilRepo, authRepo) // ← NUEVO
+	perfilService := service.NewPerfilService(perfilRepo, authRepo)
 
 	// Session Manager
 	sessionManager := utils.NewSessionManager()
 
 	// Handlers
-	userHandler := handler.NewUserHandler(userService)
 	authHandler := handler.NewAuthHandler(authService, sessionManager)
 	dashboardHandler := handler.NewDashboardHandler()
 	crudHandler := handler.NewCrudHandler(crudService)
 	imagenHandler := handler.NewImagenHandler(imagenService)
 	adminHandler := handler.NewAdminHandler(userService)
-	perfilHandler := handler.NewPerfilHandler(perfilService, sessionManager) // ← NUEVO
+	perfilHandler := handler.NewPerfilHandler(perfilService, sessionManager)
 
 	fmt.Println(" Capas inicializadas")
 
 	// *** RUTAS PÚBLICAS (sin autenticación) ***
 	fmt.Println("\n6. Configurando rutas...")
 
-	e.GET("/", userHandler.Welcome)
-	e.GET("/form", userHandler.ShowForm)
-	e.POST("/submit", userHandler.SubmitForm)
-	e.GET("/success", userHandler.ShowSuccess)
-	e.GET("/maintenance", userHandler.Maintenance)
+	// Redirigir raíz a login
+	e.GET("/", func(c echo.Context) error {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	})
 
+	// Autenticación
 	e.GET("/login", authHandler.ShowLogin)
 	e.POST("/do-login", authHandler.DoLogin)
 	e.GET("/register", authHandler.ShowRegister)
 	e.POST("/do-register", authHandler.DoRegister)
 	e.GET("/logout", authHandler.Logout)
+
+	// Páginas públicas
+	e.GET("/maintenance", authHandler.Maintenance)
+	e.GET("/success", authHandler.ShowSuccess)
 
 	// *** RUTAS PROTEGIDAS (requieren autenticación) ***
 	protected := e.Group("")
@@ -201,17 +195,17 @@ func main() {
 	protected.POST("/carrusel/reorder", imagenHandler.Reorder)
 	protected.GET("/carrusel/api/list", imagenHandler.GetCarruselJSON)
 
-	// *** PERFIL DE USUARIO ***
+	// Perfil de Usuario
 	protected.GET("/perfil", perfilHandler.ShowPerfil)
 	protected.POST("/perfil/update", perfilHandler.UpdatePerfil)
 	protected.POST("/perfil/upload", perfilHandler.UploadFoto)
 	protected.POST("/perfil/change-password", perfilHandler.ChangePassword)
-	protected.GET("/perfil/delete-foto", perfilHandler.DeleteFoto) // Opcional
-	protected.GET("/perfil/json", perfilHandler.GetPerfilJSON)     // Para AJAX
+	protected.GET("/perfil/delete-foto", perfilHandler.DeleteFoto)
+	protected.GET("/perfil/json", perfilHandler.GetPerfilJSON)
 
-	// *** RUTAS DE ADMIN (requieren rol de administrador) ***
+	// *** RUTAS DE ADMIN ***
 	adminGroup := protected.Group("/admin")
-	adminGroup.Use(handler.AdminMiddleware) // Middleware que verifica role_id=1
+	adminGroup.Use(handler.AdminMiddleware)
 
 	adminGroup.GET("/users", adminHandler.ShowUsers)
 	adminGroup.GET("/users/create", adminHandler.CreateUserForm)
@@ -219,31 +213,6 @@ func main() {
 	adminGroup.GET("/users/edit/:id", adminHandler.EditUserForm)
 	adminGroup.POST("/users/update/:id", adminHandler.UpdateUser)
 	adminGroup.DELETE("/users/:id", adminHandler.DeleteUser)
-
-	// *** RUTA DE DEBUG (solo desarrollo) ***
-	if os.Getenv("RAILWAY_ENVIRONMENT") == "" {
-		protected.GET("/debug", func(c echo.Context) error {
-			userID := c.Get("user_id")
-			userName := c.Get("user_name")
-			userRole := c.Get("user_role")
-
-			html := "<h1>Debug Info (Autenticado)</h1><pre>"
-			html += fmt.Sprintf("User ID: %v\n", userID)
-			html += fmt.Sprintf("User Name: %v\n", userName)
-			html += fmt.Sprintf("User Role: %v\n", userRole)
-			html += fmt.Sprintf("Entorno: %s\n", os.Getenv("RAILWAY_ENVIRONMENT"))
-			html += fmt.Sprintf("Puerto: %s\n", port)
-			html += fmt.Sprintf("Templates cargados: %d\n", len(renderer.templates.Templates()))
-			for i, t := range renderer.templates.Templates() {
-				html += fmt.Sprintf("%d. %s\n", i+1, t.Name())
-			}
-			html += "</pre>"
-			html += `<p><a href="/dashboard">Dashboard</a> | <a href="/logout">Cerrar Sesión</a> | <a href="/perfil">Perfil</a></p>`
-			return c.HTML(http.StatusOK, html)
-		})
-	}
-
-	fmt.Println(" Rutas configuradas")
 
 	// *** HEALTH CHECK ***
 	e.GET("/health", func(c echo.Context) error {
