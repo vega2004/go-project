@@ -18,71 +18,304 @@
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
     
     <style>
-        .stat-card {
-            transition: all 0.3s ease;
-            border: none;
-            border-radius: 15px;
-            overflow: hidden;
+        /* ===== MEJORAS DE VISIBILIDAD ===== */
+        
+        /* Badge de usuario más visible */
+        .role-badge {
+            background: #052659 !important;
+            color: white !important;
+            font-weight: 700;
+            padding: 8px 18px;
+            border-radius: 50px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: inline-block;
         }
+        
+        /* Estadísticas con mejor contraste */
+        .stat-card {
+            background: linear-gradient(135deg, #021024 0%, #052659 100%) !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(5, 38, 89, 0.2);
+            box-shadow: 0 10px 30px rgba(5, 38, 89, 0.4) !important;
         }
-        .stat-icon {
+        
+        .stat-card h3, .stat-card h6 {
+            color: white !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-weight: 700;
+        }
+        
+        .stat-card .stat-icon {
+            color: rgba(255,255,255,0.3) !important;
             font-size: 2.5rem;
-            opacity: 0.8;
         }
+        
+        /* Badges de información más visibles */
+        .badge.bg-info {
+            background: #5483B3 !important;
+            color: white !important;
+            font-weight: 600;
+            padding: 6px 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .badge.bg-danger {
+            background: #dc3545 !important;
+            color: white !important;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .badge.bg-warning {
+            background: #ffc107 !important;
+            color: #021024 !important;
+            font-weight: 700;
+        }
+        
+        /* Texto en cards más oscuro */
+        .card-text.text-muted {
+            color: #021024 !important;
+            font-weight: 500;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        /* Títulos de módulos */
+        .card-title {
+            color: #052659 !important;
+            font-weight: 800;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Footer más legible */
+        .footer {
+            background: #021024 !important;
+            color: #C1E8FF;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+        
+        .footer h5 {
+            color: white !important;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .footer p, .footer a {
+            color: #C1E8FF !important;
+            opacity: 0.9;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .footer a:hover {
+            color: white !important;
+            opacity: 1;
+            text-decoration: none;
+        }
+        
+        .footer ul li a {
+            color: #C1E8FF !important;
+            text-decoration: none;
+            display: inline-block;
+            padding: 5px 0;
+        }
+        
+        .footer hr {
+            background-color: #C1E8FF !important;
+            opacity: 0.2;
+        }
+        
+        /* Actividad reciente */
+        .activity-item p {
+            color: #052659 !important;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .activity-item small {
+            color: #5483B3 !important;
+            font-weight: 500;
+        }
+        
+        /* Botones de acciones rápidas */
+        .quick-action-btn {
+            background: white !important;
+            border: 2px solid #5483B3 !important;
+            color: #052659 !important;
+            font-weight: 700;
+            padding: 12px 25px;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        
+        .quick-action-btn:hover {
+            background: #5483B3 !important;
+            color: white !important;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(84, 131, 179, 0.4);
+        }
+        
+        .quick-action-btn i {
+            margin-right: 8px;
+        }
+        
+        /* Números de página en paginación */
+        .page-link {
+            color: #052659 !important;
+            font-weight: 600;
+            border: 2px solid #C1E8FF;
+            margin: 0 3px;
+            border-radius: 8px !important;
+        }
+        
+        .page-item.active .page-link {
+            background: #5483B3 !important;
+            color: white !important;
+            border-color: #5483B3;
+        }
+        
+        /* Mejora para el texto "Último acceso" */
+        .text-white-50 {
+            color: #C1E8FF !important;
+            opacity: 1;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        
+        /* Tarjeta de bienvenida */
         .welcome-card {
             background: linear-gradient(135deg, #021024 0%, #052659 100%);
             color: white;
             border-radius: 20px;
             padding: 30px;
             margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(2, 16, 36, 0.4);
         }
-        .quick-action-btn {
-            border-radius: 50px;
-            padding: 12px 25px;
-            font-weight: 600;
+        
+        .welcome-card h2 {
+            color: white !important;
+            font-weight: 800;
+        }
+        
+        .welcome-card .lead {
+            color: #C1E8FF !important;
+            font-weight: 500;
+        }
+        
+        /* Cards de módulos */
+        .card-hover {
+            transition: all 0.3s ease;
+            border: 2px solid #C1E8FF;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(5, 38, 89, 0.2);
+            border-color: #5483B3;
+        }
+        
+        /* Iconos en módulos */
+        .card-hover .bi {
+            color: #5483B3 !important;
             transition: all 0.3s;
         }
-        .quick-action-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(84, 131, 179, 0.3);
+        
+        .card-hover:hover .bi {
+            transform: scale(1.1);
         }
-        .role-badge {
-            padding: 8px 18px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
+        
+        /* Dropdown menu */
+        .dropdown-menu {
+            border: 2px solid #C1E8FF;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(5, 38, 89, 0.2);
         }
-        .activity-timeline {
-            position: relative;
-            padding-left: 30px;
+        
+        .dropdown-item {
+            color: #052659;
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.3s;
         }
-        .activity-timeline::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(to bottom, #5483B3, #7DA0CA);
-        }
-        .activity-item {
-            position: relative;
-            padding-bottom: 20px;
-        }
-        .activity-item::before {
-            content: '';
-            position: absolute;
-            left: -34px;
-            top: 5px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
+        
+        .dropdown-item:hover {
             background: #5483B3;
-            border: 2px solid white;
+            color: white;
+        }
+        
+        .dropdown-item i {
+            margin-right: 10px;
+            color: #5483B3;
+        }
+        
+        .dropdown-item:hover i {
+            color: white;
+        }
+        
+        /* Alertas */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #052659;
+            border-left: 5px solid #28a745;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+        
+        /* Ajustes responsive */
+        @media (max-width: 768px) {
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .card-title {
+                font-size: 1.1rem;
+            }
+            
+            .welcome-card {
+                padding: 20px;
+            }
+            
+            .welcome-card h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .role-badge {
+                display: block;
+                margin-top: 10px;
+                text-align: center;
+            }
+            
+            .quick-action-btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* Animación suave */
+        .stat-card, .card-hover, .quick-action-btn {
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
     </style>
 </head>
@@ -108,7 +341,6 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/perfil"><i class="bi bi-person"></i> Mi Perfil</a></li>
-                            <li><a class="dropdown-item" href="/settings"><i class="bi bi-gear"></i> Configuración</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
                         </ul>
@@ -188,7 +420,7 @@
         <!-- Estadísticas Rápidas -->
         <div class="row mb-4">
             <div class="col-md-3 col-6 mb-3">
-                <div class="card stat-card bg-primary text-white">
+                <div class="card stat-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -201,7 +433,7 @@
                 </div>
             </div>
             <div class="col-md-3 col-6 mb-3">
-                <div class="card stat-card bg-success text-white">
+                <div class="card stat-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -214,7 +446,7 @@
                 </div>
             </div>
             <div class="col-md-3 col-6 mb-3">
-                <div class="card stat-card bg-info text-white">
+                <div class="card stat-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -227,11 +459,11 @@
                 </div>
             </div>
             <div class="col-md-3 col-6 mb-3">
-                <div class="card stat-card bg-warning text-dark">
+                <div class="card stat-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-dark-50 mb-2">Actividad</h6>
+                                <h6 class="text-white-50 mb-2">Actividad</h6>
                                 <h3 class="mb-0">{{.Stats.ActividadHoy}}</h3>
                             </div>
                             <i class="bi bi-activity stat-icon"></i>
@@ -255,13 +487,13 @@
                         <div class="row g-4">
                             <!-- CRUD de Personas -->
                             <div class="col-md-6">
-                                <div class="card h-100 text-center card-hover">
-                                    <div class="card-body">
+                                <div class="card h-100 card-hover">
+                                    <div class="card-body text-center">
                                         <div class="mb-3">
-                                            <i class="bi bi-database" style="font-size: 3.5rem; color: #5483B3;"></i>
+                                            <i class="bi bi-database" style="font-size: 3.5rem;"></i>
                                         </div>
                                         <h5 class="card-title">CRUD de Personas</h5>
-                                        <p class="card-text text-muted small">
+                                        <p class="card-text text-muted">
                                             Administra registros con filtros, paginación y validaciones.
                                         </p>
                                         <div class="mt-3">
@@ -276,13 +508,13 @@
 
                             <!-- Carrusel de Imágenes -->
                             <div class="col-md-6">
-                                <div class="card h-100 text-center card-hover">
-                                    <div class="card-body">
+                                <div class="card h-100 card-hover">
+                                    <div class="card-body text-center">
                                         <div class="mb-3">
-                                            <i class="bi bi-images" style="font-size: 3.5rem; color: #5483B3;"></i>
+                                            <i class="bi bi-images" style="font-size: 3.5rem;"></i>
                                         </div>
                                         <h5 class="card-title">Carrusel de Imágenes</h5>
-                                        <p class="card-text text-muted small">
+                                        <p class="card-text text-muted">
                                             Sube y gestiona imágenes (JPG, PNG, GIF) hasta 5MB.
                                         </p>
                                         <div class="mt-3">
@@ -298,13 +530,13 @@
                             <!-- Panel de Admin (solo visible para administradores) -->
                             {{if eq .UserRole "admin"}}
                             <div class="col-md-6">
-                                <div class="card h-100 text-center card-hover border-warning">
-                                    <div class="card-body">
+                                <div class="card h-100 card-hover border-warning">
+                                    <div class="card-body text-center">
                                         <div class="mb-3">
                                             <i class="bi bi-people-fill" style="font-size: 3.5rem; color: #dc3545;"></i>
                                         </div>
                                         <h5 class="card-title">Administración de Usuarios</h5>
-                                        <p class="card-text text-muted small">
+                                        <p class="card-text text-muted">
                                             Gestiona todos los usuarios, roles y permisos del sistema.
                                         </p>
                                         <div class="mt-3">
@@ -320,13 +552,13 @@
 
                             <!-- Reportes (para todos) -->
                             <div class="col-md-6">
-                                <div class="card h-100 text-center card-hover">
-                                    <div class="card-body">
+                                <div class="card h-100 card-hover">
+                                    <div class="card-body text-center">
                                         <div class="mb-3">
-                                            <i class="bi bi-bar-chart-line" style="font-size: 3.5rem; color: #5483B3;"></i>
+                                            <i class="bi bi-bar-chart-line" style="font-size: 3.5rem;"></i>
                                         </div>
                                         <h5 class="card-title">Reportes y Estadísticas</h5>
-                                        <p class="card-text text-muted small">
+                                        <p class="card-text text-muted">
                                             Visualiza gráficos y reportes del sistema.
                                         </p>
                                         <div class="mt-3">
@@ -379,18 +611,18 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="/crud/create" class="btn btn-outline-primary quick-action-btn">
+                            <a href="/crud/create" class="btn quick-action-btn">
                                 <i class="bi bi-plus-circle"></i> Nueva Persona
                             </a>
-                            <a href="/carrusel/upload" class="btn btn-outline-primary quick-action-btn">
+                            <a href="/carrusel/upload" class="btn quick-action-btn">
                                 <i class="bi bi-cloud-upload"></i> Subir Imagen
                             </a>
                             {{if eq .UserRole "admin"}}
-                            <a href="/admin/users/create" class="btn btn-outline-warning quick-action-btn">
+                            <a href="/admin/users/create" class="btn quick-action-btn">
                                 <i class="bi bi-person-plus"></i> Nuevo Usuario
                             </a>
                             {{end}}
-                            <a href="/maintenance" class="btn btn-outline-secondary quick-action-btn">
+                            <a href="/maintenance" class="btn quick-action-btn">
                                 <i class="bi bi-tools"></i> Mantenimiento
                             </a>
                         </div>
@@ -401,7 +633,7 @@
 
         <!-- Footer -->
         <footer class="footer mt-5">
-            <div class="container text-center">
+            <div class="container">
                 <div class="row">
                     <div class="col-md-4">
                         <h5><i class="bi bi-building"></i> Sistema de Gestión</h5>
@@ -410,9 +642,10 @@
                     <div class="col-md-4">
                         <h5><i class="bi bi-link"></i> Enlaces Rápidos</h5>
                         <ul class="list-unstyled">
-                            <li><a href="/dashboard" class="text-white-50">Dashboard</a></li>
-                            <li><a href="/crud" class="text-white-50">CRUD</a></li>
-                            <li><a href="/carrusel" class="text-white-50">Carrusel</a></li>
+                            <li><a href="/dashboard">Dashboard</a></li>
+                            <li><a href="/crud">CRUD</a></li>
+                            <li><a href="/carrusel">Carrusel</a></li>
+                            <li><a href="/perfil">Mi Perfil</a></li>
                         </ul>
                     </div>
                     <div class="col-md-4">
@@ -422,11 +655,13 @@
                     </div>
                 </div>
                 <hr class="bg-light">
-                <p class="small mb-0">
-                    &copy; 2026 Sistema de Gestión. Todos los derechos reservados.
-                    <br>
-                    <i class="bi bi-shield-check"></i> Sistema protegido con validaciones y reCAPTCHA
-                </p>
+                <div class="text-center">
+                    <p class="small mb-0">
+                        &copy; 2026 Sistema de Gestión. Todos los derechos reservados.
+                        <br>
+                        <i class="bi bi-shield-check"></i> Sistema protegido con validaciones y reCAPTCHA
+                    </p>
+                </div>
             </div>
         </footer>
     </div>
@@ -441,12 +676,6 @@
             return new bootstrap.Tooltip(tooltipTriggerEl)
         });
 
-        // Inicializar popovers
-        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-            return new bootstrap.Popover(popoverTriggerEl)
-        });
-
         // Auto-cerrar alertas después de 5 segundos
         setTimeout(function() {
             var alerts = document.querySelectorAll('.alert');
@@ -455,17 +684,6 @@
                 bsAlert.close();
             });
         }, 5000);
-
-        // Actualizar hora en tiempo real (opcional)
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('es-MX');
-            const clockElement = document.getElementById('liveClock');
-            if (clockElement) {
-                clockElement.textContent = timeString;
-            }
-        }
-        setInterval(updateClock, 1000);
     </script>
 </body>
 </html>
