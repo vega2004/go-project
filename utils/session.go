@@ -4,8 +4,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 	"tu-proyecto/model"
 
@@ -22,9 +24,7 @@ type SessionManager struct {
 }
 
 func NewSessionManager() *SessionManager {
-	// Registrar el tipo para gob
 	gob.Register(model.Session{})
-
 	return &SessionManager{
 		secret: generateSecret(),
 	}
@@ -36,9 +36,8 @@ func generateSecret() string {
 	return base64.URLEncoding.EncodeToString(b)
 }
 
-// CreateSession - Crea una nueva sesión con información del usuario y su rol
+// CreateSession - Crea una nueva sesión
 func (sm *SessionManager) CreateSession(c echo.Context, user *model.UserAuth) error {
-	// Determinar nombre del rol basado en role_id
 	rolNombre := "user"
 	switch user.RoleID {
 	case 1:
@@ -49,7 +48,6 @@ func (sm *SessionManager) CreateSession(c echo.Context, user *model.UserAuth) er
 		rolNombre = "editor"
 	}
 
-	// Crear sesión con toda la información
 	session := &model.Session{
 		UserID:       user.ID,
 		Email:        user.Email,
@@ -62,26 +60,51 @@ func (sm *SessionManager) CreateSession(c echo.Context, user *model.UserAuth) er
 	// Guardar en contexto
 	c.Set(sessionName, session)
 
-	// Configurar cookie segura
+	// Serializar sesión para la cookie
+	sessionJSON, _ := json.Marshal(session)
+
+	// Configurar cookie
 	cookie := new(http.Cookie)
 	cookie.Name = sessionName
-	cookie.Value = fmt.Sprintf("%d", user.ID)
+	cookie.Value = base64.URLEncoding.EncodeToString(sessionJSON)
 	cookie.Expires = time.Now().Add(sessionLength)
 	cookie.Path = "/"
 	cookie.HttpOnly = true
-	cookie.Secure = true
-	cookie.SameSite = http.SameSiteStrictMode
+	cookie.SameSite = http.SameSiteLaxMode
+
+	// Secure solo en producción (HTTPS)
+	if os.Getenv("RAILWAY_ENVIRONMENT") != "" {
+		cookie.Secure = true
+	}
 
 	c.SetCookie(cookie)
 
+	fmt.Printf("✅ Sesión creada para usuario %d\n", user.ID)
 	return nil
 }
 
-// GetSession - Obtiene la sesión actual y actualiza última actividad
+// GetSession - Obtiene la sesión actual
 func (sm *SessionManager) GetSession(c echo.Context) (*model.Session, error) {
-	session, ok := c.Get(sessionName).(*model.Session)
-	if !ok {
-		return nil, fmt.Errorf("sesión no encontrada")
+	// Primero intentar obtener del contexto
+	if session, ok := c.Get(sessionName).(*model.Session); ok {
+		return session, nil
+	}
+
+	// Si no está en contexto, intentar desde la cookie
+	cookie, err := c.Cookie(sessionName)
+	if err != nil {
+		return nil, fmt.Errorf("no hay cookie de sesión")
+	}
+
+	// Decodificar cookie
+	decoded, err := base64.URLEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		return nil, fmt.Errorf("error decodificando cookie")
+	}
+
+	var session model.Session
+	if err := json.Unmarshal(decoded, &session); err != nil {
+		return nil, fmt.Errorf("error deserializando sesión")
 	}
 
 	// Verificar expiración
@@ -93,10 +116,13 @@ func (sm *SessionManager) GetSession(c echo.Context) (*model.Session, error) {
 	// Actualizar última actividad
 	session.LastActivity = time.Now()
 
-	return session, nil
+	// Guardar en contexto para futuros usos
+	c.Set(sessionName, &session)
+
+	return &session, nil
 }
 
-// ClearSession - Elimina la sesión actual
+// ClearSession - Elimina la sesión
 func (sm *SessionManager) ClearSession(c echo.Context) {
 	cookie := new(http.Cookie)
 	cookie.Name = sessionName
@@ -106,59 +132,5 @@ func (sm *SessionManager) ClearSession(c echo.Context) {
 	cookie.HttpOnly = true
 	c.SetCookie(cookie)
 	c.Set(sessionName, nil)
-}
-
-// GetUserID - Obtiene el ID del usuario de la sesión
-func (sm *SessionManager) GetUserID(c echo.Context) (int, error) {
-	session, err := sm.GetSession(c)
-	if err != nil {
-		return 0, err
-	}
-	return session.UserID, nil
-}
-
-// GetUserRole - Obtiene el rol del usuario de la sesión
-func (sm *SessionManager) GetUserRole(c echo.Context) (int, string, error) {
-	session, err := sm.GetSession(c)
-	if err != nil {
-		return 0, "", err
-	}
-	return session.RoleID, session.RoleNombre, nil
-}
-
-// IsAdmin - Verifica si el usuario actual es administrador
-func (sm *SessionManager) IsAdmin(c echo.Context) bool {
-	session, err := sm.GetSession(c)
-	if err != nil {
-		return false
-	}
-	return session.RoleID == 1
-}
-
-// RefreshSession - Renueva la sesión (útil después de cambios de rol)
-func (sm *SessionManager) RefreshSession(c echo.Context, user *model.UserAuth) error {
-	// Eliminar sesión actual
-	sm.ClearSession(c)
-
-	// Crear nueva sesión con datos actualizados
-	return sm.CreateSession(c, user)
-}
-
-// GetSessionData - Obtiene todos los datos de la sesión (útil para templates)
-func (sm *SessionManager) GetSessionData(c echo.Context) map[string]interface{} {
-	session, err := sm.GetSession(c)
-	if err != nil {
-		return map[string]interface{}{
-			"Authenticated": false,
-		}
-	}
-
-	return map[string]interface{}{
-		"Authenticated": true,
-		"UserID":        session.UserID,
-		"UserName":      session.Name,
-		"UserEmail":     session.Email,
-		"UserRoleID":    session.RoleID,
-		"UserRole":      session.RoleNombre,
-	}
+	fmt.Println("✅ Sesión eliminada")
 }
