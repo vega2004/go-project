@@ -17,473 +17,503 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
     
-    <style>
-        /* ===== MEJORAS DE VISIBILIDAD ===== */
-        
-        /* Badge de usuario más visible */
-        .role-badge {
-            background: #052659 !important;
-            color: white !important;
-            font-weight: 700;
-            padding: 8px 18px;
-            border-radius: 50px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            display: inline-block;
+   <style>
+    /* ===== MEJORAS DE VISIBILIDAD ===== */
+    
+    /* Badge de usuario más visible */
+    .role-badge {
+        background: #052659 !important;
+        color: white !important;
+        font-weight: 700;
+        padding: 8px 18px;
+        border-radius: 50px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        display: inline-block;
+    }
+    
+    /* Estadísticas con mejor contraste */
+    .stat-card {
+        background: linear-gradient(135deg, #021024 0%, #052659 100%) !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(5, 38, 89, 0.4) !important;
+    }
+    
+    .stat-card h3, .stat-card h6 {
+        color: white !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        font-weight: 700;
+    }
+    
+    .stat-card .stat-icon {
+        color: rgba(255,255,255,0.3) !important;
+        font-size: 2.5rem;
+    }
+    
+    /* Badges de información más visibles */
+    .badge.bg-info {
+        background: #5483B3 !important;
+        color: white !important;
+        font-weight: 600;
+        padding: 6px 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .badge.bg-danger {
+        background: #dc3545 !important;
+        color: white !important;
+        font-weight: 600;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .badge.bg-warning {
+        background: #ffc107 !important;
+        color: #021024 !important;
+        font-weight: 700;
+    }
+    
+    /* Texto en cards más oscuro */
+    .card-text.text-muted {
+        color: #021024 !important;
+        font-weight: 500;
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+    
+    /* Títulos de módulos */
+    .card-title {
+        color: #052659 !important;
+        font-weight: 800;
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+    }
+    
+    /* Footer más legible */
+    .footer {
+        background: #021024 !important;
+        color: #C1E8FF;
+        padding: 40px 0 20px;
+        margin-top: 60px;
+    }
+    
+    .footer h5 {
+        color: white !important;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .footer p, .footer a {
+        color: #C1E8FF !important;
+        opacity: 0.9;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    
+    .footer a:hover {
+        color: white !important;
+        opacity: 1;
+        text-decoration: none;
+    }
+    
+    .footer ul li a {
+        color: #C1E8FF !important;
+        text-decoration: none;
+        display: inline-block;
+        padding: 5px 0;
+    }
+    
+    .footer hr {
+        background-color: #C1E8FF !important;
+        opacity: 0.2;
+    }
+    
+    /* Actividad reciente */
+    .activity-item p {
+        color: #052659 !important;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .activity-item small {
+        color: #5483B3 !important;
+        font-weight: 500;
+    }
+    
+    /* Botones de acciones rápidas */
+    .quick-action-btn {
+        background: white !important;
+        border: 2px solid #5483B3 !important;
+        color: #052659 !important;
+        font-weight: 700;
+        padding: 12px 25px;
+        border-radius: 50px;
+        transition: all 0.3s;
+    }
+    
+    .quick-action-btn:hover {
+        background: #5483B3 !important;
+        color: white !important;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(84, 131, 179, 0.4);
+    }
+    
+    .quick-action-btn i {
+        margin-right: 8px;
+    }
+    
+    /* Números de página en paginación */
+    .page-link {
+        color: #052659 !important;
+        font-weight: 600;
+        border: 2px solid #C1E8FF;
+        margin: 0 3px;
+        border-radius: 8px !important;
+    }
+    
+    .page-item.active .page-link {
+        background: #5483B3 !important;
+        color: white !important;
+        border-color: #5483B3;
+    }
+    
+    /* Mejora para el texto "Último acceso" */
+    .text-white-50 {
+        color: #C1E8FF !important;
+        opacity: 1;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    
+    /* Tarjeta de bienvenida */
+    .welcome-card {
+        background: linear-gradient(135deg, #021024 0%, #052659 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(2, 16, 36, 0.4);
+    }
+    
+    .welcome-card h2 {
+        color: white !important;
+        font-weight: 800;
+    }
+    
+    .welcome-card .lead {
+        color: #C1E8FF !important;
+        font-weight: 500;
+    }
+    
+    /* Cards de módulos */
+    .card-hover {
+        transition: all 0.3s ease;
+        border: 2px solid #C1E8FF;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(5, 38, 89, 0.2);
+        border-color: #5483B3;
+    }
+    
+    /* Iconos en módulos */
+    .card-hover .bi {
+        color: #5483B3 !important;
+        transition: all 0.3s;
+    }
+    
+    .card-hover:hover .bi {
+        transform: scale(1.1);
+    }
+    
+    /* Dropdown menu */
+    .dropdown-menu {
+        border: 2px solid #C1E8FF;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(5, 38, 89, 0.2);
+    }
+    
+    .dropdown-item {
+        color: #052659;
+        font-weight: 500;
+        padding: 10px 20px;
+        transition: all 0.3s;
+    }
+    
+    .dropdown-item:hover {
+        background: #5483B3;
+        color: white;
+    }
+    
+    .dropdown-item i {
+        margin-right: 10px;
+        color: #5483B3;
+    }
+    
+    .dropdown-item:hover i {
+        color: white;
+    }
+    
+    /* Alertas */
+    .alert {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .alert-success {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        color: #052659;
+        border-left: 5px solid #28a745;
+    }
+    
+    .alert-danger {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        color: #721c24;
+        border-left: 5px solid #dc3545;
+    }
+
+    /* ===== CORRECCIÓN PARA NAVBAR-BRAND (AHORA VISIBLE) ===== */
+    .navbar-brand {
+        color: #C1E8FF !important;
+        font-weight: 800;
+        font-size: 1.6rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        background: transparent !important;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand:hover {
+        color: white !important;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        transform: translateY(-2px);
+    }
+
+    .navbar-brand i {
+        color: #C1E8FF !important;
+        margin-right: 8px;
+        font-size: 1.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand:hover i {
+        color: white !important;
+        transform: scale(1.1);
+    }
+
+    /* ===== MEJORAS PARA NAVBAR Y DROPDOWN ===== */
+
+    /* Botón del usuario (dropdown toggle) */
+    .navbar-nav .dropdown-toggle {
+        background: linear-gradient(135deg, #5483B3 0%, #052659 100%) !important;
+        border: 2px solid #C1E8FF !important;
+        color: white !important;
+        font-weight: 700 !important;
+        padding: 10px 20px !important;
+        border-radius: 50px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .navbar-nav .dropdown-toggle:hover {
+        background: #5483B3 !important;
+        border-color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(84, 131, 179, 0.5) !important;
+    }
+
+    /* Badge del rol en el botón */
+    .navbar-nav .dropdown-toggle .badge {
+        font-size: 0.7rem;
+        padding: 5px 10px;
+        border-radius: 50px;
+        margin-left: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        text-transform: uppercase;
+        font-weight: 800;
+    }
+
+    /* Colores específicos para badges de roles */
+    .navbar-nav .dropdown-toggle .badge.bg-danger {
+        background: #dc3545 !important;
+        color: white !important;
+    }
+
+    .navbar-nav .dropdown-toggle .badge.bg-warning {
+        background: #ffc107 !important;
+        color: #021024 !important;
+    }
+
+    .navbar-nav .dropdown-toggle .badge.bg-info {
+        background: #5483B3 !important;
+        color: white !important;
+    }
+
+    /* Menú desplegable */
+    .dropdown-menu {
+        background: white !important;
+        border: 2px solid #5483B3 !important;
+        border-radius: 15px !important;
+        box-shadow: 0 10px 30px rgba(2, 16, 36, 0.3) !important;
+        padding: 10px !important;
+        min-width: 220px !important;
+        margin-top: 10px !important;
+    }
+
+    /* Flecha del dropdown */
+    .dropdown-menu::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        right: 20px;
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 10px solid #5483B3;
+    }
+
+    /* Items del menú */
+    .dropdown-item {
+        color: #021024 !important;
+        font-weight: 600 !important;
+        padding: 12px 20px !important;
+        border-radius: 10px !important;
+        transition: all 0.3s ease !important;
+        font-size: 0.95rem !important;
+    }
+
+    .dropdown-item i {
+        color: #5483B3 !important;
+        margin-right: 12px !important;
+        font-size: 1.1rem !important;
+        transition: all 0.3s ease;
+    }
+
+    .dropdown-item:hover {
+        background: linear-gradient(135deg, #5483B3 0%, #052659 100%) !important;
+        color: white !important;
+        transform: translateX(5px);
+    }
+
+    .dropdown-item:hover i {
+        color: white !important;
+        transform: scale(1.1);
+    }
+
+    /* Separador */
+    .dropdown-divider {
+        border-top: 2px solid #C1E8FF !important;
+        margin: 8px 0 !important;
+        opacity: 0.5;
+    }
+
+    /* Item de cerrar sesión */
+    .dropdown-item.text-danger {
+        color: #dc3545 !important;
+        font-weight: 700 !important;
+    }
+
+    .dropdown-item.text-danger i {
+        color: #dc3545 !important;
+    }
+
+    .dropdown-item.text-danger:hover {
+        background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%) !important;
+        color: white !important;
+    }
+
+    .dropdown-item.text-danger:hover i {
+        color: white !important;
+    }
+
+    /* Icono del usuario */
+    .navbar-nav .dropdown-toggle i {
+        color: white !important;
+        font-size: 1.2rem;
+        margin-right: 5px;
+    }
+
+    /* Ícono decorativo del navbar */
+    .navbar .container::before {
+        content: "📊";
+        color: #C1E8FF;
+        margin-right: 15px;
+        font-size: 1.5rem;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    /* Navbar con borde inferior */
+    .navbar {
+        border-bottom: 3px solid #5483B3 !important;
+    }
+
+    /* Responsive para dropdown */
+    @media (max-width: 768px) {
+        .dropdown-menu {
+            width: 100% !important;
+            position: static !important;
+            float: none !important;
+            margin-top: 5px !important;
         }
         
-        /* Estadísticas con mejor contraste */
+        .dropdown-menu::before {
+            display: none;
+        }
+        
+        .navbar-nav .dropdown-toggle {
+            width: 100%;
+            text-align: center;
+        }
+    }
+    
+    /* Ajustes responsive generales */
+    @media (max-width: 768px) {
         .stat-card {
-            background: linear-gradient(135deg, #021024 0%, #052659 100%) !important;
-            border: none !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-            border-radius: 15px;
-            transition: all 0.3s ease;
+            margin-bottom: 15px;
         }
         
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(5, 38, 89, 0.4) !important;
-        }
-        
-        .stat-card h3, .stat-card h6 {
-            color: white !important;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            font-weight: 700;
-        }
-        
-        .stat-card .stat-icon {
-            color: rgba(255,255,255,0.3) !important;
-            font-size: 2.5rem;
-        }
-        
-        /* Badges de información más visibles */
-        .badge.bg-info {
-            background: #5483B3 !important;
-            color: white !important;
-            font-weight: 600;
-            padding: 6px 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .badge.bg-danger {
-            background: #dc3545 !important;
-            color: white !important;
-            font-weight: 600;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .badge.bg-warning {
-            background: #ffc107 !important;
-            color: #021024 !important;
-            font-weight: 700;
-        }
-        
-        /* Texto en cards más oscuro */
-        .card-text.text-muted {
-            color: #021024 !important;
-            font-weight: 500;
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
-        
-        /* Títulos de módulos */
         .card-title {
-            color: #052659 !important;
-            font-weight: 800;
-            font-size: 1.3rem;
-            margin-bottom: 10px;
+            font-size: 1.1rem;
         }
         
-        /* Footer más legible */
-        .footer {
-            background: #021024 !important;
-            color: #C1E8FF;
-            padding: 40px 0 20px;
-            margin-top: 60px;
-        }
-        
-        .footer h5 {
-            color: white !important;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-        
-        .footer p, .footer a {
-            color: #C1E8FF !important;
-            opacity: 0.9;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .footer a:hover {
-            color: white !important;
-            opacity: 1;
-            text-decoration: none;
-        }
-        
-        .footer ul li a {
-            color: #C1E8FF !important;
-            text-decoration: none;
-            display: inline-block;
-            padding: 5px 0;
-        }
-        
-        .footer hr {
-            background-color: #C1E8FF !important;
-            opacity: 0.2;
-        }
-        
-        /* Actividad reciente */
-        .activity-item p {
-            color: #052659 !important;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .activity-item small {
-            color: #5483B3 !important;
-            font-weight: 500;
-        }
-        
-        /* Botones de acciones rápidas */
-        .quick-action-btn {
-            background: white !important;
-            border: 2px solid #5483B3 !important;
-            color: #052659 !important;
-            font-weight: 700;
-            padding: 12px 25px;
-            border-radius: 50px;
-            transition: all 0.3s;
-        }
-        
-        .quick-action-btn:hover {
-            background: #5483B3 !important;
-            color: white !important;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(84, 131, 179, 0.4);
-        }
-        
-        .quick-action-btn i {
-            margin-right: 8px;
-        }
-        
-        /* Números de página en paginación */
-        .page-link {
-            color: #052659 !important;
-            font-weight: 600;
-            border: 2px solid #C1E8FF;
-            margin: 0 3px;
-            border-radius: 8px !important;
-        }
-        
-        .page-item.active .page-link {
-            background: #5483B3 !important;
-            color: white !important;
-            border-color: #5483B3;
-        }
-        
-        /* Mejora para el texto "Último acceso" */
-        .text-white-50 {
-            color: #C1E8FF !important;
-            opacity: 1;
-            font-weight: 500;
-            font-size: 1rem;
-        }
-        
-        /* Tarjeta de bienvenida */
         .welcome-card {
-            background: linear-gradient(135deg, #021024 0%, #052659 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(2, 16, 36, 0.4);
+            padding: 20px;
         }
         
         .welcome-card h2 {
-            color: white !important;
-            font-weight: 800;
+            font-size: 1.5rem;
         }
-        
-        .welcome-card .lead {
-            color: #C1E8FF !important;
-            font-weight: 500;
-        }
-        
-        /* Cards de módulos */
-        .card-hover {
-            transition: all 0.3s ease;
-            border: 2px solid #C1E8FF;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(5, 38, 89, 0.2);
-            border-color: #5483B3;
-        }
-        
-        /* Iconos en módulos */
-        .card-hover .bi {
-            color: #5483B3 !important;
-            transition: all 0.3s;
-        }
-        
-        .card-hover:hover .bi {
-            transform: scale(1.1);
-        }
-        
-        /* Dropdown menu */
-        .dropdown-menu {
-            border: 2px solid #C1E8FF;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(5, 38, 89, 0.2);
-        }
-        
-        .dropdown-item {
-            color: #052659;
-            font-weight: 500;
-            padding: 10px 20px;
-            transition: all 0.3s;
-        }
-        
-        .dropdown-item:hover {
-            background: #5483B3;
-            color: white;
-        }
-        
-        .dropdown-item i {
-            margin-right: 10px;
-            color: #5483B3;
-        }
-        
-        .dropdown-item:hover i {
-            color: white;
-        }
-        
-        /* Alertas */
-        .alert {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #052659;
-            border-left: 5px solid #28a745;
-        }
-        
-        .alert-danger {
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-            color: #721c24;
-            border-left: 5px solid #dc3545;
-        }
-
-        /* ===== MEJORAS PARA NAVBAR Y DROPDOWN (AGREGAR AL FINAL DEL <style>) ===== */
-
-/* Botón del usuario (dropdown toggle) */
-.navbar-nav .dropdown-toggle {
-    background: linear-gradient(135deg, #5483B3 0%, #052659 100%) !important;
-    border: 2px solid #C1E8FF !important;
-    color: white !important;
-    font-weight: 700 !important;
-    padding: 10px 20px !important;
-    border-radius: 50px !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
-}
-
-.navbar-nav .dropdown-toggle:hover {
-    background: #5483B3 !important;
-    border-color: white !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(84, 131, 179, 0.5) !important;
-}
-
-/* Badge del rol en el botón */
-.navbar-nav .dropdown-toggle .badge {
-    font-size: 0.7rem;
-    padding: 5px 10px;
-    border-radius: 50px;
-    margin-left: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    text-transform: uppercase;
-    font-weight: 800;
-}
-
-/* Colores específicos para badges de roles */
-.navbar-nav .dropdown-toggle .badge.bg-danger {
-    background: #dc3545 !important;
-    color: white !important;
-}
-
-.navbar-nav .dropdown-toggle .badge.bg-warning {
-    background: #ffc107 !important;
-    color: #021024 !important;
-}
-
-.navbar-nav .dropdown-toggle .badge.bg-info {
-    background: #5483B3 !important;
-    color: white !important;
-}
-
-/* Menú desplegable */
-.dropdown-menu {
-    background: white !important;
-    border: 2px solid #5483B3 !important;
-    border-radius: 15px !important;
-    box-shadow: 0 10px 30px rgba(2, 16, 36, 0.3) !important;
-    padding: 10px !important;
-    min-width: 220px !important;
-    margin-top: 10px !important;
-}
-
-/* Flecha del dropdown */
-.dropdown-menu::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    right: 20px;
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-bottom: 10px solid #5483B3;
-}
-
-/* Items del menú */
-.dropdown-item {
-    color: #021024 !important;
-    font-weight: 600 !important;
-    padding: 12px 20px !important;
-    border-radius: 10px !important;
-    transition: all 0.3s ease !important;
-    font-size: 0.95rem !important;
-}
-
-.dropdown-item i {
-    color: #5483B3 !important;
-    margin-right: 12px !important;
-    font-size: 1.1rem !important;
-    transition: all 0.3s ease;
-}
-
-.dropdown-item:hover {
-    background: linear-gradient(135deg, #5483B3 0%, #052659 100%) !important;
-    color: white !important;
-    transform: translateX(5px);
-}
-
-.dropdown-item:hover i {
-    color: white !important;
-    transform: scale(1.1);
-}
-
-/* Separador */
-.dropdown-divider {
-    border-top: 2px solid #C1E8FF !important;
-    margin: 8px 0 !important;
-    opacity: 0.5;
-}
-
-/* Item de cerrar sesión */
-.dropdown-item.text-danger {
-    color: #dc3545 !important;
-    font-weight: 700 !important;
-}
-
-.dropdown-item.text-danger i {
-    color: #dc3545 !important;
-}
-
-.dropdown-item.text-danger:hover {
-    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%) !important;
-    color: white !important;
-}
-
-.dropdown-item.text-danger:hover i {
-    color: white !important;
-}
-
-/* Icono del usuario */
-.navbar-nav .dropdown-toggle i {
-    color: white !important;
-    font-size: 1.2rem;
-    margin-right: 5px;
-}
-
-/* Ícono decorativo del navbar */
-.navbar .container::before {
-    content: "📊";
-    color: #C1E8FF;
-    margin-right: 15px;
-    font-size: 1.5rem;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-/* Navbar con borde inferior */
-.navbar {
-    border-bottom: 3px solid #5483B3 !important;
-}
-
-/* Responsive para dropdown */
-@media (max-width: 768px) {
-    .dropdown-menu {
-        width: 100% !important;
-        position: static !important;
-        float: none !important;
-        margin-top: 5px !important;
     }
     
-    .dropdown-menu::before {
-        display: none;
+    @media (max-width: 576px) {
+        .role-badge {
+            display: block;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .quick-action-btn {
+            width: 100%;
+            margin-bottom: 10px;
+        }
     }
     
-    .navbar-nav .dropdown-toggle {
-        width: 100%;
-        text-align: center;
+    /* Animación suave */
+    .stat-card, .card-hover, .quick-action-btn, .navbar-brand {
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
-}
-        
-        /* Ajustes responsive */
-        @media (max-width: 768px) {
-            .stat-card {
-                margin-bottom: 15px;
-            }
-            
-            .card-title {
-                font-size: 1.1rem;
-            }
-            
-            .welcome-card {
-                padding: 20px;
-            }
-            
-            .welcome-card h2 {
-                font-size: 1.5rem;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .role-badge {
-                display: block;
-                margin-top: 10px;
-                text-align: center;
-            }
-            
-            .quick-action-btn {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-        }
-        
-        /* Animación suave */
-        .stat-card, .card-hover, .quick-action-btn {
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-        }
-        
-    </style>
+    
+</style>
 </head>
 <body>
 
