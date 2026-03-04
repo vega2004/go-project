@@ -135,7 +135,7 @@ func AuthMiddleware(sm *utils.SessionManager, authRepo repository.AuthRepository
 				return c.Redirect(http.StatusSeeOther, "/login?error=Por favor inicie sesión para continuar")
 			}
 
-			// --- NUEVA VERIFICACIÓN: Obtener usuario actualizado de BD ---
+			// --- VERIFICACIÓN DE ROL ACTUALIZADO EN BD ---
 			userActualizado, err := authRepo.FindByID(session.UserID)
 			if err == nil && userActualizado.RoleID != session.RoleID {
 				// El rol cambió en BD, actualizar sesión
@@ -145,13 +145,14 @@ func AuthMiddleware(sm *utils.SessionManager, authRepo repository.AuthRepository
 				session.RoleID = userActualizado.RoleID
 				session.RoleNombre = getRolNombre(userActualizado.RoleID)
 
-				// Actualizar la sesión en el contexto
-				c.Set("user_session", session)
-
-				// También podrías actualizar la cookie si es necesario
-				// sm.UpdateSession(c, session)
+				// ¡IMPORTANTE! Actualizar la cookie también
+				if err := sm.UpdateSession(c, session); err != nil {
+					log.Printf("⚠️ Error al actualizar cookie: %v", err)
+				} else {
+					log.Printf("✅ Cookie actualizada con nuevo rol: %d", session.RoleID)
+				}
 			}
-			// ----------------------------------------------------------
+			// ---------------------------------------------
 
 			// Actualizar última actividad de la sesión
 			session.LastActivity = time.Now()

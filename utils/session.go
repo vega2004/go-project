@@ -134,3 +134,35 @@ func (sm *SessionManager) ClearSession(c echo.Context) {
 	c.Set(sessionName, nil)
 	fmt.Println("✅ Sesión eliminada")
 }
+
+// UpdateSession - Actualiza la sesión existente (para cuando cambia el rol)
+func (sm *SessionManager) UpdateSession(c echo.Context, updatedSession *model.Session) error {
+	// Guardar en contexto
+	c.Set(sessionName, updatedSession)
+
+	// Serializar sesión actualizada para la cookie
+	sessionJSON, _ := json.Marshal(updatedSession)
+
+	// Obtener cookie existente o crear nueva
+	cookie, err := c.Cookie(sessionName)
+	if err != nil {
+		cookie = new(http.Cookie)
+	}
+
+	cookie.Name = sessionName
+	cookie.Value = base64.URLEncoding.EncodeToString(sessionJSON)
+	cookie.Expires = time.Now().Add(sessionLength)
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteLaxMode
+
+	if os.Getenv("RAILWAY_ENVIRONMENT") != "" {
+		cookie.Secure = true
+	}
+
+	c.SetCookie(cookie)
+
+	fmt.Printf("🔄 Sesión actualizada para usuario %d (nuevo rol: %d)\n",
+		updatedSession.UserID, updatedSession.RoleID)
+	return nil
+}
