@@ -150,7 +150,7 @@
             </table>
         </div>
         
-        <!-- Paginación SIMPLIFICADA (sin funciones sub/add) -->
+        <!-- PAGINACIÓN SIMPLIFICADA - SIN FUNCIONES sub/add -->
         {{if gt .Users.TotalPages 1}}
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
@@ -168,47 +168,12 @@
                     </a>
                 </li>
                 
-                <!-- Números de página (mostrar 5 números) -->
-                {{$current := .Users.Page}}
-                {{$total := .Users.TotalPages}}
-                {{$start := 1}}
-                {{$end := $total}}
-                
-                {{if gt $total 5}}
-                    {{$start = sub $current 2}}
-                    {{if lt $start 1}}{{$start = 1}}{{end}}
-                    {{$end = add $start 4}}
-                    {{if gt $end $total}}
-                        {{$end = $total}}
-                        {{$start = sub $end 4}}
-                    {{end}}
-                {{end}}
-                
-                <!-- POR AHORA, SOLO MOSTRAMOS PÁGINAS SIMPLES -->
-                <!-- Esto es temporal mientras resolvemos las funciones -->
-                <li class="page-item {{if eq .Users.Page 1}}active{{end}}">
-                    <a class="page-link" href="?page=1{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">1</a>
+                <!-- Página actual -->
+                <li class="page-item active">
+                    <span class="page-link">
+                        Página {{.Users.Page}} de {{.Users.TotalPages}}
+                    </span>
                 </li>
-                {{if gt .Users.TotalPages 1}}
-                <li class="page-item {{if eq .Users.Page 2}}active{{end}}">
-                    <a class="page-link" href="?page=2{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">2</a>
-                </li>
-                {{end}}
-                {{if gt .Users.TotalPages 2}}
-                <li class="page-item {{if eq .Users.Page 3}}active{{end}}">
-                    <a class="page-link" href="?page=3{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">3</a>
-                </li>
-                {{end}}
-                {{if gt .Users.TotalPages 3}}
-                <li class="page-item {{if eq .Users.Page 4}}active{{end}}">
-                    <a class="page-link" href="?page=4{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">4</a>
-                </li>
-                {{end}}
-                {{if gt .Users.TotalPages 4}}
-                <li class="page-item {{if eq .Users.Page 5}}active{{end}}">
-                    <a class="page-link" href="?page=5{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">5</a>
-                </li>
-                {{end}}
                 
                 <!-- Botón Siguiente -->
                 <li class="page-item {{if eq .Users.Page .Users.TotalPages}}disabled{{end}}">
@@ -225,12 +190,12 @@
                 </li>
             </ul>
         </nav>
-        {{end}}
         
-        <!-- Información de paginación -->
+        <!-- Información de registros -->
         <div class="text-center text-muted mt-2">
-            <small>Página {{.Users.Page}} de {{.Users.TotalPages}} | Total de registros: {{.Users.Total}}</small>
+            <small>Mostrando página {{.Users.Page}} de {{.Users.TotalPages}} | Total de registros: {{.Users.Total}}</small>
         </div>
+        {{end}}
     </div>
     
     <!-- Footer -->
