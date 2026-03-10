@@ -160,12 +160,16 @@
             font-weight: 700;
             margin-bottom: 15px;
             font-size: 1.3rem;
+            position: relative;
+            z-index: 1;
         }
         
         .info-alert ul {
             list-style: none;
             padding: 0;
             margin: 0;
+            position: relative;
+            z-index: 1;
         }
         
         .info-alert li {
@@ -256,13 +260,6 @@
             transition: width 1s;
         }
         
-        .countdown {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #5483B3;
-            margin: 20px 0;
-        }
-        
         .status-badge {
             display: inline-block;
             padding: 8px 20px;
@@ -272,29 +269,6 @@
             font-weight: 700;
             margin-bottom: 20px;
             animation: pulse 2s infinite;
-        }
-        
-        .social-links {
-            margin-top: 30px;
-        }
-        
-        .social-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(84, 131, 179, 0.1);
-            color: #5483B3;
-            margin: 0 5px;
-            transition: all 0.3s;
-        }
-        
-        .social-link:hover {
-            background: #5483B3;
-            color: white;
-            transform: translateY(-3px);
         }
         
         .timer-container {
@@ -331,10 +305,6 @@
             font-size: 0.8rem;
             color: #C1E8FF;
             text-transform: uppercase;
-        }
-        
-        .notification-checkbox {
-            margin: 20px 0;
         }
         
         .toast-notification {
@@ -490,7 +460,7 @@
                             Lo sentimos, estamos realizando mejoras para brindarte un mejor servicio.
                         </p>
                         
-                        <!-- Timer de cuenta regresiva (opcional) -->
+                        <!-- Timer de cuenta regresiva -->
                         <div class="timer-container">
                             <h6><i class="bi bi-hourglass-split"></i> Tiempo estimado restante</h6>
                             <div class="timer" id="timer">
@@ -519,43 +489,33 @@
                             </small>
                         </div>
                         
-                        <!-- Información detallada -->
+                        <!-- Información detallada (CORREGIDA - SIN default) -->
                         <div class="info-alert">
                             <h5><i class="bi bi-clock-history"></i> Detalles del mantenimiento:</h5>
                             <ul>
                                 <li>
                                     <strong><i class="bi bi-calendar"></i> Inicio:</strong> 
-                                    {{.StartTime | default "10:00 AM"}}
+                                    {{if .StartTime}}{{.StartTime}}{{else}}10:00 AM{{end}}
                                 </li>
                                 <li>
                                     <strong><i class="bi bi-calendar-check"></i> Fin estimado:</strong> 
-                                    <span id="endTime">{{.EndTime | default "12:00 PM"}}</span>
+                                    <span id="endTime">{{if .EndTime}}{{.EndTime}}{{else}}12:00 PM{{end}}</span>
                                 </li>
                                 <li>
                                     <strong><i class="bi bi-gear"></i> Motivo:</strong> 
-                                    {{.Reason | default "Actualización de servidores"}}
+                                    {{if .Reason}}{{.Reason}}{{else}}Actualización de servidores{{end}}
                                 </li>
                                 <li>
                                     <strong><i class="bi bi-envelope"></i> Contacto:</strong> 
-                                    <a href="mailto:{{.ContactEmail | default 'soporte@tuempresa.com'}}" class="text-decoration-none">
-                                        {{.ContactEmail | default "soporte@tuempresa.com"}}
+                                    <a href="mailto:{{if .ContactEmail}}{{.ContactEmail}}{{else}}soporte@tuempresa.com{{end}}" class="text-decoration-none">
+                                        {{if .ContactEmail}}{{.ContactEmail}}{{else}}soporte@tuempresa.com{{end}}
                                     </a>
                                 </li>
                                 <li>
                                     <strong><i class="bi bi-phone"></i> Teléfono:</strong> 
-                                    {{.ContactPhone | default "+52 555 123 4567"}}
+                                    {{if .ContactPhone}}{{.ContactPhone}}{{else}}+52 555 123 4567{{end}}
                                 </li>
                             </ul>
-                        </div>
-                        
-                        <!-- Checkbox de notificación -->
-                        <div class="notification-checkbox">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="notifyCheck">
-                                <label class="form-check-label" for="notifyCheck">
-                                    <i class="bi bi-bell"></i> Notificarme cuando termine
-                                </label>
-                            </div>
                         </div>
                         
                         <!-- Botones de acción -->
@@ -566,33 +526,6 @@
                             <button class="btn btn-custom btn-outline-custom" onclick="checkStatus()">
                                 <i class="bi bi-arrow-clockwise"></i> Verificar estado
                             </button>
-                        </div>
-                        
-                        <!-- Enlace para reintentar automático -->
-                        <div class="mt-3">
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle"></i> 
-                                Redirección automática en <span id="countdown">60</span> segundos
-                                <button class="btn btn-link btn-sm p-0 ms-2" onclick="stopRedirect()">
-                                    Cancelar
-                                </button>
-                            </small>
-                        </div>
-                        
-                        <!-- Redes sociales -->
-                        <div class="social-links">
-                            <a href="#" class="social-link" title="Twitter">
-                                <i class="bi bi-twitter"></i>
-                            </a>
-                            <a href="#" class="social-link" title="Facebook">
-                                <i class="bi bi-facebook"></i>
-                            </a>
-                            <a href="#" class="social-link" title="WhatsApp">
-                                <i class="bi bi-whatsapp"></i>
-                            </a>
-                            <a href="#" class="social-link" title="Telegram">
-                                <i class="bi bi-telegram"></i>
-                            </a>
                         </div>
                         
                         <!-- Mensaje final -->
@@ -608,67 +541,13 @@
         </div>
     </div>
 
-    <!-- Modal de notificación -->
-    <div class="modal fade" id="notifyModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title">
-                        <i class="bi bi-bell"></i> Notificación
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Te notificaremos cuando el sistema esté disponible.</p>
-                    <div class="mb-3">
-                        <label class="form-label">Correo electrónico:</label>
-                        <input type="email" class="form-control" id="notifyEmail" placeholder="tu@email.com">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="subscribeNotification()">
-                        <i class="bi bi-check-circle"></i> Suscribirme
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/api.js"></script>
     
     <script>
-        // Variables globales
-        let redirectCountdown = 60;
-        let redirectInterval;
-        let shouldRedirect = true;
-        let notifyModal;
-        
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
-            notifyModal = new bootstrap.Modal(document.getElementById('notifyModal'));
-            
-            // Iniciar timer
             startTimer();
-            
-            // Iniciar countdown de redirección
-            startRedirectCountdown();
-            
-            // Manejar checkbox de notificación
-            document.getElementById('notifyCheck').addEventListener('change', function(e) {
-                if (e.target.checked) {
-                    notifyModal.show();
-                }
-            });
-            
-            // Auto-cerrar alertas
-            setTimeout(function() {
-                document.querySelectorAll('.alert').forEach(function(alert) {
-                    var bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                });
-            }, 5000);
         });
         
         // Timer de cuenta regresiva
@@ -682,22 +561,10 @@
                 const diff = targetTime - now;
                 
                 if (diff <= 0) {
-                    // El tiempo terminó
                     document.getElementById('hours').textContent = '00';
                     document.getElementById('minutes').textContent = '00';
                     document.getElementById('seconds').textContent = '00';
-                    
-                    // Actualizar barra de progreso
                     document.getElementById('progressBar').style.width = '100%';
-                    
-                    // Mostrar mensaje
-                    showToast('success', '¡El mantenimiento ha finalizado!');
-                    
-                    // Redirigir después de 5 segundos
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 5000);
-                    
                     return;
                 }
                 
@@ -709,7 +576,7 @@
                 document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
                 document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
                 
-                // Calcular progreso (asumiendo 2 horas totales)
+                // Calcular progreso
                 const totalMinutes = 2 * 60;
                 const elapsedMinutes = totalMinutes - (hours * 60 + minutes);
                 const progress = (elapsedMinutes / totalMinutes) * 100;
@@ -718,27 +585,6 @@
             
             updateTimer();
             setInterval(updateTimer, 1000);
-        }
-        
-        // Countdown para redirección
-        function startRedirectCountdown() {
-            redirectInterval = setInterval(() => {
-                if (!shouldRedirect) return;
-                
-                redirectCountdown--;
-                document.getElementById('countdown').textContent = redirectCountdown;
-                
-                if (redirectCountdown <= 0) {
-                    window.location.href = '/';
-                }
-            }, 1000);
-        }
-        
-        // Detener redirección
-        function stopRedirect() {
-            shouldRedirect = false;
-            document.getElementById('countdown').textContent = '∞';
-            showToast('info', 'Redirección automática cancelada');
         }
         
         // Verificar estado del sistema
@@ -759,23 +605,6 @@
             } catch (error) {
                 showToast('error', 'Error al verificar el estado');
             }
-        }
-        
-        // Suscribirse a notificaciones
-        function subscribeNotification() {
-            const email = document.getElementById('notifyEmail').value;
-            
-            if (!email || !email.includes('@')) {
-                showToast('error', 'Por favor, ingresa un email válido');
-                return;
-            }
-            
-            // Aquí iría la lógica para guardar el email
-            showToast('success', 'Te notificaremos cuando el sistema esté disponible');
-            notifyModal.hide();
-            
-            // Desmarcar checkbox
-            document.getElementById('notifyCheck').checked = false;
         }
         
         // Mostrar toast
@@ -817,11 +646,6 @@
                 const toast = document.getElementById(toastId);
                 if (toast) toast.remove();
             }, 5000);
-        }
-        
-        // Función para default en templates
-        function default(value, defaultValue) {
-            return value || defaultValue;
         }
     </script>
 </body>
