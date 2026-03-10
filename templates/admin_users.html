@@ -545,48 +545,48 @@
             </div>
         </div>
         
-        <!-- Paginación Mejorada -->
+        <!-- PAGINACIÓN CORREGIDA - SIN FUNCIÓN seq -->
         {{if gt .Users.TotalPages 1}}
         <div class="d-flex justify-content-between align-items-center mt-4">
             <div class="pagination-info">
                 <i class="bi bi-list"></i> 
-                Mostrando {{.Users.Page}} de {{.Users.TotalPages}} páginas | 
+                Mostrando página {{.Users.Page}} de {{.Users.TotalPages}} | 
                 Total: {{.Users.Total}} registros
             </div>
             
             <nav aria-label="Page navigation">
                 <ul class="pagination">
+                    <!-- Botón Primera página -->
                     <li class="page-item {{if eq .Users.Page 1}}disabled{{end}}">
-                        <a class="page-link" href="#" onclick="changePage(1)" aria-label="First">
+                        <a class="page-link" href="?page=1{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}" aria-label="First">
                             <i class="bi bi-chevron-double-left"></i>
                         </a>
                     </li>
+                    
+                    <!-- Botón Anterior -->
                     <li class="page-item {{if eq .Users.Page 1}}disabled{{end}}">
-                        <a class="page-link" href="#" onclick="changePage({{.Users.PrevPage}})" aria-label="Previous">
+                        <a class="page-link" href="?page={{.Users.PrevPage}}{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}" aria-label="Previous">
                             <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
                     
-                    {{$currentPage := .Users.Page}}
-                    {{$totalPages := .Users.TotalPages}}
+                    <!-- Página actual (simplificado) -->
+                    <li class="page-item active">
+                        <span class="page-link">
+                            {{.Users.Page}}
+                        </span>
+                    </li>
                     
-                    {{range $i := seq 1 $totalPages}}
-                        {{if or (eq $i 1) (eq $i $totalPages) (and (ge $i (sub $currentPage 2)) (le $i (add $currentPage 2)))}}
-                            <li class="page-item {{if eq $i $currentPage}}active{{end}}">
-                                <a class="page-link" href="#" onclick="changePage({{$i}})">{{$i}}</a>
-                            </li>
-                        {{else if or (eq $i (sub $currentPage 3)) (eq $i (add $currentPage 3))}}
-                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                        {{end}}
-                    {{end}}
-                    
+                    <!-- Botón Siguiente -->
                     <li class="page-item {{if eq .Users.Page .Users.TotalPages}}disabled{{end}}">
-                        <a class="page-link" href="#" onclick="changePage({{.Users.NextPage}})" aria-label="Next">
+                        <a class="page-link" href="?page={{.Users.NextPage}}{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}" aria-label="Next">
                             <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
+                    
+                    <!-- Botón Última página -->
                     <li class="page-item {{if eq .Users.Page .Users.TotalPages}}disabled{{end}}">
-                        <a class="page-link" href="#" onclick="changePage({{.Users.TotalPages}})" aria-label="Last">
+                        <a class="page-link" href="?page={{.Users.TotalPages}}{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}" aria-label="Last">
                             <i class="bi bi-chevron-double-right"></i>
                         </a>
                     </li>
@@ -629,6 +629,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/static/js/api.js"></script>
     <script src="/static/js/search-filters.js"></script>
     
@@ -956,15 +957,6 @@
             document.getElementById('lastUpdate').textContent = 
                 `Última actualización: ${new Date().toLocaleString('es-ES')}`;
         }
-        
-        // Función auxiliar para secuencias en templates
-        function seq(start, end) {
-            return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-        }
-        
-        // Función auxiliar para sumar (usada en paginación)
-        function add(a, b) { return a + b; }
-        function sub(a, b) { return a - b; }
     </script>
 </body>
 </html>
