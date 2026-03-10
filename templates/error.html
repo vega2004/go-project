@@ -4,30 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error {{.Code}} - {{.Title}}</title>
+    
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <style>
-        .error-container {
-            min-height: 80vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        .error-code {
-            font-size: 8rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #5483B3 0%, #052659 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1;
-        }
-    </style>
 </head>
-<body>
+<body class="bg-light">
+    <!-- Breadcrumbs (simplificados) -->
+    {{if .breadcrumbs}}
     <nav aria-label="breadcrumb" class="container mt-3">
-        <ol class="breadcrumb">
+        <ol class="breadcrumb bg-white p-2 rounded">
             {{range .breadcrumbs}}
             <li class="breadcrumb-item">
                 {{if .url}}<a href="{{.url}}">{{.name}}</a>{{else}}{{.name}}{{end}}
@@ -35,36 +23,44 @@
             {{end}}
         </ol>
     </nav>
+    {{end}}
     
-    <div class="error-container">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-md-8">
-                    <div class="card shadow-lg border-0">
-                        <div class="card-body p-5 text-center">
-                            <div class="error-code">{{.Code}}</div>
-                            <h1 class="mb-4">{{.Title}}</h1>
-                            <p class="lead mb-4">{{.Message}}</p>
-                            
-                            {{if .Details}}
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle"></i> {{.Details}}
-                            </div>
-                            {{end}}
-                            
-                            <div class="mt-4">
-                                <a href="/dashboard" class="btn btn-primary">
-                                    <i class="bi bi-speedometer2"></i> Ir al Dashboard
-                                </a>
-                                <button onclick="history.back()" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left"></i> Volver
-                                </button>
-                            </div>
-                            
-                            <div class="mt-4 text-muted small">
-                                <i class="bi bi-clock"></i> {{.Timestamp}} 
-                                | ID: {{.ErrorID}}
-                            </div>
+    <div class="container">
+        <div class="row min-vh-100 align-items-center justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow">
+                    <div class="card-body p-5 text-center">
+                        <!-- Código de error -->
+                        <h1 class="display-1 fw-bold text-primary mb-0">{{.Code}}</h1>
+                        
+                        <!-- Título -->
+                        <h2 class="h3 mb-3">{{.Title}}</h2>
+                        
+                        <!-- Mensaje -->
+                        <p class="text-muted mb-4">{{.Message}}</p>
+                        
+                        <!-- Detalles adicionales (si existen) -->
+                        {{if .Details}}
+                        <div class="alert alert-info text-start">
+                            <i class="bi bi-info-circle"></i> {{.Details}}
+                        </div>
+                        {{end}}
+                        
+                        <!-- Botones de acción -->
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="/dashboard" class="btn btn-primary">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                            <button onclick="history.back()" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Volver
+                            </button>
+                        </div>
+                        
+                        <!-- Metadatos del error -->
+                        <div class="mt-4 small text-muted">
+                            <i class="bi bi-clock"></i> {{.Timestamp}} 
+                            <span class="mx-2">|</span>
+                            <i class="bi bi-hash"></i> {{.ErrorID}}
                         </div>
                     </div>
                 </div>

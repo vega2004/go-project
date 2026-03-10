@@ -11,300 +11,12 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     
-    <!-- CSS Personalizado -->
-    <link rel="stylesheet" href="/static/css/style.css">
-    
-    <!-- Cropper.js para edición de imágenes -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-    
-    <style>
-        /* Estilos mejorados para el perfil */
-        .profile-avatar {
-            width: 180px;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 5px solid #5483B3;
-            box-shadow: 0 8px 25px rgba(5,38,89,0.3);
-            transition: all 0.3s;
-        }
-        
-        .profile-avatar:hover {
-            transform: scale(1.02);
-            border-color: #052659;
-        }
-        
-        .avatar-upload {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-        
-        .avatar-upload .upload-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: linear-gradient(135deg, #5483B3, #052659);
-            color: white;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 3px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        
-        .avatar-upload .upload-btn:hover {
-            background: linear-gradient(135deg, #052659, #021024);
-            transform: scale(1.15) rotate(15deg);
-        }
-        
-        .avatar-upload .upload-btn i {
-            font-size: 1.3rem;
-        }
-        
-        .avatar-upload .delete-btn {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: #dc3545;
-            color: white;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 3px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            opacity: 0;
-            transform: scale(0.8);
-        }
-        
-        .avatar-upload:hover .delete-btn {
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        .avatar-upload .delete-btn:hover {
-            background: #b02a37;
-            transform: scale(1.15) rotate(15deg);
-        }
-        
-        #uploadInput {
-            display: none;
-        }
-        
-        /* Tarjeta de información */
-        .info-card {
-            background: linear-gradient(135deg, #f8fafc, #ffffff);
-            border: 2px solid #C1E8FF;
-            border-radius: 20px;
-            transition: all 0.3s;
-        }
-        
-        .info-card:hover {
-            border-color: #5483B3;
-            box-shadow: 0 10px 25px rgba(5,38,89,0.1);
-        }
-        
-        /* Badge de rol mejorado */
-        .role-badge {
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .role-badge.admin {
-            background: linear-gradient(135deg, #dc3545, #b02a37);
-            color: white;
-        }
-        
-        .role-badge.user {
-            background: linear-gradient(135deg, #5483B3, #052659);
-            color: white;
-        }
-        
-        .role-badge.editor {
-            background: linear-gradient(135deg, #ffc107, #fd7e14);
-            color: #021024;
-        }
-        
-        /* Validaciones de formulario */
-        .form-control.is-valid {
-            border-color: #28a745;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right calc(0.375em + 0.1875rem) center;
-            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-        }
-        
-        .form-control.is-invalid {
-            border-color: #dc3545;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right calc(0.375em + 0.1875rem) center;
-        }
-        
-        .validation-feedback {
-            font-size: 0.85rem;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .validation-feedback.show {
-            display: block;
-        }
-        
-        .validation-feedback.valid {
-            color: #28a745;
-        }
-        
-        .validation-feedback.invalid {
-            color: #dc3545;
-        }
-        
-        /* Medidor de fuerza de contraseña */
-        .password-strength {
-            margin-top: 10px;
-            height: 5px;
-            border-radius: 3px;
-            background: #C1E8FF;
-            overflow: hidden;
-        }
-        
-        .password-strength-bar {
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s, background-color 0.3s;
-        }
-        
-        .strength-very-weak { background-color: #dc3545; width: 20%; }
-        .strength-weak { background-color: #ffc107; width: 40%; }
-        .strength-medium { background-color: #fd7e14; width: 60%; }
-        .strength-strong { background-color: #20c997; width: 80%; }
-        .strength-very-strong { background-color: #28a745; width: 100%; }
-        
-        /* Toast notifications */
-        .toast-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 300px;
-        }
-        
-        .toast {
-            background: white;
-            border-left: 5px solid;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            margin-bottom: 10px;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        .toast.success { border-left-color: #28a745; }
-        .toast.error { border-left-color: #dc3545; }
-        .toast.warning { border-left-color: #ffc107; }
-        .toast.info { border-left-color: #5483B3; }
-        
-        .toast-header {
-            padding: 10px 15px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .toast-body {
-            padding: 12px 15px;
-        }
-        
-        /* Loading spinner */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255,255,255,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-        
-        .loading-overlay.active {
-            display: flex;
-        }
-        
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid #C1E8FF;
-            border-top-color: #5483B3;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Modal de recorte de imagen */
-        .cropper-container {
-            max-height: 400px;
-            margin-bottom: 20px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .profile-avatar {
-                width: 140px;
-                height: 140px;
-            }
-            
-            .avatar-upload .upload-btn,
-            .avatar-upload .delete-btn {
-                width: 35px;
-                height: 35px;
-            }
-        }
-    </style>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
 </head>
-<body data-user-id="{{.UserID}}">
-    <!-- Toast Notifications Container -->
-    <div class="toast-notification" id="toastContainer"></div>
-    
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
+<body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/dashboard">
                 <i class="bi bi-grid-fill"></i> Sistema de Gestión
@@ -315,18 +27,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> {{.UserName}}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/perfil"><i class="bi bi-person"></i> Mi Perfil</a></li>
+                            <li><a class="dropdown-item" href="/perfil">Mi Perfil</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                            <li><a class="dropdown-item text-danger" href="/logout">Cerrar Sesión</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -337,7 +47,7 @@
     <!-- Breadcrumbs -->
     <div class="container mt-3">
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+            <ol class="breadcrumb bg-light p-2 rounded">
                 {{range .breadcrumbs}}
                 <li class="breadcrumb-item">
                     {{if .url}}
@@ -370,57 +80,33 @@
         <div class="row">
             <!-- Columna izquierda - Foto y datos básicos -->
             <div class="col-md-4">
-                <div class="card shadow mb-4 info-card">
+                <div class="card shadow mb-4">
                     <div class="card-body text-center">
-                        <div class="avatar-upload mb-3">
-                            <img src="{{.Perfil.Foto}}" alt="Avatar" class="profile-avatar" id="profileImage">
-                            <label for="uploadInput" class="upload-btn" title="Cambiar foto">
-                                <i class="bi bi-camera-fill"></i>
-                            </label>
-                            {{if ne .Perfil.Foto "/static/uploads/perfil/default-avatar.png"}}
-                            <div class="delete-btn" onclick="deleteFoto()" title="Eliminar foto">
-                                <i class="bi bi-trash"></i>
-                            </div>
-                            {{end}}
-                            <form id="uploadForm" action="/perfil/upload" method="POST" enctype="multipart/form-data">
-                                <input type="file" id="uploadInput" name="foto" accept="image/*">
-                            </form>
-                        </div>
+                        <!-- Foto de perfil -->
+                        <img src="{{.Perfil.Foto}}" alt="Avatar" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #0d6efd;">
                         
-                        <h4 class="mb-2">{{.UserName}}</h4>
-                        <p class="text-muted mb-3">
-                            <i class="bi bi-envelope"></i> {{.UserEmail}}
-                        </p>
+                        <h4>{{.UserName}}</h4>
+                        <p class="text-muted">{{.UserEmail}}</p>
                         
-                        <!-- Badge de rol mejorado -->
-                        <div class="mb-3">
-                            <span class="role-badge {{if eq .UserRole "admin"}}admin{{else if eq .UserRole "editor"}}editor{{else}}user{{end}}">
-                                <i class="bi {{if eq .UserRole "admin"}}bi-shield-lock{{else if eq .UserRole "editor"}}bi-pencil{{else}}bi-person{{end}}"></i>
-                                {{if eq .UserRole "admin"}}
-                                    Administrador
-                                {{else if eq .UserRole "editor"}}
-                                    Editor
-                                {{else}}
-                                    Usuario
-                                {{end}}
-                            </span>
-                        </div>
+                        <!-- Badge de rol -->
+                        <span class="badge {{if eq .UserRole "admin"}}bg-danger{{else if eq .UserRole "editor"}}bg-warning text-dark{{else}}bg-info{{end}} mb-3">
+                            {{if eq .UserRole "admin"}}Administrador{{else if eq .UserRole "editor"}}Editor{{else}}Usuario{{end}}
+                        </span>
                         
-                        <!-- Estadísticas rápidas -->
-                        <div class="row mt-4">
-                            <div class="col-6">
-                                <div class="border rounded p-2">
-                                    <small class="text-muted d-block">Miembro desde</small>
-                                    <strong>{{.Perfil.CreatedAt.Format "Jan 2006"}}</strong>
-                                </div>
+                        <!-- Formulario de subida de foto -->
+                        <form action="/perfil/upload" method="POST" enctype="multipart/form-data" class="mt-3">
+                            <div class="mb-3">
+                                <label for="foto" class="form-label">Cambiar foto</label>
+                                <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
                             </div>
-                            <div class="col-6">
-                                <div class="border rounded p-2">
-                                    <small class="text-muted d-block">Última actualización</small>
-                                    <strong>{{.Perfil.UpdatedAt.Format "02/01/2006"}}</strong>
-                                </div>
-                            </div>
-                        </div>
+                            <button type="submit" class="btn btn-primary btn-sm">Subir foto</button>
+                        </form>
+                        
+                        {{if ne .Perfil.Foto "/static/uploads/perfil/default-avatar.png"}}
+                        <a href="/perfil/delete-foto" class="btn btn-danger btn-sm mt-2" onclick="return confirm('¿Eliminar foto?')">
+                            Eliminar foto
+                        </a>
+                        {{end}}
                     </div>
                 </div>
             </div>
@@ -430,546 +116,58 @@
                 <!-- Datos del Perfil -->
                 <div class="card shadow mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-person-gear"></i> Información Personal</h5>
+                        <h5 class="mb-0">Información Personal</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="/perfil/update" id="profileForm">
+                        <form method="POST" action="/perfil/update">
                             <div class="mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-chat-text"></i> Biografía
-                                </label>
-                                <textarea class="form-control" 
-                                          name="bio" 
-                                          id="bio"
-                                          rows="4" 
-                                          maxlength="500"
-                                          placeholder="Cuéntanos sobre ti...">{{.Perfil.Bio}}</textarea>
-                                <small class="text-muted float-end" id="bioCount">{{len .Perfil.Bio}}/500</small>
+                                <label class="form-label">Biografía</label>
+                                <textarea class="form-control" name="bio" rows="3">{{.Perfil.Bio}}</textarea>
                             </div>
-                            
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-geo-alt"></i> Ubicación
-                                    </label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           name="ubicacion" 
-                                           id="ubicacion"
-                                           value="{{.Perfil.Ubicacion}}" 
-                                           placeholder="Ciudad, País"
-                                           maxlength="100">
+                                    <label class="form-label">Ubicación</label>
+                                    <input type="text" class="form-control" name="ubicacion" value="{{.Perfil.Ubicacion}}">
                                 </div>
-                                
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-link"></i> Sitio Web
-                                    </label>
-                                    <input type="url" 
-                                           class="form-control" 
-                                           name="sitio_web" 
-                                           id="sitioWeb"
-                                           value="{{.Perfil.SitioWeb}}" 
-                                           placeholder="https://ejemplo.com">
-                                    <div class="validation-feedback" id="webFeedback"></div>
+                                    <label class="form-label">Sitio Web</label>
+                                    <input type="url" class="form-control" name="sitio_web" value="{{.Perfil.SitioWeb}}">
                                 </div>
                             </div>
-                            
-                            <button type="submit" class="btn btn-primary" id="saveProfileBtn">
-                                <i class="bi bi-save"></i> Guardar Cambios
-                            </button>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                         </form>
                     </div>
                 </div>
 
                 <!-- Cambiar Contraseña -->
-                <div class="card shadow mb-4">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0"><i class="bi bi-lock"></i> Cambiar Contraseña</h5>
+                <div class="card shadow">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">Cambiar Contraseña</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="/perfil/change-password" id="passwordForm">
+                        <form method="POST" action="/perfil/change-password">
                             <div class="mb-3">
                                 <label class="form-label">Contraseña Actual</label>
-                                <input type="password" 
-                                       class="form-control" 
-                                       name="actual" 
-                                       id="actualPassword"
-                                       required>
-                                <div class="validation-feedback" id="actualPasswordFeedback"></div>
+                                <input type="password" class="form-control" name="actual" required>
                             </div>
-                            
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Nueva Contraseña</label>
-                                    <input type="password" 
-                                           class="form-control" 
-                                           name="nueva" 
-                                           id="nuevaPassword"
-                                           required 
-                                           minlength="6">
-                                    <div class="password-strength">
-                                        <div class="password-strength-bar" id="passwordStrength"></div>
-                                    </div>
-                                    <div class="validation-feedback" id="nuevaPasswordFeedback"></div>
-                                    <small class="text-muted">Mínimo 6 caracteres</small>
+                                    <input type="password" class="form-control" name="nueva" required>
                                 </div>
-                                
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Confirmar Contraseña</label>
-                                    <input type="password" 
-                                           class="form-control" 
-                                           name="confirmar" 
-                                           id="confirmPassword"
-                                           required>
-                                    <div class="validation-feedback" id="confirmPasswordFeedback"></div>
+                                    <input type="password" class="form-control" name="confirmar" required>
                                 </div>
                             </div>
-                            
-                            <button type="submit" class="btn btn-warning" id="changePasswordBtn">
-                                <i class="bi bi-key"></i> Cambiar Contraseña
-                            </button>
+                            <button type="submit" class="btn btn-warning">Cambiar Contraseña</button>
                         </form>
                     </div>
                 </div>
-
-                <!-- Actividad Reciente -->
-                <div class="card shadow">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Actividad Reciente</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="recentActivity">
-                            <!-- Se llenará con JavaScript -->
-                            <div class="text-center py-3">
-                                <div class="spinner-border spinner-border-sm text-primary me-2"></div>
-                                <span class="text-muted">Cargando actividad...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal de recorte de imagen -->
-    <div class="modal fade" id="cropModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">
-                        <i class="bi bi-crop"></i> Ajustar Foto de Perfil
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="cropper-container">
-                        <img id="cropImage" style="max-width: 100%;">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="cropAndUpload()">
-                        <i class="bi bi-check-circle"></i> Aplicar y Subir
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <script src="/static/js/api.js"></script>
-    <script src="/static/js/validations.js"></script>
-    
-    <script>
-        // Variables globales
-        let cropper = null;
-        let cropModal;
-        let currentFile = null;
-        
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', function() {
-            cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
-            
-            // Inicializar validaciones
-            initValidations();
-            
-            // Cargar actividad reciente
-            loadRecentActivity();
-            
-            // Contador de caracteres para biografía
-            document.getElementById('bio').addEventListener('input', function() {
-                const count = this.value.length;
-                document.getElementById('bioCount').textContent = count + '/500';
-            });
-        });
-        
-        // Inicializar validaciones
-        function initValidations() {
-            // Validar sitio web en tiempo real
-            const sitioWeb = document.getElementById('sitioWeb');
-            sitioWeb.addEventListener('input', function() {
-                validateWebsite(this);
-            });
-            
-            // Validar contraseñas
-            const nuevaPassword = document.getElementById('nuevaPassword');
-            const confirmPassword = document.getElementById('confirmPassword');
-            
-            nuevaPassword.addEventListener('input', function() {
-                validateNewPassword(this);
-                checkPasswordStrength(this.value);
-                if (confirmPassword.value) {
-                    validatePasswordMatch(nuevaPassword, confirmPassword);
-                }
-            });
-            
-            confirmPassword.addEventListener('input', function() {
-                validatePasswordMatch(nuevaPassword, this);
-            });
-        }
-        
-        // Validar sitio web
-        function validateWebsite(input) {
-            const value = input.value.trim();
-            const feedback = document.getElementById('webFeedback');
-            
-            if (value && !isValidUrl(value)) {
-                showValidation(input, feedback, false, 'URL no válida (debe comenzar con http:// o https://)');
-                return false;
-            } else {
-                showValidation(input, feedback, true, 'URL válida');
-                return true;
-            }
-        }
-        
-        // Validar URL
-        function isValidUrl(string) {
-            try {
-                new URL(string);
-                return true;
-            } catch (_) {
-                return false;
-            }
-        }
-        
-        // Validar nueva contraseña
-        function validateNewPassword(input) {
-            const value = input.value;
-            const feedback = document.getElementById('nuevaPasswordFeedback');
-            
-            if (value.length === 0) {
-                showValidation(input, feedback, false, 'La contraseña es requerida');
-                return false;
-            } else if (value.length < 6) {
-                showValidation(input, feedback, false, 'Mínimo 6 caracteres');
-                return false;
-            } else {
-                showValidation(input, feedback, true, 'Contraseña válida');
-                return true;
-            }
-        }
-        
-        // Validar que las contraseñas coincidan
-        function validatePasswordMatch(passwordInput, confirmInput) {
-            const feedback = document.getElementById('confirmPasswordFeedback');
-            const isValid = passwordInput.value === confirmInput.value;
-            
-            if (confirmInput.value.length === 0) {
-                showValidation(confirmInput, feedback, false, 'Confirme su contraseña');
-                return false;
-            } else if (!isValid) {
-                showValidation(confirmInput, feedback, false, 'Las contraseñas no coinciden');
-                return false;
-            } else {
-                showValidation(confirmInput, feedback, true, 'Las contraseñas coinciden');
-                return true;
-            }
-        }
-        
-        // Mostrar validación
-        function showValidation(input, feedback, isValid, message) {
-            if (isValid) {
-                input.classList.remove('is-invalid');
-                input.classList.add('is-valid');
-                if (feedback) {
-                    feedback.classList.remove('invalid', 'show');
-                    feedback.classList.add('valid', 'show');
-                    feedback.textContent = '✓ ' + message;
-                }
-            } else {
-                input.classList.remove('is-valid');
-                input.classList.add('is-invalid');
-                if (feedback) {
-                    feedback.classList.remove('valid', 'show');
-                    feedback.classList.add('invalid', 'show');
-                    feedback.textContent = '✗ ' + message;
-                }
-            }
-        }
-        
-        // Medir fuerza de contraseña
-        function checkPasswordStrength(password) {
-            const strengthBar = document.getElementById('passwordStrength');
-            if (!strengthBar) return;
-            
-            let strength = 0;
-            
-            if (password.length >= 6) strength += 1;
-            if (password.length >= 8) strength += 1;
-            if (/[A-Z]/.test(password)) strength += 1;
-            if (/[0-9]/.test(password)) strength += 1;
-            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-            
-            strengthBar.className = 'password-strength-bar';
-            
-            if (password.length === 0) {
-                strengthBar.style.width = '0%';
-            } else if (strength <= 1) {
-                strengthBar.classList.add('strength-very-weak');
-            } else if (strength === 2) {
-                strengthBar.classList.add('strength-weak');
-            } else if (strength === 3) {
-                strengthBar.classList.add('strength-medium');
-            } else if (strength === 4) {
-                strengthBar.classList.add('strength-strong');
-            } else {
-                strengthBar.classList.add('strength-very-strong');
-            }
-        }
-        
-        // Upload de foto con recorte
-        document.getElementById('uploadInput').addEventListener('change', function(e) {
-            if (this.files && this.files[0]) {
-                const file = this.files[0];
-                
-                // Validaciones
-                if (!file.type.startsWith('image/')) {
-                    showToast('error', 'El archivo debe ser una imagen');
-                    return;
-                }
-                
-                if (file.size > 5 * 1024 * 1024) {
-                    showToast('error', 'La imagen no puede superar los 5MB');
-                    return;
-                }
-                
-                currentFile = file;
-                
-                // Mostrar modal de recorte
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const image = document.getElementById('cropImage');
-                    image.src = e.target.result;
-                    
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    
-                    cropModal.show();
-                    
-                    setTimeout(() => {
-                        cropper = new Cropper(image, {
-                            aspectRatio: 1,
-                            viewMode: 1,
-                            dragMode: 'move',
-                            autoCropArea: 1,
-                            cropBoxMovable: false,
-                            cropBoxResizable: true,
-                            background: false
-                        });
-                    }, 500);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Aplicar recorte y subir
-        function cropAndUpload() {
-            if (!cropper) return;
-            
-            showLoading();
-            
-            const canvas = cropper.getCroppedCanvas({
-                width: 400,
-                height: 400
-            });
-            
-            canvas.toBlob(function(blob) {
-                const formData = new FormData();
-                formData.append('foto', blob, 'profile.jpg');
-                
-                API.upload('/perfil/upload', formData)
-                    .then(response => {
-                        showToast('success', 'Foto actualizada correctamente');
-                        document.getElementById('profileImage').src = canvas.toDataURL();
-                        cropModal.hide();
-                        setTimeout(() => location.reload(), 1000);
-                    })
-                    .catch(error => {
-                        showToast('error', 'Error al subir la foto: ' + error.message);
-                    })
-                    .finally(() => {
-                        hideLoading();
-                    });
-            }, 'image/jpeg', 0.9);
-        }
-        
-        // Eliminar foto
-        function deleteFoto() {
-            if (!confirm('¿Estás seguro de eliminar tu foto de perfil?')) return;
-            
-            showLoading();
-            
-            API.get('/perfil/delete-foto')
-                .then(response => {
-                    showToast('success', 'Foto eliminada correctamente');
-                    setTimeout(() => location.reload(), 1000);
-                })
-                .catch(error => {
-                    showToast('error', 'Error al eliminar la foto: ' + error.message);
-                })
-                .finally(() => {
-                    hideLoading();
-                });
-        }
-        
-        // Cargar actividad reciente
-        async function loadRecentActivity() {
-            try {
-                // Simular actividad (implementar según tu backend)
-                const activity = [
-                    { action: 'Actualizó su perfil', time: 'hace 2 horas' },
-                    { action: 'Cambió su contraseña', time: 'hace 3 días' }
-                ];
-                
-                renderActivity(activity);
-            } catch (error) {
-                console.warn('Error cargando actividad:', error);
-            }
-        }
-        
-        // Renderizar actividad
-        function renderActivity(activity) {
-            const container = document.getElementById('recentActivity');
-            
-            if (activity.length === 0) {
-                container.innerHTML = '<p class="text-muted text-center py-3">No hay actividad reciente</p>';
-                return;
-            }
-            
-            container.innerHTML = activity.map(item => `
-                <div class="d-flex align-items-center mb-3">
-                    <div class="bg-info bg-opacity-25 rounded-circle p-2 me-3">
-                        <i class="bi bi-arrow-right-circle text-info"></i>
-                    </div>
-                    <div>
-                        <strong>${item.action}</strong>
-                        <br>
-                        <small class="text-muted">${item.time}</small>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        // Validación de formulario de perfil
-        document.getElementById('profileForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const sitioWeb = document.getElementById('sitioWeb');
-            if (sitioWeb.value && !validateWebsite(sitioWeb)) {
-                showToast('error', 'Corrija los errores antes de guardar');
-                return;
-            }
-            
-            this.submit();
-        });
-        
-        // Validación de formulario de contraseña
-        document.getElementById('passwordForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const actual = document.getElementById('actualPassword');
-            const nueva = document.getElementById('nuevaPassword');
-            const confirmar = document.getElementById('confirmPassword');
-            
-            const isActualValid = actual.value.length > 0;
-            const isNuevaValid = validateNewPassword(nueva);
-            const isConfirmValid = validatePasswordMatch(nueva, confirmar);
-            
-            if (!isActualValid) {
-                showToast('error', 'La contraseña actual es requerida');
-                return;
-            }
-            
-            if (!isNuevaValid || !isConfirmValid) {
-                showToast('error', 'Corrija los errores de contraseña');
-                return;
-            }
-            
-            this.submit();
-        });
-        
-        // Mostrar loading
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.add('active');
-        }
-        
-        // Ocultar loading
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('active');
-        }
-        
-        // Mostrar toast
-        function showToast(type, message) {
-            const container = document.getElementById('toastContainer');
-            const toastId = 'toast-' + Date.now();
-            
-            const icons = {
-                success: 'bi-check-circle-fill',
-                error: 'bi-exclamation-triangle-fill',
-                warning: 'bi-exclamation-circle-fill',
-                info: 'bi-info-circle-fill'
-            };
-            
-            const titles = {
-                success: 'Éxito',
-                error: 'Error',
-                warning: 'Advertencia',
-                info: 'Información'
-            };
-            
-            const html = `
-                <div class="toast ${type}" id="${toastId}">
-                    <div class="toast-header">
-                        <i class="bi ${icons[type]} me-2"></i>
-                        <strong class="me-auto">${titles[type]}</strong>
-                        <small>ahora</small>
-                        <button type="button" class="btn-close" onclick="document.getElementById('${toastId}').remove()"></button>
-                    </div>
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', html);
-            
-            setTimeout(() => {
-                const toast = document.getElementById(toastId);
-                if (toast) toast.remove();
-            }, 5000);
-        }
-        
-        // Auto-cerrar alertas
-        setTimeout(function() {
-            document.querySelectorAll('.alert').forEach(function(alert) {
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
-    </script>
 </body>
 </html>

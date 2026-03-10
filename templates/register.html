@@ -11,350 +11,17 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     
-    <!-- CSS Personalizado -->
-    <link rel="stylesheet" href="/static/css/style.css">
-    
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
-    
-    <style>
-        body {
-            background: linear-gradient(135deg, #021024 0%, #052659 50%, #5483B3 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .register-container {
-            animation: fadeInUp 0.8s ease;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .card {
-            border: none;
-            border-radius: 30px;
-            overflow: hidden;
-            box-shadow: 0 30px 60px rgba(2, 16, 36, 0.5);
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.98);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, #5483B3, #052659);
-            padding: 25px 30px;
-            border-bottom: none;
-        }
-        
-        .card-header h4 {
-            color: white;
-            font-weight: 700;
-            margin: 0;
-            font-size: 1.8rem;
-        }
-        
-        .card-header i {
-            color: #C1E8FF;
-            margin-right: 10px;
-        }
-        
-        .card-body {
-            padding: 40px;
-        }
-        
-        .form-label {
-            color: #052659;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-        
-        .form-control {
-            border-radius: 12px;
-            border: 2px solid #C1E8FF;
-            padding: 12px 18px;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-        }
-        
-        .form-control:focus {
-            border-color: #5483B3;
-            box-shadow: 0 0 0 0.25rem rgba(84, 131, 179, 0.25);
-            transform: translateY(-2px);
-        }
-        
-        .form-control.is-valid {
-            border-color: #28a745;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right calc(0.375em + 0.1875rem) center;
-            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-        }
-        
-        .form-control.is-invalid {
-            border-color: #dc3545;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right calc(0.375em + 0.1875rem) center;
-        }
-        
-        .validation-feedback {
-            font-size: 0.85rem;
-            margin-top: 5px;
-            display: none;
-            padding-left: 5px;
-        }
-        
-        .validation-feedback.show {
-            display: block;
-        }
-        
-        .validation-feedback.valid {
-            color: #28a745;
-        }
-        
-        .validation-feedback.invalid {
-            color: #dc3545;
-        }
-        
-        .form-text {
-            color: #7DA0CA;
-            font-size: 0.8rem;
-            margin-top: 5px;
-        }
-        
-        .password-strength {
-            margin-top: 10px;
-        }
-        
-        .progress {
-            height: 8px;
-            border-radius: 4px;
-            background: #C1E8FF;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            transition: width 0.3s, background-color 0.3s;
-        }
-        
-        .strength-text {
-            font-size: 0.85rem;
-            margin-top: 5px;
-            display: block;
-            color: #5483B3;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #5483B3, #052659);
-            border: none;
-            border-radius: 12px;
-            padding: 14px 30px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(84, 131, 179, 0.4);
-        }
-        
-        .btn-primary:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        
-        .btn-primary .spinner-border {
-            width: 1.2rem;
-            height: 1.2rem;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        
-        .btn-link {
-            color: #5483B3;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-link:hover {
-            color: #052659;
-            transform: translateX(5px);
-        }
-        
-        .alert {
-            border-radius: 12px;
-            border: none;
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            animation: slideDown 0.5s ease;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .alert-danger {
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-            color: #721c24;
-            border-left: 5px solid #dc3545;
-        }
-        
-        .recaptcha-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-            transform: scale(1);
-            transition: transform 0.3s;
-        }
-        
-        .recaptcha-container:hover {
-            transform: scale(1.02);
-        }
-        
-        .password-toggle {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #7DA0CA;
-            transition: all 0.3s;
-            z-index: 10;
-        }
-        
-        .password-toggle:hover {
-            color: #5483B3;
-        }
-        
-        .input-group {
-            position: relative;
-        }
-        
-        .toast-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 300px;
-        }
-        
-        .toast {
-            background: white;
-            border-left: 5px solid;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            margin-bottom: 10px;
-            animation: slideInRight 0.3s ease;
-        }
-        
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        .toast.error { border-left-color: #dc3545; }
-        .toast.success { border-left-color: #28a745; }
-        .toast.warning { border-left-color: #ffc107; }
-        .toast.info { border-left-color: #5483B3; }
-        
-        .toast-header {
-            padding: 12px 15px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .toast-body {
-            padding: 12px 15px;
-        }
-        
-        .requirements-list {
-            list-style: none;
-            padding: 0;
-            margin: 10px 0 0;
-            font-size: 0.85rem;
-        }
-        
-        .requirements-list li {
-            margin-bottom: 5px;
-            color: #7DA0CA;
-        }
-        
-        .requirements-list li.valid {
-            color: #28a745;
-        }
-        
-        .requirements-list li i {
-            margin-right: 5px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .card-body {
-                padding: 30px 20px;
-            }
-            
-            .card-header h4 {
-                font-size: 1.5rem;
-            }
-            
-            .recaptcha-container {
-                transform: scale(0.9);
-            }
-            
-            .btn-primary {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            
-            .d-flex {
-                flex-direction: column;
-            }
-        }
-    </style>
 </head>
-<body>
-    <!-- Toast Notifications Container -->
-    <div class="toast-notification" id="toastContainer"></div>
-
-    <!-- Migajas de pan -->
-    <nav aria-label="breadcrumb" class="container mt-3 position-relative" style="z-index: 2;">
-        <ol class="breadcrumb bg-dark bg-opacity-25 p-3 rounded">
+<body class="bg-light">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="container mt-3">
+        <ol class="breadcrumb bg-white p-3 rounded shadow-sm">
             {{range .breadcrumbs}}
-            <li class="breadcrumb-item text-white">
+            <li class="breadcrumb-item">
                 {{if .url}}
-                <a href="{{.url}}" class="text-white">{{.name}}</a>
+                <a href="{{.url}}">{{.name}}</a>
                 {{else}}
                 {{.name}}
                 {{end}}
@@ -363,147 +30,52 @@
         </ol>
     </nav>
     
-    <div class="container register-container">
-        <div class="row justify-content-center">
+    <div class="container">
+        <div class="row min-vh-100 align-items-center justify-content-center">
             <div class="col-md-10 col-lg-8">
-                <div class="card shadow">
-                    <div class="card-header text-center">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-primary text-white text-center py-3">
                         <h4 class="mb-0">
-                            <i class="bi bi-person-plus"></i> 
-                            {{.Title}}
+                            <i class="bi bi-person-plus"></i> {{.Title}}
                         </h4>
-                        <p class="text-white-50 mb-0 mt-2">Completa el formulario para crear tu cuenta</p>
                     </div>
-                    <div class="card-body">
-                        <!-- Mensaje de error mejorado -->
+                    <div class="card-body p-4">
+                        <!-- Mensaje de error -->
                         {{if .Error}}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            <strong>Error:</strong> {{.Error}}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> {{.Error}}
                         </div>
                         {{end}}
                         
-                        <div id="validationErrors" class="alert alert-danger d-none"></div>
-                        
-                        <form method="POST" action="/do-register" id="registerForm" novalidate>
+                        <!-- Formulario de registro -->
+                        <form method="POST" action="/do-register">
                             <div class="row">
-                                <!-- Nombre -->
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-person-fill"></i> Nombre completo *
-                                    </label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           name="name" 
-                                           id="name"
-                                           value="{{.Form.Name}}"
-                                           placeholder="Ej: Juan Pérez"
-                                           required
-                                           maxlength="50">
-                                    <div class="validation-feedback" id="nameFeedback"></div>
-                                    <div class="form-text">
-                                        <i class="bi bi-info-circle"></i> Solo letras y espacios (2-50 caracteres)
-                                    </div>
+                                    <label class="form-label">Nombre completo *</label>
+                                    <input type="text" class="form-control" name="name" value="{{.Form.Name}}" required>
                                 </div>
                                 
-                                <!-- Email -->
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-envelope-fill"></i> Email *
-                                    </label>
-                                    <input type="email" 
-                                           class="form-control" 
-                                           name="email" 
-                                           id="email"
-                                           value="{{.Form.Email}}"
-                                           placeholder="ejemplo@correo.com"
-                                           required>
-                                    <div class="validation-feedback" id="emailFeedback"></div>
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" name="email" value="{{.Form.Email}}" required>
                                 </div>
                             </div>
                             
                             <div class="row">
-                                <!-- Teléfono -->
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-telephone-fill"></i> Teléfono *
-                                    </label>
-                                    <input type="tel" 
-                                           class="form-control" 
-                                           name="phone" 
-                                           id="phone"
-                                           value="{{.Form.Phone}}"
-                                           placeholder="+34 600 123 456"
-                                           required>
-                                    <div class="validation-feedback" id="phoneFeedback"></div>
-                                    <div class="form-text">
-                                        <i class="bi bi-info-circle"></i> Solo números, +, - y espacios (8-15 dígitos)
-                                    </div>
+                                    <label class="form-label">Teléfono *</label>
+                                    <input type="tel" class="form-control" name="phone" value="{{.Form.Phone}}" required>
                                 </div>
                                 
-                                <!-- Contraseña -->
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-lock-fill"></i> Contraseña *
-                                    </label>
-                                    <div class="input-group position-relative">
-                                        <input type="password" 
-                                               class="form-control" 
-                                               name="password" 
-                                               id="password"
-                                               required 
-                                               minlength="6">
-                                        <span class="password-toggle" onclick="togglePassword('password')">
-                                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
-                                        </span>
-                                    </div>
-                                    <div class="validation-feedback" id="passwordFeedback"></div>
-                                    
-                                    <!-- Medidor de fuerza de contraseña -->
-                                    <div class="password-strength">
-                                        <div class="progress">
-                                            <div class="progress-bar" id="passwordStrength" style="width: 0%;"></div>
-                                        </div>
-                                        <small class="strength-text" id="strengthText">
-                                            <i class="bi bi-shield"></i> Fortaleza de la contraseña
-                                        </small>
-                                    </div>
-                                    
-                                    <!-- Requisitos de contraseña -->
-                                    <ul class="requirements-list" id="passwordRequirements">
-                                        <li id="reqLength">
-                                            <i class="bi bi-x-circle"></i> Mínimo 6 caracteres
-                                        </li>
-                                        <li id="reqUpperCase">
-                                            <i class="bi bi-x-circle"></i> Al menos una mayúscula
-                                        </li>
-                                        <li id="reqNumber">
-                                            <i class="bi bi-x-circle"></i> Al menos un número
-                                        </li>
-                                        <li id="reqSpecial">
-                                            <i class="bi bi-x-circle"></i> Al menos un carácter especial
-                                        </li>
-                                    </ul>
+                                    <label class="form-label">Contraseña *</label>
+                                    <input type="password" class="form-control" name="password" required minlength="6">
                                 </div>
                             </div>
                             
-                            <!-- Confirmar contraseña -->
                             <div class="mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-lock-fill"></i> Confirmar contraseña *
-                                </label>
-                                <div class="input-group position-relative">
-                                    <input type="password" 
-                                           class="form-control" 
-                                           name="confirm_password" 
-                                           id="confirm_password"
-                                           required>
-                                    <span class="password-toggle" onclick="togglePassword('confirm_password')">
-                                        <i class="bi bi-eye" id="toggleConfirmIcon"></i>
-                                    </span>
-                                </div>
-                                <div class="validation-feedback" id="confirmPasswordFeedback"></div>
+                                <label class="form-label">Confirmar contraseña *</label>
+                                <input type="password" class="form-control" name="confirm_password" required>
                             </div>
                             
                             <!-- Términos y condiciones -->
@@ -513,29 +85,22 @@
                                     <label class="form-check-label" for="terms">
                                         Acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">términos y condiciones</a> *
                                     </label>
-                                    <div class="validation-feedback" id="termsFeedback"></div>
                                 </div>
                             </div>
                             
                             <!-- reCAPTCHA -->
-                            <div class="mb-4">
-                                <div class="recaptcha-container">
-                                    <div class="g-recaptcha" data-sitekey="{{.RecaptchaKey}}"></div>
-                                </div>
+                            <div class="mb-3">
+                                <div class="g-recaptcha" data-sitekey="{{.RecaptchaKey}}"></div>
                                 <input type="hidden" name="recaptchaToken" id="recaptchaToken">
-                                <div class="validation-feedback" id="recaptchaFeedback"></div>
                             </div>
                             
-                            <!-- Botones de acción -->
-                            <div class="d-flex justify-content-between align-items-center">
+                            <!-- Botones -->
+                            <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary" id="submitBtn">
-                                    <span class="spinner-border spinner-border-sm d-none" id="submitSpinner"></span>
-                                    <span id="submitText">
-                                        <i class="bi bi-check-circle"></i> Registrarse
-                                    </span>
+                                    <i class="bi bi-check-circle"></i> Registrarse
                                 </button>
-                                <a href="/login" class="btn btn-link">
-                                    <i class="bi bi-box-arrow-in-right"></i> ¿Ya tienes cuenta? Inicia sesión
+                                <a href="/login" class="btn btn-link text-center">
+                                    ¿Ya tienes cuenta? Inicia sesión
                                 </a>
                             </div>
                         </form>
@@ -547,25 +112,15 @@
 
     <!-- Modal de Términos y Condiciones -->
     <div class="modal fade" id="termsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">
-                        <i class="bi bi-file-text"></i> Términos y Condiciones
-                    </h5>
+                    <h5 class="modal-title">Términos y Condiciones</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <h6>1. Aceptación de términos</h6>
-                    <p>Al registrarte en nuestro sistema, aceptas cumplir con estos términos y condiciones.</p>
-                    
-                    <h6>2. Privacidad</h6>
+                    <p>Al registrarte en nuestro sistema, aceptas cumplir con nuestros términos y condiciones.</p>
                     <p>Tus datos personales serán tratados conforme a nuestra política de privacidad.</p>
-                    
-                    <h6>3. Uso del sistema</h6>
-                    <p>El sistema es para uso personal y no debe ser utilizado para actividades ilícitas.</p>
-                    
-                    <h6>4. Responsabilidad</h6>
                     <p>Eres responsable de mantener la confidencialidad de tu contraseña.</p>
                 </div>
                 <div class="modal-footer">
@@ -575,398 +130,19 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <script src="/static/js/validations.js"></script>
     
     <script>
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', function() {
-            // Validaciones en tiempo real
-            initRealTimeValidations();
-        });
-
-        // Inicializar validaciones en tiempo real
-        function initRealTimeValidations() {
-            const nameInput = document.getElementById('name');
-            const emailInput = document.getElementById('email');
-            const phoneInput = document.getElementById('phone');
-            const passwordInput = document.getElementById('password');
-            const confirmInput = document.getElementById('confirm_password');
-            
-            // Validar nombre
-            nameInput.addEventListener('input', function() {
-                validateName(this);
-            });
-            
-            // Validar email
-            emailInput.addEventListener('input', function() {
-                validateEmail(this);
-            });
-            
-            // Validar teléfono
-            phoneInput.addEventListener('input', function(e) {
-                let value = this.value.replace(/[^\d+\-\s]/g, '');
-                this.value = value;
-                validatePhone(this);
-            });
-            
-            // Validar contraseña y requisitos
-            passwordInput.addEventListener('input', function() {
-                validatePassword(this);
-                checkPasswordStrength(this.value);
-                checkPasswordRequirements(this.value);
-                if (confirmInput.value) {
-                    validatePasswordMatch(passwordInput, confirmInput);
-                }
-            });
-            
-            // Validar confirmación
-            confirmInput.addEventListener('input', function() {
-                validatePasswordMatch(passwordInput, this);
-            });
-        }
-
-        // Validar nombre
-        function validateName(input) {
-            const value = input.value.trim();
-            const feedback = document.getElementById('nameFeedback');
-            
-            // Limpiar caracteres no permitidos
-            input.value = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]/g, '');
-            
-            const isValid = value.length >= 2 && value.length <= 50 && 
-                           /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/.test(value);
-            
-            if (value.length === 0) {
-                showValidation(input, feedback, false, 'El nombre es requerido');
-                return false;
-            } else if (value.length < 2) {
-                showValidation(input, feedback, false, 'Mínimo 2 caracteres');
-                return false;
-            } else if (!isValid) {
-                showValidation(input, feedback, false, 'Solo letras y espacios');
-                return false;
-            } else {
-                showValidation(input, feedback, true, 'Nombre válido');
-                return true;
-            }
-        }
-
-        // Validar email
-        function validateEmail(input) {
-            const value = input.value.trim();
-            const feedback = document.getElementById('emailFeedback');
-            
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const isValid = emailRegex.test(value);
-            
-            if (value.length === 0) {
-                showValidation(input, feedback, false, 'El email es requerido');
-                return false;
-            } else if (!isValid) {
-                showValidation(input, feedback, false, 'Email no válido');
-                return false;
-            } else {
-                showValidation(input, feedback, true, 'Email válido');
-                return true;
-            }
-        }
-
-        // Validar teléfono
-        function validatePhone(input) {
-            const value = input.value.trim();
-            const feedback = document.getElementById('phoneFeedback');
-            
-            // Contar solo dígitos
-            const digits = value.replace(/\D/g, '');
-            
-            if (value.length === 0) {
-                showValidation(input, feedback, false, 'El teléfono es requerido');
-                return false;
-            } else if (digits.length < 8 || digits.length > 15) {
-                showValidation(input, feedback, false, 'Debe tener entre 8 y 15 dígitos');
-                return false;
-            } else if (!/^[0-9+\-\s]+$/.test(value)) {
-                showValidation(input, feedback, false, 'Caracteres no válidos');
-                return false;
-            } else {
-                showValidation(input, feedback, true, 'Teléfono válido');
-                return true;
-            }
-        }
-
-        // Validar contraseña
-        function validatePassword(input) {
-            const value = input.value;
-            const feedback = document.getElementById('passwordFeedback');
-            
-            if (value.length === 0) {
-                showValidation(input, feedback, false, 'La contraseña es requerida');
-                return false;
-            } else if (value.length < 6) {
-                showValidation(input, feedback, false, 'Mínimo 6 caracteres');
-                return false;
-            } else {
-                showValidation(input, feedback, true, 'Contraseña válida');
-                return true;
-            }
-        }
-
-        // Validar que las contraseñas coincidan
-        function validatePasswordMatch(passwordInput, confirmInput) {
-            const feedback = document.getElementById('confirmPasswordFeedback');
-            const isValid = passwordInput.value === confirmInput.value;
-            
-            if (confirmInput.value.length === 0) {
-                showValidation(confirmInput, feedback, false, 'Confirme su contraseña');
-                return false;
-            } else if (!isValid) {
-                showValidation(confirmInput, feedback, false, 'Las contraseñas no coinciden');
-                return false;
-            } else {
-                showValidation(confirmInput, feedback, true, 'Las contraseñas coinciden');
-                return true;
-            }
-        }
-
-        // Mostrar validación
-        function showValidation(input, feedback, isValid, message) {
-            if (isValid) {
-                input.classList.remove('is-invalid');
-                input.classList.add('is-valid');
-                if (feedback) {
-                    feedback.classList.remove('invalid', 'show');
-                    feedback.classList.add('valid', 'show');
-                    feedback.textContent = '✓ ' + message;
-                }
-            } else {
-                input.classList.remove('is-valid');
-                input.classList.add('is-invalid');
-                if (feedback) {
-                    feedback.classList.remove('valid', 'show');
-                    feedback.classList.add('invalid', 'show');
-                    feedback.textContent = '✗ ' + message;
-                }
-            }
-        }
-
-        // Medidor de fuerza de contraseña
-        function checkPasswordStrength(password) {
-            const strengthBar = document.getElementById('passwordStrength');
-            const strengthText = document.getElementById('strengthText');
-            
-            let strength = 0;
-            
-            if (password.length >= 6) strength += 20;
-            if (password.length >= 8) strength += 20;
-            if (/[A-Z]/.test(password)) strength += 20;
-            if (/[0-9]/.test(password)) strength += 20;
-            if (/[^A-Za-z0-9]/.test(password)) strength += 20;
-            
-            strengthBar.style.width = strength + '%';
-            
-            let message = '';
-            let color = '';
-            
-            if (password.length === 0) {
-                message = 'Ingresa una contraseña';
-                color = '';
-            } else if (strength < 40) {
-                message = 'Muy débil';
-                color = 'bg-danger';
-            } else if (strength < 60) {
-                message = 'Débil';
-                color = 'bg-warning';
-            } else if (strength < 80) {
-                message = 'Media';
-                color = 'bg-info';
-            } else {
-                message = 'Fuerte';
-                color = 'bg-success';
-            }
-            
-            strengthBar.className = 'progress-bar ' + color;
-            strengthText.innerHTML = `<i class="bi bi-shield"></i> Fortaleza: ${message}`;
-        }
-
-        // Verificar requisitos de contraseña
-        function checkPasswordRequirements(password) {
-            const reqLength = document.getElementById('reqLength');
-            const reqUpperCase = document.getElementById('reqUpperCase');
-            const reqNumber = document.getElementById('reqNumber');
-            const reqSpecial = document.getElementById('reqSpecial');
-            
-            // Longitud
-            if (password.length >= 6) {
-                reqLength.className = 'valid';
-                reqLength.innerHTML = '<i class="bi bi-check-circle"></i> Mínimo 6 caracteres';
-            } else {
-                reqLength.className = '';
-                reqLength.innerHTML = '<i class="bi bi-x-circle"></i> Mínimo 6 caracteres';
-            }
-            
-            // Mayúscula
-            if (/[A-Z]/.test(password)) {
-                reqUpperCase.className = 'valid';
-                reqUpperCase.innerHTML = '<i class="bi bi-check-circle"></i> Al menos una mayúscula';
-            } else {
-                reqUpperCase.className = '';
-                reqUpperCase.innerHTML = '<i class="bi bi-x-circle"></i> Al menos una mayúscula';
-            }
-            
-            // Número
-            if (/[0-9]/.test(password)) {
-                reqNumber.className = 'valid';
-                reqNumber.innerHTML = '<i class="bi bi-check-circle"></i> Al menos un número';
-            } else {
-                reqNumber.className = '';
-                reqNumber.innerHTML = '<i class="bi bi-x-circle"></i> Al menos un número';
-            }
-            
-            // Carácter especial
-            if (/[^A-Za-z0-9]/.test(password)) {
-                reqSpecial.className = 'valid';
-                reqSpecial.innerHTML = '<i class="bi bi-check-circle"></i> Al menos un carácter especial';
-            } else {
-                reqSpecial.className = '';
-                reqSpecial.innerHTML = '<i class="bi bi-x-circle"></i> Al menos un carácter especial';
-            }
-        }
-
-        // Toggle contraseña visible/invisible
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = inputId === 'password' ? 
-                        document.getElementById('togglePasswordIcon') : 
-                        document.getElementById('toggleConfirmIcon');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('bi-eye');
-                icon.classList.add('bi-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('bi-eye-slash');
-                icon.classList.add('bi-eye');
-            }
-        }
-
-        // Mostrar toast
-        function showToast(type, message) {
-            const container = document.getElementById('toastContainer');
-            const toastId = 'toast-' + Date.now();
-            
-            const icons = {
-                success: 'bi-check-circle-fill',
-                error: 'bi-exclamation-triangle-fill',
-                warning: 'bi-exclamation-circle-fill',
-                info: 'bi-info-circle-fill'
-            };
-            
-            const titles = {
-                success: 'Éxito',
-                error: 'Error',
-                warning: 'Advertencia',
-                info: 'Información'
-            };
-            
-            const html = `
-                <div class="toast ${type}" id="${toastId}">
-                    <div class="toast-header">
-                        <i class="bi ${icons[type]} me-2"></i>
-                        <strong class="me-auto">${titles[type]}</strong>
-                        <small>ahora</small>
-                        <button type="button" class="btn-close" onclick="document.getElementById('${toastId}').remove()"></button>
-                    </div>
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', html);
-            
-            setTimeout(() => {
-                const toast = document.getElementById(toastId);
-                if (toast) toast.remove();
-            }, 5000);
-        }
-
-        // Validar formulario completo antes de enviar
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validar todos los campos
-            const isNameValid = validateName(document.getElementById('name'));
-            const isEmailValid = validateEmail(document.getElementById('email'));
-            const isPhoneValid = validatePhone(document.getElementById('phone'));
-            const isPasswordValid = validatePassword(document.getElementById('password'));
-            const isConfirmValid = validatePasswordMatch(
-                document.getElementById('password'),
-                document.getElementById('confirm_password')
-            );
-            
-            // Validar términos
-            const termsChecked = document.getElementById('terms').checked;
-            const termsFeedback = document.getElementById('termsFeedback');
-            if (!termsChecked) {
-                termsFeedback.classList.add('invalid', 'show');
-                termsFeedback.textContent = '✗ Debes aceptar los términos y condiciones';
-            } else {
-                termsFeedback.classList.remove('invalid', 'show');
-            }
-            
-            // Validar reCAPTCHA
+        document.getElementById('submitBtn')?.addEventListener('click', function(e) {
             const recaptchaResponse = grecaptcha.getResponse();
-            const recaptchaFeedback = document.getElementById('recaptchaFeedback');
-            
             if (!recaptchaResponse) {
-                recaptchaFeedback.classList.add('invalid', 'show');
-                recaptchaFeedback.textContent = '✗ Por favor, complete la verificación reCAPTCHA';
-                showToast('error', 'Complete el reCAPTCHA');
-                return;
-            } else {
-                recaptchaFeedback.classList.remove('invalid', 'show');
-            }
-            
-            if (!isNameValid || !isEmailValid || !isPhoneValid || !isPasswordValid || !isConfirmValid || !termsChecked) {
-                showToast('error', 'Por favor, corrija los errores en el formulario');
-                
-                // Hacer scroll al primer error
-                const firstError = document.querySelector('.is-invalid');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+                e.preventDefault();
+                alert('Por favor, complete la verificación reCAPTCHA');
                 return;
             }
-            
-            // Mostrar loading
-            const submitBtn = document.getElementById('submitBtn');
-            const submitSpinner = document.getElementById('submitSpinner');
-            const submitText = document.getElementById('submitText');
-            
-            submitBtn.disabled = true;
-            submitSpinner.classList.remove('d-none');
-            submitText.innerHTML = 'Procesando...';
-            
-            // Asignar token y enviar
             document.getElementById('recaptchaToken').value = recaptchaResponse;
-            
-            // Pequeña pausa para mostrar el loading
-            setTimeout(() => {
-                this.submit();
-            }, 500);
         });
-
-        // Auto-cerrar alertas
-        setTimeout(function() {
-            document.querySelectorAll('.alert').forEach(function(alert) {
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
     </script>
 </body>
 </html>
