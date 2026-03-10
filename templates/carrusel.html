@@ -15,29 +15,41 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <style>
-        /* Estilos mínimos necesarios */
         .image-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 1.5rem;
+            margin-top: 1.5rem;
         }
         
         .image-card {
             transition: transform 0.2s, box-shadow 0.2s;
-            border: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
         }
         
         .image-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
         
         .image-card img {
+            width: 100%;
             height: 180px;
             object-fit: cover;
-            border-top-left-radius: calc(0.375rem - 1px);
-            border-top-right-radius: calc(0.375rem - 1px);
+            cursor: pointer;
+        }
+        
+        .image-card .card-body {
+            padding: 0.75rem;
+        }
+        
+        .image-card .card-footer {
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
         }
         
         .upload-area {
@@ -56,13 +68,19 @@
         }
         
         .upload-area i {
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: #6c757d;
         }
         
-        .upload-area p {
-            margin: 0.5rem 0 0;
-            color: #6c757d;
+        /* Preview modal */
+        #previewModal .modal-body {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        #previewModal img {
+            max-width: 100%;
+            max-height: 70vh;
         }
     </style>
 </head>
@@ -93,7 +111,7 @@
     <!-- Breadcrumbs -->
     <div class="container mt-3">
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb bg-light p-2 rounded">
+            <ol class="breadcrumb bg-light p-3 rounded">
                 {{range .breadcrumbs}}
                 <li class="breadcrumb-item">
                     {{if .url}}<a href="{{.url}}">{{.name}}</a>{{else}}{{.name}}{{end}}
@@ -104,59 +122,110 @@
     </div>
 
     <div class="container mt-4">
-        <!-- Header -->
+        <!-- Header con botón actualizar -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-images"></i> {{.Title}}</h2>
+            <h2><i class="bi bi-images text-primary"></i> {{.Title}}</h2>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                </button>
+                <a href="/dashboard" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Dashboard
+                </a>
+            </div>
         </div>
 
-        <!-- Upload Area (solo admin/editor) -->
+        <!-- Upload Area (solo admin/editor) CON PREVISUALIZACIÓN -->
         {{if or (eq .UserRole "admin") (eq .UserRole "editor")}}
         <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-cloud-upload"></i> Subir Nueva Imagen</h5>
+            </div>
             <div class="card-body">
+                <!-- Previsualización -->
+                <div id="previewContainer" class="text-center mb-3" style="display: none;">
+                    <img id="imagePreview" src="#" alt="Vista previa" class="img-fluid rounded" style="max-height: 200px;">
+                    <p class="text-muted small mt-2">Vista previa</p>
+                </div>
+
                 <form action="/carrusel/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
                     <div class="upload-area" onclick="document.getElementById('fileInput').click()">
                         <i class="bi bi-cloud-upload"></i>
-                        <p class="mt-2">Arrastra o haz clic para subir una imagen</p>
-                        <small class="text-muted">Máx 5MB - JPG, PNG, GIF</small>
+                        <p class="mt-2 fw-bold">Arrastra o haz clic para seleccionar una imagen</p>
+                        <small class="text-muted">Máximo 5MB - Formatos: JPG, PNG, GIF</small>
                         <input type="file" id="fileInput" name="imagen" accept="image/*" style="display: none;" required>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mt-3" id="submitBtn">
-                        <span id="submitText"><i class="bi bi-cloud-upload"></i> Subir Imagen</span>
-                        <span id="submitSpinner" class="spinner-border spinner-border-sm d-none"></span>
-                    </button>
+                    
+                    <div class="mt-3 d-flex justify-content-between align-items-center">
+                        <span id="fileName" class="text-muted small">Ningún archivo seleccionado</span>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span id="submitText"><i class="bi bi-cloud-upload"></i> Subir Imagen</span>
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none"></span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
         {{end}}
 
         <!-- Grid de Imágenes -->
-        <h4 class="mb-3">Todas las imágenes</h4>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="bi bi-grid"></i> Todas las imágenes</h4>
+            {{if .Imagenes}}
+            <span class="badge bg-primary">{{len .Imagenes}} imagen(es)</span>
+            {{end}}
+        </div>
         
-        {{if .Imagenes}}
-        <div class="image-grid">
-            {{range .Imagenes}}
-            <div class="card image-card">
-                <img src="{{.Ruta}}" class="card-img-top" alt="{{.Nombre}}">
-                <div class="card-body p-2">
-                    <p class="card-text small text-truncate mb-1">{{.Nombre}}</p>
-                    <small class="text-muted">{{.CreatedAt.Format "02/01/2006"}}</small>
+        <div class="image-grid" id="imageGrid">
+            {{if .Imagenes}}
+                {{range .Imagenes}}
+                <div class="image-card" data-id="{{.ID}}">
+                    <img src="{{.Ruta}}" alt="{{.Nombre}}" class="preview-trigger" style="cursor: pointer;" onclick="showPreview('{{.Ruta}}', '{{.Nombre}}')">
+                    <div class="card-body">
+                        <p class="card-text small text-truncate mb-1" title="{{.Nombre}}">{{.Nombre}}</p>
+                        <small class="text-muted">
+                            <i class="bi bi-calendar3"></i> {{.CreatedAt.Format "02/01/2006"}}
+                        </small>
+                    </div>
+                    {{if or (eq $.UserRole "admin") (eq $.UserRole "editor")}}
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-outline-danger w-100 delete-btn" data-id="{{.ID}}">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </div>
+                    {{end}}
                 </div>
-                {{if or (eq $.UserRole "admin") (eq $.UserRole "editor")}}
-                <div class="card-footer p-2 bg-transparent border-top-0">
-                    <button class="btn btn-sm btn-outline-danger w-100 delete-btn" data-id="{{.ID}}">
-                        <i class="bi bi-trash"></i> Eliminar
-                    </button>
-                </div>
+                {{end}}
+            {{else}}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-image fs-1 text-muted d-block mb-3"></i>
+                <h5>No hay imágenes en el carrusel</h5>
+                {{if or (eq .UserRole "admin") (eq .UserRole "editor")}}
+                <p class="text-muted">Sube tu primera imagen usando el formulario</p>
+                {{else}}
+                <p class="text-muted">No hay imágenes disponibles</p>
                 {{end}}
             </div>
             {{end}}
         </div>
-        {{else}}
-        <div class="text-center py-5">
-            <i class="bi bi-image fs-1 text-muted"></i>
-            <p class="mt-3">No hay imágenes en el carrusel</p>
+    </div>
+
+    <!-- Modal de previsualización -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="previewModalTitle">Vista previa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="previewModalImage" class="img-fluid" alt="Vista previa">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
         </div>
-        {{end}}
     </div>
 
     <!-- Scripts -->
@@ -189,11 +258,58 @@
         });
         {{end}}
 
+        // Previsualización de imagen antes de subir
+        document.getElementById('fileInput')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileName = document.getElementById('fileName');
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            
+            if (file) {
+                fileName.textContent = `Archivo seleccionado: ${file.name}`;
+                
+                // Validar tamaño
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'La imagen no puede superar los 5MB'
+                    });
+                    this.value = '';
+                    fileName.textContent = 'Ningún archivo seleccionado';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Mostrar previsualización
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                fileName.textContent = 'Ningún archivo seleccionado';
+                previewContainer.style.display = 'none';
+            }
+        });
+
         // Manejar envío del formulario
         document.getElementById('uploadForm')?.addEventListener('submit', function(e) {
             const btn = document.getElementById('submitBtn');
             const text = document.getElementById('submitText');
             const spinner = document.getElementById('submitSpinner');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atención',
+                    text: 'Debe seleccionar una imagen'
+                });
+                return;
+            }
             
             btn.disabled = true;
             text.classList.add('d-none');
@@ -221,6 +337,13 @@
                 });
             });
         });
+
+        // Función para mostrar preview en modal
+        function showPreview(src, title) {
+            document.getElementById('previewModalTitle').textContent = title;
+            document.getElementById('previewModalImage').src = src;
+            new bootstrap.Modal(document.getElementById('previewModal')).show();
+        }
     </script>
 </body>
 </html>
