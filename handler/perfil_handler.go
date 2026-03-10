@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"tu-proyecto/model"
 	"tu-proyecto/service"
@@ -21,7 +22,6 @@ func NewPerfilHandler(perfilService service.PerfilService, sm *utils.SessionMana
 	}
 }
 
-// ShowPerfil - Muestra la página de perfil
 func (h *PerfilHandler) ShowPerfil(c echo.Context) error {
 	userID := c.Get("user_id").(int)
 	userName := c.Get("user_name").(string)
@@ -32,6 +32,18 @@ func (h *PerfilHandler) ShowPerfil(c echo.Context) error {
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Error al cargar perfil")
 	}
+
+	// 🔴 LOGS TEMPORALES
+	fmt.Println("========== DATOS DEL PERFIL ==========")
+	fmt.Printf("UserID: %d\n", userID)
+	fmt.Printf("UserName: %s\n", userName)
+	fmt.Printf("UserEmail: %s\n", userEmail)
+	fmt.Printf("UserRole: %s\n", userRole)
+	fmt.Printf("Perfil.Foto: %s\n", perfil.Foto)
+	fmt.Printf("Perfil.Bio: %s\n", perfil.Bio)
+	fmt.Printf("Perfil.Ubicacion: %s\n", perfil.Ubicacion)
+	fmt.Printf("Perfil.SitioWeb: %s\n", perfil.SitioWeb)
+	fmt.Println("======================================")
 
 	data := map[string]interface{}{
 		"Title":       "Mi Perfil",
