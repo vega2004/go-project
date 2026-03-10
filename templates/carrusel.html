@@ -10,9 +10,278 @@
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <style>
+        /* Estilos necesarios para el carrusel */
+        .carousel-interactive {
+            position: relative;
+            margin-bottom: 2rem;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(5, 38, 89, 0.3);
+        }
+        
+        .carousel-main {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            background: #021024;
+        }
+        
+        .carousel-track-container {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+        }
+        
+        .carousel-track {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            height: 100%;
+        }
+        
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+        }
+        
+        .carousel-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .carousel-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(2, 16, 36, 0.9));
+            color: white;
+            padding: 2rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .carousel-slide.active .carousel-caption {
+            transform: translateY(0);
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+            border: none;
+        }
+        
+        .carousel-btn:hover {
+            background: #5483B3;
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .carousel-prev {
+            left: 20px;
+        }
+        
+        .carousel-next {
+            right: 20px;
+        }
+        
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #C1E8FF;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .indicator.active {
+            background: #5483B3;
+            transform: scale(1.3);
+        }
+        
+        .upload-area {
+            border: 3px dashed #7DA0CA;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(193, 232, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin: 30px 0;
+        }
+        
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #5483B3;
+            background: rgba(84, 131, 179, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .upload-area i {
+            font-size: 4rem;
+            color: #5483B3;
+            margin-bottom: 15px;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .image-card {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(5, 38, 89, 0.15);
+            transition: all 0.3s;
+            aspect-ratio: 1;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(5, 38, 89, 0.3);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(2, 16, 36, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            gap: 10px;
+        }
+        
+        .image-card:hover .image-overlay {
+            opacity: 1;
+        }
+        
+        .image-overlay button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            color: #052659;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .image-overlay button:hover {
+            transform: scale(1.1);
+        }
+        
+        .image-overlay .delete-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .badge-main {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(193, 232, 255, 0.1);
+            border-radius: 20px;
+            margin: 40px 0;
+        }
+        
+        .empty-state i {
+            font-size: 5rem;
+            color: #7DA0CA;
+            margin-bottom: 20px;
+        }
+        
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        }
+        
+        .toast {
+            background: white;
+            border-left: 5px solid;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .toast.success { border-left-color: #28a745; }
+        .toast.error { border-left-color: #dc3545; }
+        .toast.info { border-left-color: #5483B3; }
+    </style>
 </head>
-<body>
-    <!-- Navbar simplificada -->
+<body data-user-role="{{.UserRole}}" data-user-id="{{.UserID}}">
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/dashboard">
@@ -58,23 +327,9 @@
         </nav>
     </div>
 
-    {{if .Success}}
-    <div class="container mt-3">
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle"></i> {{.Success}}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    </div>
-    {{end}}
+    <!-- Toast Notifications -->
+    <div class="toast-notification" id="toastContainer"></div>
 
-    {{if .Error}}
-    <div class="container mt-3">
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i> {{.Error}}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    </div>
-    {{end}}
     <!-- Contenido Principal -->
     <div class="container mt-4">
         <!-- Header -->
@@ -85,6 +340,9 @@
             </button>
         </div>
         
+        <!-- CARRUSEL INTERACTIVO - AHORA SÍ SE USA -->
+        <div id="mainCarousel" class="carousel-interactive"></div>
+        
         <!-- Lista de imágenes actual (solo para admin/editor) -->
         {{if or (eq .UserRole "admin") (eq .UserRole "editor")}}
         <div class="card mb-4">
@@ -92,7 +350,7 @@
                 <h5 class="mb-0"><i class="bi bi-cloud-upload"></i> Subir Nueva Imagen</h5>
             </div>
             <div class="card-body">
-                <form action="/carrusel/upload" method="POST" enctype="multipart/form-data">
+                <form action="/carrusel/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
                     <div class="mb-3">
                         <label for="imagen" class="form-label">Seleccionar imagen</label>
                         <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*" required>
@@ -106,29 +364,30 @@
         </div>
         {{end}}
         
-        <!-- Grid de Imágenes -->
+        <!-- Grid de Imágenes (respaldo) -->
         <h4 class="mb-3"><i class="bi bi-grid"></i> Todas las imágenes</h4>
         
-        {{if .Imagenes}}
-        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-            {{range .Imagenes}}
-            <div class="col">
-                <div class="card h-100">
-                    <img src="{{.Ruta}}" class="card-img-top" alt="{{.Nombre}}" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <p class="card-text text-truncate">{{.Nombre}}</p>
-                        <p class="card-text"><small class="text-muted">Subida: {{.CreatedAt.Format "02/01/2006"}}</small></p>
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" id="imageGrid">
+            {{if .Imagenes}}
+                {{range .Imagenes}}
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="{{.Ruta}}" class="card-img-top" alt="{{.Nombre}}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <p class="card-text text-truncate">{{.Nombre}}</p>
+                            <p class="card-text"><small class="text-muted">Subida: {{.CreatedAt.Format "02/01/2006"}}</small></p>
+                        </div>
+                        {{if or (eq $.UserRole "admin") (eq $.UserRole "editor")}}
+                        <div class="card-footer">
+                            <a href="/carrusel/delete/{{.ID}}" class="btn btn-sm btn-danger" 
+                               onclick="return confirm('¿Eliminar esta imagen?')">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </a>
+                        </div>
+                        {{end}}
                     </div>
-                    {{if or (eq $.UserRole "admin") (eq $.UserRole "editor")}}
-                    <div class="card-footer">
-                        <a href="/carrusel/delete/{{.ID}}" class="btn btn-sm btn-danger" 
-                           onclick="return confirm('¿Eliminar esta imagen?')">
-                            <i class="bi bi-trash"></i> Eliminar
-                        </a>
-                    </div>
-                    {{end}}
                 </div>
-            </div>
+                {{end}}
             {{else}}
             <div class="col-12">
                 <div class="alert alert-info text-center">
@@ -139,15 +398,32 @@
             </div>
             {{end}}
         </div>
-        {{else}}
-        <div class="alert alert-info text-center">
-            <i class="bi bi-image fs-1 d-block mb-3"></i>
-            <h4>No hay imágenes en el carrusel</h4>
-            <p>Sube tu primera imagen usando el formulario</p>
-        </div>
-        {{end}}
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/carousel.js"></script>
+    
+    <script>
+        // SweetAlert2 para mensajes profesionales (opcional)
+        {{if .Success}}
+        Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: '{{.Success}}',
+            timer: 3000,
+            showConfirmButton: false
+        });
+        {{end}}
+        
+        {{if .Error}}
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '{{.Error}}'
+        });
+        {{end}}
+    </script>
 </body>
 </html>
