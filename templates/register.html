@@ -47,8 +47,8 @@
                         </div>
                         {{end}}
                         
-                        <!-- Formulario de registro -->
-                        <form method="POST" action="/do-register">
+                        <!-- Formulario de registro - AGREGADO ID="registerForm" -->
+                        <form method="POST" action="/do-register" id="registerForm">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Nombre completo *</label>
@@ -96,7 +96,7 @@
                             
                             <!-- Botones -->
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-check-circle"></i> Registrarse
                                 </button>
                                 <a href="/login" class="btn btn-link text-center">
@@ -134,7 +134,8 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     
     <script>
-        document.getElementById('submitBtn')?.addEventListener('click', function(e) {
+        // ✅ CORREGIDO: El evento se asocia al FORMULARIO, no al botón
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
             const recaptchaResponse = grecaptcha.getResponse();
             if (!recaptchaResponse) {
                 e.preventDefault();

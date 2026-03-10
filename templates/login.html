@@ -39,8 +39,8 @@
                         </div>
                         {{end}}
 
-                        <!-- Formulario de login -->
-                        <form method="POST" action="/do-login">
+                        <!-- Formulario de login - YA CON ID -->
+                        <form method="POST" action="/do-login" id="loginForm">
                             <div class="mb-3">
                                 <label class="form-label">Correo Electrónico</label>
                                 <input type="email" class="form-control" name="email" value="{{.Email}}" required>
@@ -81,7 +81,8 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     
     <script>
-        document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+        // ✅ AHORA SÍ encuentra el formulario por su ID
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             const recaptchaResponse = grecaptcha.getResponse();
             if (!recaptchaResponse) {
                 e.preventDefault();
