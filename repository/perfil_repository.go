@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 	"tu-proyecto/model"
 )
@@ -21,9 +22,13 @@ func NewPerfilRepository(db *sql.DB) PerfilRepository {
 }
 
 func (r *perfilRepository) GetPerfil(userID int) (*model.Perfil, error) {
+	fmt.Printf("🔍 Buscando perfil para userID: %d\n", userID)
+
 	perfil := &model.Perfil{}
 	query := `SELECT user_id, foto, bio, ubicacion, sitio_web, updated_at 
-	          FROM perfiles WHERE user_id = $1`
+              FROM perfiles WHERE user_id = $1`
+
+	fmt.Printf("📝 Query: %s\n", query)
 
 	err := r.db.QueryRow(query, userID).Scan(
 		&perfil.UserID,
@@ -35,12 +40,18 @@ func (r *perfilRepository) GetPerfil(userID int) (*model.Perfil, error) {
 	)
 
 	if err == sql.ErrNoRows {
-		// Crear perfil por defecto si no existe
+		fmt.Println("⚠️ No se encontró perfil, creando uno por defecto")
 		return r.createDefaultPerfil(userID)
 	}
-	return perfil, err
-}
 
+	if err != nil {
+		fmt.Printf("❌ Error en QueryRow: %v\n", err)
+		return nil, err
+	}
+
+	fmt.Printf("✅ Perfil encontrado: %+v\n", perfil)
+	return perfil, nil
+}
 func (r *perfilRepository) createDefaultPerfil(userID int) (*model.Perfil, error) {
 	query := `INSERT INTO perfiles (user_id, foto, updated_at) 
 	          VALUES ($1, $2, $3) RETURNING user_id, foto, updated_at`

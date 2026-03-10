@@ -47,10 +47,10 @@ func BreadcrumbMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 				map[string]string{"name": "Éxito", "url": "/success"},
 			)
 		case "/maintenance":
-			breadcrumbs = append(breadcrumbs, map[string]string{
-				"name": "🔧 Mantenimiento",
-				"url":  "/maintenance",
-			})
+			breadcrumbs = append(breadcrumbs,
+				map[string]string{"name": "Dashboard", "url": "/dashboard"},
+				map[string]string{"name": "🔧 Mantenimiento", "url": "/maintenance"},
+			)
 		case "/login":
 			breadcrumbs = append(breadcrumbs, map[string]string{
 				"name": "Iniciar Sesión",
