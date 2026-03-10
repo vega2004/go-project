@@ -42,25 +42,26 @@ func (h *AdminHandler) ShowUsers(c echo.Context) error {
 		"Title":       "Administración de Usuarios",
 		"Users":       result,
 		"Filtros":     filter,
-		"Success":     c.QueryParam("success"), // ← Mensaje de éxito
-		"Error":       c.QueryParam("error"),   // ← Mensaje de error
+		"Success":     c.QueryParam("success"),
+		"Error":       c.QueryParam("error"),
 		"breadcrumbs": c.Get("breadcrumbs"),
 	}
 
 	return c.Render(http.StatusOK, "admin_users.html", data)
 }
 
-// CreateUserForm - Mostrar formulario para crear usuario
+// CreateUserForm - Mostrar formulario para crear usuario (CORREGIDO)
 func (h *AdminHandler) CreateUserForm(c echo.Context) error {
 	data := map[string]interface{}{
 		"Title":       "Crear Usuario",
-		"Error":       c.QueryParam("error"), // ← Error del formulario
+		"User":        nil, // ← AGREGADO EXPLÍCITAMENTE
+		"Error":       c.QueryParam("error"),
 		"breadcrumbs": c.Get("breadcrumbs"),
 	}
 	return c.Render(http.StatusOK, "admin_user_form.html", data)
 }
 
-// CreateUser - Procesar creación de usuario (CORREGIDO)
+// CreateUser - Procesar creación de usuario
 func (h *AdminHandler) CreateUser(c echo.Context) error {
 	var form model.RegisterForm
 	if err := c.Bind(&form); err != nil {
@@ -78,7 +79,7 @@ func (h *AdminHandler) CreateUser(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/users/create?error="+err.Error())
 	}
 
-	// ✅ REDIRECCIÓN A LISTA CON MENSAJE DE ÉXITO
+	// Redirección a lista con mensaje de éxito
 	return c.Redirect(http.StatusSeeOther, "/admin/users?success=Usuario creado exitosamente")
 }
 
@@ -100,7 +101,7 @@ func (h *AdminHandler) EditUserForm(c echo.Context) error {
 	return c.Render(http.StatusOK, "admin_user_form.html", data)
 }
 
-// UpdateUser - Actualizar usuario (CORREGIDO)
+// UpdateUser - Actualizar usuario
 func (h *AdminHandler) UpdateUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -119,11 +120,11 @@ func (h *AdminHandler) UpdateUser(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/users/edit/"+strconv.Itoa(id)+"?error="+err.Error())
 	}
 
-	// ✅ REDIRECCIÓN A LISTA CON MENSAJE DE ÉXITO
+	// Redirección a lista con mensaje de éxito
 	return c.Redirect(http.StatusSeeOther, "/admin/users?success=Usuario actualizado correctamente")
 }
 
-// DeleteUser - Eliminar usuario (mejorado)
+// DeleteUser - Eliminar usuario
 func (h *AdminHandler) DeleteUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -141,7 +142,7 @@ func (h *AdminHandler) DeleteUser(c echo.Context) error {
 		})
 	}
 
-	// ✅ RESPUESTA JSON (el fetch recargará la página)
+	// Respuesta JSON (el fetch recargará la página)
 	return c.JSON(http.StatusOK, map[string]string{
 		"message": "Usuario eliminado exitosamente",
 	})
