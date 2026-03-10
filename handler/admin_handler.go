@@ -33,7 +33,6 @@ func (h *AdminHandler) ShowUsers(c echo.Context) error {
 		PageSize: 5,
 	}
 
-	// Necesitas implementar GetAllUsers en UserService
 	result, err := h.userService.GetAllUsers(filter)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/maintenance")
@@ -42,6 +41,9 @@ func (h *AdminHandler) ShowUsers(c echo.Context) error {
 	data := map[string]interface{}{
 		"Title":       "Administración de Usuarios",
 		"Users":       result,
+		"Filtros":     filter,
+		"Success":     c.QueryParam("success"), // ← Mensaje de éxito
+		"Error":       c.QueryParam("error"),   // ← Mensaje de error
 		"breadcrumbs": c.Get("breadcrumbs"),
 	}
 
@@ -52,27 +54,32 @@ func (h *AdminHandler) ShowUsers(c echo.Context) error {
 func (h *AdminHandler) CreateUserForm(c echo.Context) error {
 	data := map[string]interface{}{
 		"Title":       "Crear Usuario",
+		"Error":       c.QueryParam("error"), // ← Error del formulario
 		"breadcrumbs": c.Get("breadcrumbs"),
 	}
 	return c.Render(http.StatusOK, "admin_user_form.html", data)
 }
 
-// CreateUser - Procesar creación de usuario
+// CreateUser - Procesar creación de usuario (CORREGIDO)
 func (h *AdminHandler) CreateUser(c echo.Context) error {
 	var form model.RegisterForm
 	if err := c.Bind(&form); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Datos inválidos"})
+		return c.Redirect(http.StatusSeeOther, "/admin/users/create?error=Error en formulario")
 	}
 
-	// Asignar rol (viene del formulario)
+	// Asignar rol
 	roleID, _ := strconv.Atoi(c.FormValue("role_id"))
+	if roleID < 1 || roleID > 3 {
+		roleID = 2
+	}
 
 	err := h.userService.CreateUserByAdmin(&form, roleID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.Redirect(http.StatusSeeOther, "/admin/users/create?error="+err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Usuario creado exitosamente"})
+	// ✅ REDIRECCIÓN A LISTA CON MENSAJE DE ÉXITO
+	return c.Redirect(http.StatusSeeOther, "/admin/users?success=Usuario creado exitosamente")
 }
 
 // EditUserForm - Mostrar formulario de edición
@@ -87,46 +94,55 @@ func (h *AdminHandler) EditUserForm(c echo.Context) error {
 	data := map[string]interface{}{
 		"Title":       "Editar Usuario",
 		"User":        user,
+		"Error":       c.QueryParam("error"),
 		"breadcrumbs": c.Get("breadcrumbs"),
 	}
 	return c.Render(http.StatusOK, "admin_user_form.html", data)
 }
 
-// UpdateUser - Actualizar usuario
+// UpdateUser - Actualizar usuario (CORREGIDO)
 func (h *AdminHandler) UpdateUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	var form model.RegisterForm
 	if err := c.Bind(&form); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Datos inválidos"})
+		return c.Redirect(http.StatusSeeOther, "/admin/users/edit/"+strconv.Itoa(id)+"?error=Error en formulario")
 	}
 
 	roleID, _ := strconv.Atoi(c.FormValue("role_id"))
+	if roleID < 1 || roleID > 3 {
+		roleID = 2
+	}
 
 	err := h.userService.UpdateUser(id, &form, roleID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.Redirect(http.StatusSeeOther, "/admin/users/edit/"+strconv.Itoa(id)+"?error="+err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Usuario actualizado exitosamente"})
+	// ✅ REDIRECCIÓN A LISTA CON MENSAJE DE ÉXITO
+	return c.Redirect(http.StatusSeeOther, "/admin/users?success=Usuario actualizado correctamente")
 }
 
-// DeleteUser - Eliminar usuario (con confirmación)
+// DeleteUser - Eliminar usuario (mejorado)
 func (h *AdminHandler) DeleteUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	// Confirmación vía query param
+	// Verificar confirmación
 	if c.QueryParam("confirm") != "true" {
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"require_confirm": true,
-			"message":         "¿Está seguro de eliminar este usuario?",
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Se requiere confirmación",
 		})
 	}
 
 	err := h.userService.DeleteUser(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Usuario eliminado exitosamente"})
+	// ✅ RESPUESTA JSON (el fetch recargará la página)
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Usuario eliminado exitosamente",
+	})
 }

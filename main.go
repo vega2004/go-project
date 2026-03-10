@@ -150,13 +150,8 @@ func main() {
 		}
 	}
 
-	// Servir archivos estáticos
+	// Servir archivos estáticos - SOLO ESTO ES SUFICIENTE
 	e.Static("/static", staticDir)
-	e.Static("/uploads", filepath.Join(staticDir, "uploads"))
-
-	// Servir archivos JS específicos
-	e.Static("/js", filepath.Join(staticDir, "js"))
-	e.Static("/css", filepath.Join(staticDir, "css"))
 
 	fmt.Println("✅ Archivos estáticos configurados")
 
