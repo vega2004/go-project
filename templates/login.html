@@ -13,6 +13,17 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    
+    <style>
+        /* Pequeños ajustes de seguridad visual */
+        .alert {
+            word-break: break-word;
+        }
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+    </style>
 </head>
 <body class="bg-light">
     <div class="container">
@@ -39,26 +50,45 @@
                         </div>
                         {{end}}
 
-                        <!-- Formulario de login - YA CON ID -->
-                        <form method="POST" action="/do-login" id="loginForm">
+                        <!-- Formulario de login - VERSIÓN BLINDADA -->
+                        <form method="POST" action="/do-login" id="loginForm" novalidate>
                             <div class="mb-3">
                                 <label class="form-label">Correo Electrónico</label>
-                                <input type="email" class="form-control" name="email" value="{{.Email}}" required>
+                                <input type="email" 
+                                       class="form-control" 
+                                       name="email" 
+                                       value="{{.Email}}" 
+                                       required
+                                       maxlength="100"
+                                       pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                                       title="Ingrese un email válido (ejemplo@correo.com)"
+                                       autocomplete="email">
+                                <div class="invalid-feedback">Por favor, ingrese un email válido.</div>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" name="password" required>
+                                <input type="password" 
+                                       class="form-control" 
+                                       name="password" 
+                                       required
+                                       minlength="6"
+                                       maxlength="72"
+                                       title="La contraseña debe tener al menos 6 caracteres"
+                                       autocomplete="current-password">
+                                <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
                             </div>
 
                             <!-- reCAPTCHA -->
                             <div class="mb-3">
                                 <div class="g-recaptcha" data-sitekey="{{.RecaptchaKey}}"></div>
                                 <input type="hidden" name="recaptchaToken" id="recaptchaToken">
+                                <div class="text-danger small" id="recaptchaError"></div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                            <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                                <span id="submitText"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</span>
+                                <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
                             </button>
                         </form>
 
@@ -71,7 +101,7 @@
                 
                 <!-- Footer -->
                 <div class="text-center mt-3 text-muted">
-                    <small>Sistema protegido con reCAPTCHA</small>
+                    <small><i class="bi bi-shield-check"></i> Sistema protegido con reCAPTCHA</small>
                 </div>
             </div>
         </div>
@@ -81,16 +111,57 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     
     <script>
-        // ✅ AHORA SÍ encuentra el formulario por su ID
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const recaptchaResponse = grecaptcha.getResponse();
-            if (!recaptchaResponse) {
-                e.preventDefault();
-                alert('Por favor, complete la verificación reCAPTCHA');
-                return;
-            }
-            document.getElementById('recaptchaToken').value = recaptchaResponse;
-        });
+        (function() {
+            'use strict';
+            
+            const form = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitSpinner = document.getElementById('submitSpinner');
+            const recaptchaError = document.getElementById('recaptchaError');
+            
+            // Validación personalizada de Bootstrap
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Limpiar errores previos
+                recaptchaError.textContent = '';
+                
+                // Validar campos del formulario
+                if (!form.checkValidity()) {
+                    event.stopPropagation();
+                    form.classList.add('was-validated');
+                    return;
+                }
+                
+                // Validar reCAPTCHA
+                const recaptchaResponse = grecaptcha.getResponse();
+                if (!recaptchaResponse) {
+                    recaptchaError.textContent = 'Por favor, complete la verificación reCAPTCHA';
+                    return;
+                }
+                
+                // Asignar token
+                document.getElementById('recaptchaToken').value = recaptchaResponse;
+                
+                // Mostrar estado de carga
+                submitBtn.disabled = true;
+                submitText.classList.add('d-none');
+                submitSpinner.classList.remove('d-none');
+                
+                // Enviar formulario
+                form.submit();
+            }, false);
+            
+            // Limpiar validación al empezar a escribir
+            const inputs = form.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                });
+            });
+            
+        })();
     </script>
 </body>
 </html>

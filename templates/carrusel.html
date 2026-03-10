@@ -58,6 +58,23 @@
         </nav>
     </div>
 
+    {{if .Success}}
+    <div class="container mt-3">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> {{.Success}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    {{end}}
+
+    {{if .Error}}
+    <div class="container mt-3">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> {{.Error}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    {{end}}
     <!-- Contenido Principal -->
     <div class="container mt-4">
         <!-- Header -->

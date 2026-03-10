@@ -15,7 +15,7 @@
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
 </head>
 <body>
-    <!-- Navbar simplificada -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/dashboard">
@@ -74,7 +74,7 @@
         </div>
         {{end}}
 
-        <!-- Tarjeta de Bienvenida simple -->
+        <!-- Tarjeta de Bienvenida -->
         <div class="card bg-primary text-white mb-4">
             <div class="card-body">
                 <h4 class="mb-0">¡Bienvenido, {{.UserName}}!</h4>
@@ -82,107 +82,87 @@
             </div>
         </div>
 
-        <!-- Estadísticas Rápidas -->
-        <div class="row mb-4">
-            <div class="col-md-3 col-6 mb-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <h6>Total Personas</h6>
-                        <h3>{{.Stats.TotalPersonas}}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <h6>Imágenes</h6>
-                        <h3>{{.Stats.TotalImagenes}}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-                <div class="card bg-warning">
-                    <div class="card-body">
-                        <h6>Usuarios</h6>
-                        <h3>{{.Stats.TotalUsuarios}}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-                <div class="card bg-danger text-white">
-                    <div class="card-body">
-                        <h6>Actividad</h6>
-                        <h3>{{.Stats.ActividadHoy}}</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Módulos del Sistema -->
         <div class="row">
-            <div class="col-md-4 mb-3">
+            <!-- Carrusel -->
+            <div class="col-md-3 mb-3">
                 <div class="card h-100">
                     <div class="card-body text-center">
-                        <i class="bi bi-images" style="font-size: 3rem;"></i>
-                        <h5 class="card-title">Carrusel</h5>
-                        <p class="card-text">Gestiona las imágenes del carrusel</p>
-                        <a href="/carrusel" class="btn btn-primary">Ir al Carrusel</a>
+                        <i class="bi bi-images" style="font-size: 2.5rem; color: #0d6efd;"></i>
+                        <h5 class="card-title mt-2">Carrusel</h5>
+                        <p class="card-text small text-muted">Gestiona imágenes</p>
+                        <a href="/carrusel" class="btn btn-sm btn-primary w-100">Ir</a>
                     </div>
                 </div>
             </div>
 
-            {{if eq .UserRole "admin"}}
-            <div class="col-md-4 mb-3">
+            <!-- Perfil -->
+            <div class="col-md-3 mb-3">
                 <div class="card h-100">
                     <div class="card-body text-center">
-                        <i class="bi bi-people-fill" style="font-size: 3rem;"></i>
-                        <h5 class="card-title">Usuarios</h5>
-                        <p class="card-text">Administra los usuarios del sistema</p>
-                        <a href="/admin/users" class="btn btn-warning">Panel Admin</a>
+                        <i class="bi bi-person-circle" style="font-size: 2.5rem; color: #198754;"></i>
+                        <h5 class="card-title mt-2">Mi Perfil</h5>
+                        <p class="card-text small text-muted">Actualiza tus datos</p>
+                        <a href="/perfil" class="btn btn-sm btn-success w-100">Ir</a>
                     </div>
                 </div>
             </div>
-            {{else}}
-            <div class="col-md-4 mb-3">
+
+            <!-- Mantenimiento -->
+            <div class="col-md-3 mb-3">
                 <div class="card h-100">
                     <div class="card-body text-center">
-                        <i class="bi bi-person-badge" style="font-size: 3rem;"></i>
-                        <h5 class="card-title">Mi Perfil</h5>
-                        <p class="card-text">Actualiza tu información personal</p>
-                        <a href="/perfil" class="btn btn-primary">Ver Perfil</a>
+                        <i class="bi bi-tools" style="font-size: 2.5rem; color: #6c757d;"></i>
+                        <h5 class="card-title mt-2">Mantenimiento</h5>
+                        <p class="card-text small text-muted">Página de sistema</p>
+                        <a href="/maintenance" class="btn btn-sm btn-secondary w-100">Ir</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Admin (solo para administradores) -->
+            {{if eq .UserRole "admin"}}
+            <div class="col-md-3 mb-3">
+                <div class="card h-100 border-warning">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill" style="font-size: 2.5rem; color: #ffc107;"></i>
+                        <h5 class="card-title mt-2">Usuarios</h5>
+                        <p class="card-text small text-muted">Administrar</p>
+                        <a href="/admin/users" class="btn btn-sm btn-warning w-100">Ir</a>
                     </div>
                 </div>
             </div>
             {{end}}
-
-            <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-tools" style="font-size: 3rem;"></i>
-                        <h5 class="card-title">Mantenimiento</h5>
-                        <p class="card-text">Página de mantenimiento</p>
-                        <a href="/maintenance" class="btn btn-secondary">Ir a Mantenimiento</a>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <!-- Actividad Reciente (simplificada) -->
-        <div class="card mt-4">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">Actividad Reciente</h5>
-            </div>
-            <div class="card-body">
-                {{if .RecentActivity}}
-                    {{range .RecentActivity}}
-                    <div class="border-bottom mb-2 pb-2">
-                        <strong>{{.User}}</strong> {{.Action}}
-                        <br><small class="text-muted">{{.Time}}</small>
+        <!-- Estadísticas Rápidas -->
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white py-2">
+                        <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Estadísticas</h6>
                     </div>
-                    {{end}}
-                {{else}}
-                    <p class="text-muted mb-0">No hay actividad reciente</p>
-                {{end}}
+                    <div class="card-body py-2">
+                        <div class="row text-center">
+                            <div class="col-3">
+                                <h6 class="mb-0">{{.Stats.TotalPersonas}}</h6>
+                                <small class="text-muted">Personas</small>
+                            </div>
+                            <div class="col-3">
+                                <h6 class="mb-0">{{.Stats.TotalImagenes}}</h6>
+                                <small class="text-muted">Imágenes</small>
+                            </div>
+                            <div class="col-3">
+                                <h6 class="mb-0">{{.Stats.TotalUsuarios}}</h6>
+                                <small class="text-muted">Usuarios</small>
+                            </div>
+                            <div class="col-3">
+                                <h6 class="mb-0">{{.Stats.ActividadHoy}}</h6>
+                                <small class="text-muted">Hoy</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
