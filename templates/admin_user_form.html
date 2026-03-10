@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Admin</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        /* Estilos adicionales para el formulario */
+        .password-strength {
+            margin-top: 5px;
+            height: 5px;
+            border-radius: 3px;
+            background: #C1E8FF;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background-color 0.3s;
+        }
+        
+        .strength-very-weak { background-color: #dc3545; width: 20%; }
+        .strength-weak { background-color: #ffc107; width: 40%; }
+        .strength-medium { background-color: #fd7e14; width: 60%; }
+        .strength-strong { background-color: #20c997; width: 80%; }
+        .strength-very-strong { background-color: #28a745; width: 100%; }
+        
+        .validation-feedback {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .validation-feedback.show {
+            display: block;
+        }
+        
+        .validation-feedback.valid {
+            color: #28a745;
+        }
+        
+        .validation-feedback.invalid {
+            color: #dc3545;
+        }
+        
+        .is-valid {
+            border-color: #28a745 !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .is-invalid {
+            border-color: #dc3545 !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #5483B3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        
+        .btn-loading .loading-spinner {
+            display: inline-block;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        }
+        
+        .toast {
+            background: white;
+            border-left: 5px solid;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast.success { border-left-color: #28a745; }
+        .toast.error { border-left-color: #dc3545; }
+        .toast.warning { border-left-color: #ffc107; }
+        .toast.info { border-left-color: #5483B3; }
+        
+        .toast-header {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .toast-body {
+            padding: 12px 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="bi bi-grid-fill"></i> Sistema de Gestión
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-notification" id="toastContainer"></div>
+
+    <!-- Breadcrumbs -->
+    <div class="container mt-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {{range .breadcrumbs}}
+                <li class="breadcrumb-item">
+                    {{if .url}}
+                    <a href="{{.url}}">{{.name}}</a>
+                    {{else}}
+                    {{.name}}
+                    {{end}}
+                </li>
+                {{end}}
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-person-plus"></i> {{.Title}}</h4>
+                    </div>
+                    <div class="card-body">
+                        {{if .Error}}
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <i class="bi bi-exclamation-triangle"></i> {{.Error}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {{end}}
+                        
+                        <form method="POST" action="/admin/users/{{if .User}}update/{{.User.ID}}{{else}}create{{end}}" id="userForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-person"></i> Nombre *
+                                    </label>
+                                    <input type="text" 
+                                           name="name" 
+                                           id="name"
+                                           class="form-control" 
+                                           value="{{.User.Name}}" 
+                                           required
+                                           minlength="2"
+                                           maxlength="50"
+                                           pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+"
+                                           title="Solo letras, espacios, apóstrofes y guiones">
+                                    <div class="validation-feedback" id="nameFeedback"></div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-envelope"></i> Email *
+                                    </label>
+                                    <input type="email" 
+                                           name="email" 
+                                           id="email"
+                                           class="form-control" 
+                                           value="{{.User.Email}}" 
+                                           required>
+                                    <div class="validation-feedback" id="emailFeedback"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-telephone"></i> Teléfono
+                                    </label>
+                                    <input type="tel" 
+                                           name="phone" 
+                                           id="phone"
+                                           class="form-control" 
+                                           value="{{.User.Phone}}"
+                                           pattern="[0-9+\-\s]+"
+                                           title="Solo números, +, - y espacios">
+                                    <div class="validation-feedback" id="phoneFeedback"></div>
+                                    <small class="text-muted">Formato: +34 600 123 456</small>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-shield-lock"></i> Rol
+                                    </label>
+                                    <select name="role_id" id="role" class="form-select">
+                                        <option value="2" {{if eq .User.RoleID 2}}selected{{end}}>
+                                            <i class="bi bi-person"></i> Usuario
+                                        </option>
+                                        <option value="1" {{if eq .User.RoleID 1}}selected{{end}}>
+                                            <i class="bi bi-shield"></i> Administrador
+                                        </option>
+                                        <option value="3" {{if eq .User.RoleID 3}}selected{{end}}>
+                                            <i class="bi bi-pencil"></i> Editor
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-lock"></i> Contraseña 
+                                    {{if .User}}
+                                        <small class="text-muted">(dejar en blanco para no cambiar)</small>
+                                    {{end}}
+                                </label>
+                                <input type="password" 
+                                       name="password" 
+                                       id="password"
+                                       class="form-control" 
+                                       {{if not .User}}required{{end}} 
+                                       minlength="6"
+                                       {{if not .User}}required{{end}}>
+                                <div class="password-strength mt-2">
+                                    <div class="password-strength-bar" id="passwordStrength"></div>
+                                </div>
+                                <div class="validation-feedback" id="passwordFeedback"></div>
+                                <small class="text-muted">Mínimo 6 caracteres</small>
+                            </div>
+
+                            {{if not .User}}
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-lock"></i> Confirmar Contraseña *
+                                </label>
+                                <input type="password" 
+                                       name="confirm_password" 
+                                       id="confirmPassword"
+                                       class="form-control" 
+                                       required>
+                                <div class="validation-feedback" id="confirmPasswordFeedback"></div>
+                            </div>
+                            {{end}}
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="/admin/users" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <i class="bi bi-check-circle"></i> Guardar
+                                    <span class="loading-spinner" id="submitSpinner"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/validations.js"></script>
+    
+    <script>
+        // Validaciones en tiempo real
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('userForm');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const passwordInput = document.getElementById('password');
+            const confirmInput = document.getElementById('confirmPassword');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Validar nombre en tiempo real
+            nameInput.addEventListener('input', function() {
+                validateName(this);
+            });
+            
+            // Validar email en tiempo real
+            emailInput.addEventListener('input', function() {
+                validateEmail(this);
+            });
+            
+            // Validar teléfono en tiempo real
+            phoneInput.addEventListener('input', function() {
+                validatePhone(this);
+            });
+            
+            // Validar contraseña en tiempo real
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    validatePassword(this);
+                    checkPasswordStrength(this.value);
+                    
+                    if (confirmInput) {
+                        validatePasswordMatch(passwordInput, confirmInput);
+                    }
+                });
+            }
+            
+            // Validar confirmación de contraseña
+            if (confirmInput) {
+                confirmInput.addEventListener('input', function() {
+                    validatePasswordMatch(passwordInput, this);
+                });
+            }
+            
+            // Validar formulario antes de enviar
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validar todos los campos
+                const isNameValid = validateName(nameInput);
+                const isEmailValid = validateEmail(emailInput);
+                const isPhoneValid = phoneInput.value ? validatePhone(phoneInput) : true;
+                const isPasswordValid = validatePassword(passwordInput);
+                
+                let isConfirmValid = true;
+                if (confirmInput) {
+                    isConfirmValid = validatePasswordMatch(passwordInput, confirmInput);
+                }
+                
+                if (isNameValid && isEmailValid && isPhoneValid && isPasswordValid && isConfirmValid) {
+                    // Mostrar loading
+                    submitBtn.classList.add('btn-loading');
+                    submitBtn.disabled = true;
+                    
+                    // Enviar formulario
+                    this.submit();
+                } else {
+                    showToast('error', 'Por favor, corrija los errores en el formulario');
+                    
+                    // Hacer scroll al primer error
+                    const firstError = document.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+            
+            // Auto-cerrar alertas
+            setTimeout(function() {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+        
+        // Función para validar nombre
+        function validateName(input) {
+            const value = input.value.trim();
+            const feedback = document.getElementById('nameFeedback');
+            
+            // Validar con nuestra librería
+            const isValid = Validator ? Validator.name(value) : /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,50}$/.test(value);
+            
+            if (value.length === 0) {
+                showValidation(input, feedback, false, 'El nombre es requerido');
+            } else if (value.length < 2) {
+                showValidation(input, feedback, false, 'El nombre debe tener al menos 2 caracteres');
+            } else if (!isValid) {
+                showValidation(input, feedback, false, 'Solo letras, espacios, apóstrofes y guiones');
+            } else {
+                showValidation(input, feedback, true, 'Nombre válido');
+            }
+            
+            return isValid && value.length >= 2;
+        }
+        
+        // Función para validar email
+        function validateEmail(input) {
+            const value = input.value.trim();
+            const feedback = document.getElementById('emailFeedback');
+            
+            // Validar con nuestra librería
+            const isValid = Validator ? Validator.email(value) : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+            
+            if (value.length === 0) {
+                showValidation(input, feedback, false, 'El email es requerido');
+            } else if (!isValid) {
+                showValidation(input, feedback, false, 'Email no válido');
+            } else {
+                showValidation(input, feedback, true, 'Email válido');
+            }
+            
+            return isValid && value.length > 0;
+        }
+        
+        // Función para validar teléfono
+        function validatePhone(input) {
+            const value = input.value.trim();
+            const feedback = document.getElementById('phoneFeedback');
+            
+            if (value.length === 0) {
+                // Teléfono es opcional
+                showValidation(input, feedback, true, '');
+                return true;
+            }
+            
+            // Validar con nuestra librería
+            const isValid = Validator ? Validator.phone(value) : /^[0-9+\-\s]{8,15}$/.test(value);
+            
+            if (!isValid) {
+                showValidation(input, feedback, false, 'Formato de teléfono no válido');
+            } else {
+                showValidation(input, feedback, true, 'Teléfono válido');
+            }
+            
+            return isValid;
+        }
+        
+        // Función para validar contraseña
+        function validatePassword(input) {
+            if (!input) return true;
+            
+            const value = input.value;
+            const feedback = document.getElementById('passwordFeedback');
+            
+            // Si está vacío y es edición, es válido (no cambiar)
+            if (value.length === 0 && document.querySelector('input[name="password"]').hasAttribute('data-editing')) {
+                showValidation(input, feedback, true, '');
+                return true;
+            }
+            
+            const isValid = value.length >= 6;
+            
+            if (value.length === 0) {
+                showValidation(input, feedback, false, 'La contraseña es requerida');
+            } else if (value.length < 6) {
+                showValidation(input, feedback, false, 'Mínimo 6 caracteres');
+            } else {
+                showValidation(input, feedback, true, 'Contraseña válida');
+            }
+            
+            return isValid;
+        }
+        
+        // Función para validar que las contraseñas coincidan
+        function validatePasswordMatch(passwordInput, confirmInput) {
+            if (!confirmInput) return true;
+            
+            const password = passwordInput.value;
+            const confirm = confirmInput.value;
+            const feedback = document.getElementById('confirmPasswordFeedback');
+            
+            const isValid = password === confirm;
+            
+            if (confirm.length === 0) {
+                showValidation(confirmInput, feedback, false, 'Confirme su contraseña');
+            } else if (!isValid) {
+                showValidation(confirmInput, feedback, false, 'Las contraseñas no coinciden');
+            } else {
+                showValidation(confirmInput, feedback, true, 'Las contraseñas coinciden');
+            }
+            
+            return isValid;
+        }
+        
+        // Función para mostrar validación
+        function showValidation(input, feedback, isValid, message) {
+            if (isValid) {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+                if (feedback) {
+                    feedback.classList.remove('invalid');
+                    feedback.classList.add('valid', 'show');
+                    feedback.textContent = message || '✓ Válido';
+                }
+            } else {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+                if (feedback) {
+                    feedback.classList.remove('valid');
+                    feedback.classList.add('invalid', 'show');
+                    feedback.textContent = message || '✗ Inválido';
+                }
+            }
+        }
+        
+        // Función para medir fortaleza de contraseña
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('passwordStrength');
+            if (!strengthBar) return;
+            
+            let strength = 0;
+            
+            if (password.length >= 6) strength += 1;
+            if (password.length >= 8) strength += 1;
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            strengthBar.className = 'password-strength-bar';
+            
+            if (password.length === 0) {
+                strengthBar.style.width = '0%';
+            } else if (strength <= 1) {
+                strengthBar.classList.add('strength-very-weak');
+            } else if (strength === 2) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength === 3) {
+                strengthBar.classList.add('strength-medium');
+            } else if (strength === 4) {
+                strengthBar.classList.add('strength-strong');
+            } else {
+                strengthBar.classList.add('strength-very-strong');
+            }
+        }
+        
+        // Función para mostrar toast
+        function showToast(type, message) {
+            const container = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const icons = {
+                success: 'bi-check-circle-fill',
+                error: 'bi-exclamation-triangle-fill',
+                warning: 'bi-exclamation-circle-fill',
+                info: 'bi-info-circle-fill'
+            };
+            
+            const titles = {
+                success: 'Éxito',
+                error: 'Error',
+                warning: 'Advertencia',
+                info: 'Información'
+            };
+            
+            const html = `
+                <div class="toast ${type}" id="${toastId}">
+                    <div class="toast-header">
+                        <i class="bi ${icons[type]} me-2"></i>
+                        <strong class="me-auto">${titles[type]}</strong>
+                        <small>ahora</small>
+                        <button type="button" class="btn-close" onclick="document.getElementById('${toastId}').remove()"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+            
+            setTimeout(() => {
+                const toast = document.getElementById(toastId);
+                if (toast) toast.remove();
+            }, 5000);
+        }
+        
+        // Marcar campo de contraseña como edición si aplica
+        {{if .User}}
+        document.getElementById('password').setAttribute('data-editing', 'true');
+        {{end}}
+    </script>
+</body>
+</html>

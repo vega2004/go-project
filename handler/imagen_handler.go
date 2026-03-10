@@ -20,8 +20,11 @@ func NewImagenHandler(imagenService service.ImagenService) *ImagenHandler {
 	}
 }
 
+// ShowCarrusel - Muestra la página del carrusel
 func (h *ImagenHandler) ShowCarrusel(c echo.Context) error {
 	userID := c.Get("user_id").(int)
+	userName := c.Get("user_name").(string)
+	userRole := c.Get("user_role").(string)
 
 	imagenes, err := h.imagenService.GetAll()
 	if err != nil {
@@ -31,6 +34,8 @@ func (h *ImagenHandler) ShowCarrusel(c echo.Context) error {
 	data := map[string]interface{}{
 		"Title":       "Gestión de Carrusel",
 		"UserID":      userID,
+		"UserName":    userName,
+		"UserRole":    userRole,
 		"Imagenes":    imagenes,
 		"breadcrumbs": c.Get("breadcrumbs"),
 	}
@@ -38,33 +43,71 @@ func (h *ImagenHandler) ShowCarrusel(c echo.Context) error {
 	return c.Render(http.StatusOK, "carrusel.html", data)
 }
 
+// Upload - Sube una nueva imagen (versión mejorada con validaciones)
 func (h *ImagenHandler) Upload(c echo.Context) error {
 	userID := c.Get("user_id").(int)
+	userRole := c.Get("user_role").(string)
 
-	file, err := c.FormFile("imagen")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "No se recibió ninguna imagen"})
+	// Verificar permisos
+	if userRole != "admin" && userRole != "editor" {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": "No tienes permisos para subir imágenes",
+		})
 	}
 
+	// Obtener el archivo
+	file, err := c.FormFile("imagen")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "No se recibió ninguna imagen",
+		})
+	}
+
+	// Validar límite de imágenes
+	imagenes, err := h.imagenService.GetAll()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Error al verificar límite de imágenes",
+		})
+	}
+
+	if len(imagenes) >= 10 {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Máximo 10 imágenes permitidas",
+		})
+	}
+
+	// Abrir el archivo
 	src, err := file.Open()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al abrir la imagen"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Error al abrir la imagen",
+		})
 	}
 	defer src.Close()
 
+	// Validar y guardar la imagen
 	uploadedFile, err := utils.SaveUploadedFile(src, file)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
 	}
 
+	// Crear registro en base de datos
 	imagen := &model.Imagen{
 		Nombre: uploadedFile.OriginalName,
 		Ruta:   uploadedFile.Path,
 		Activo: true,
+		UserID: userID,
 	}
 
 	if err := h.imagenService.Save(imagen, userID); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		// Si falla la BD, eliminar el archivo subido
+		utils.DeleteFile(uploadedFile.Path)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Error al guardar en base de datos",
+		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -73,37 +116,94 @@ func (h *ImagenHandler) Upload(c echo.Context) error {
 	})
 }
 
+// Delete - Elimina una imagen (versión mejorada)
 func (h *ImagenHandler) Delete(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "ID inválido"})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "ID inválido",
+		})
 	}
 
+	userRole := c.Get("user_role").(string)
+	if userRole != "admin" && userRole != "editor" {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": "No tienes permisos para eliminar imágenes",
+		})
+	}
+
+	// Obtener la imagen antes de eliminarla (para borrar el archivo)
+	imagenes, err := h.imagenService.GetAll()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Error al obtener la imagen",
+		})
+	}
+
+	var imagenEliminar *model.Imagen
+	for _, img := range imagenes {
+		if img.ID == id {
+			imagenEliminar = &img
+			break
+		}
+	}
+
+	if imagenEliminar == nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Imagen no encontrada",
+		})
+	}
+
+	// Eliminar de la base de datos
 	if err := h.imagenService.Delete(id); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Imagen eliminada exitosamente"})
+	// Eliminar el archivo físico
+	utils.DeleteFile(imagenEliminar.Ruta)
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Imagen eliminada exitosamente",
+	})
 }
 
-func (h *ImagenHandler) Reorder(c echo.Context) error {
-	var ordenes []int
-	if err := c.Bind(&ordenes); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Datos inválidos"})
-	}
-
-	if err := h.imagenService.Reorder(ordenes); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
-
-	return c.JSON(http.StatusOK, map[string]string{"message": "Orden actualizado exitosamente"})
-}
-
+// GetCarruselJSON - Devuelve las imágenes en formato JSON para Fetch API
 func (h *ImagenHandler) GetCarruselJSON(c echo.Context) error {
 	imagenes, err := h.imagenService.GetForCarrusel()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Error al cargar imágenes",
+		})
 	}
 
 	return c.JSON(http.StatusOK, imagenes)
+}
+
+// Reorder - Reordena las imágenes (drag & drop)
+func (h *ImagenHandler) Reorder(c echo.Context) error {
+	var ordenes []int
+	if err := c.Bind(&ordenes); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Datos inválidos",
+		})
+	}
+
+	userRole := c.Get("user_role").(string)
+	if userRole != "admin" && userRole != "editor" {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"error": "No tienes permisos para reordenar",
+		})
+	}
+
+	if err := h.imagenService.Reorder(ordenes); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Orden actualizado exitosamente",
+	})
 }

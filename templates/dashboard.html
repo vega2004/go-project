@@ -17,504 +17,700 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
     
-   <style>
-    /* ===== MEJORAS DE VISIBILIDAD ===== */
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    /* Badge de usuario más visible */
-    .role-badge {
-        background: #052659 !important;
-        color: white !important;
-        font-weight: 700;
-        padding: 8px 18px;
-        border-radius: 50px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        display: inline-block;
-    }
-    
-    /* Estadísticas con mejor contraste */
-    .stat-card {
-        background: linear-gradient(135deg, #021024 0%, #052659 100%) !important;
-        border: none !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-        border-radius: 15px;
-        transition: all 0.3s ease;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(5, 38, 89, 0.4) !important;
-    }
-    
-    .stat-card h3, .stat-card h6 {
-        color: white !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        font-weight: 700;
-    }
-    
-    .stat-card .stat-icon {
-        color: rgba(255,255,255,0.3) !important;
-        font-size: 2.5rem;
-    }
-    
-    /* Badges de información más visibles */
-    .badge.bg-info {
-        background: #5483B3 !important;
-        color: white !important;
-        font-weight: 600;
-        padding: 6px 12px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    
-    .badge.bg-danger {
-        background: #dc3545 !important;
-        color: white !important;
-        font-weight: 600;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    
-    .badge.bg-warning {
-        background: #ffc107 !important;
-        color: #021024 !important;
-        font-weight: 700;
-    }
-    
-    /* Texto en cards más oscuro */
-    .card-text.text-muted {
-        color: #021024 !important;
-        font-weight: 500;
-        opacity: 0.9;
-        font-size: 0.9rem;
-    }
-    
-    /* Títulos de módulos */
-    .card-title {
-        color: #052659 !important;
-        font-weight: 800;
-        font-size: 1.3rem;
-        margin-bottom: 10px;
-    }
-    
-    /* Footer más legible */
-    .footer {
-        background: #021024 !important;
-        color: #C1E8FF;
-        padding: 40px 0 20px;
-        margin-top: 60px;
-    }
-    
-    .footer h5 {
-        color: white !important;
-        font-weight: 700;
-        margin-bottom: 20px;
-    }
-    
-    .footer p, .footer a {
-        color: #C1E8FF !important;
-        opacity: 0.9;
-        font-weight: 500;
-        transition: all 0.3s;
-    }
-    
-    .footer a:hover {
-        color: white !important;
-        opacity: 1;
-        text-decoration: none;
-    }
-    
-    .footer ul li a {
-        color: #C1E8FF !important;
-        text-decoration: none;
-        display: inline-block;
-        padding: 5px 0;
-    }
-    
-    .footer hr {
-        background-color: #C1E8FF !important;
-        opacity: 0.2;
-    }
-    
-    /* Actividad reciente */
-    .activity-item p {
-        color: #052659 !important;
-        font-weight: 600;
-        margin-bottom: 5px;
-    }
-    
-    .activity-item small {
-        color: #5483B3 !important;
-        font-weight: 500;
-    }
-    
-    /* Botones de acciones rápidas */
-    .quick-action-btn {
-        background: white !important;
-        border: 2px solid #5483B3 !important;
-        color: #052659 !important;
-        font-weight: 700;
-        padding: 12px 25px;
-        border-radius: 50px;
-        transition: all 0.3s;
-    }
-    
-    .quick-action-btn:hover {
-        background: #5483B3 !important;
-        color: white !important;
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(84, 131, 179, 0.4);
-    }
-    
-    .quick-action-btn i {
-        margin-right: 8px;
-    }
-    
-    /* Números de página en paginación */
-    .page-link {
-        color: #052659 !important;
-        font-weight: 600;
-        border: 2px solid #C1E8FF;
-        margin: 0 3px;
-        border-radius: 8px !important;
-    }
-    
-    .page-item.active .page-link {
-        background: #5483B3 !important;
-        color: white !important;
-        border-color: #5483B3;
-    }
-    
-    /* Mejora para el texto "Último acceso" */
-    .text-white-50 {
-        color: #C1E8FF !important;
-        opacity: 1;
-        font-weight: 500;
-        font-size: 1rem;
-    }
-    
-    /* Tarjeta de bienvenida */
-    .welcome-card {
-        background: linear-gradient(135deg, #021024 0%, #052659 100%);
-        color: white;
-        border-radius: 20px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(2, 16, 36, 0.4);
-    }
-    
-    .welcome-card h2 {
-        color: white !important;
-        font-weight: 800;
-    }
-    
-    .welcome-card .lead {
-        color: #C1E8FF !important;
-        font-weight: 500;
-    }
-    
-    /* Cards de módulos */
-    .card-hover {
-        transition: all 0.3s ease;
-        border: 2px solid #C1E8FF;
-        border-radius: 15px;
-        overflow: hidden;
-    }
-    
-    .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(5, 38, 89, 0.2);
-        border-color: #5483B3;
-    }
-    
-    /* Iconos en módulos */
-    .card-hover .bi {
-        color: #5483B3 !important;
-        transition: all 0.3s;
-    }
-    
-    .card-hover:hover .bi {
-        transform: scale(1.1);
-    }
-    
-    /* Dropdown menu */
-    .dropdown-menu {
-        border: 2px solid #C1E8FF;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(5, 38, 89, 0.2);
-    }
-    
-    .dropdown-item {
-        color: #052659;
-        font-weight: 500;
-        padding: 10px 20px;
-        transition: all 0.3s;
-    }
-    
-    .dropdown-item:hover {
-        background: #5483B3;
-        color: white;
-    }
-    
-    .dropdown-item i {
-        margin-right: 10px;
-        color: #5483B3;
-    }
-    
-    .dropdown-item:hover i {
-        color: white;
-    }
-    
-    /* Alertas */
-    .alert {
-        border-radius: 12px;
-        border: none;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    
-    .alert-success {
-        background: linear-gradient(135deg, #d4edda, #c3e6cb);
-        color: #052659;
-        border-left: 5px solid #28a745;
-    }
-    
-    .alert-danger {
-        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-        color: #721c24;
-        border-left: 5px solid #dc3545;
-    }
-
-    /* ===== CORRECCIÓN PARA NAVBAR-BRAND (AHORA VISIBLE) ===== */
-    .navbar-brand {
-        color: #C1E8FF !important;
-        font-weight: 800;
-        font-size: 1.6rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        background: transparent !important;
-        transition: all 0.3s ease;
-    }
-
-    .navbar-brand:hover {
-        color: white !important;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-        transform: translateY(-2px);
-    }
-
-    .navbar-brand i {
-        color: #1d4156 !important;
-        margin-right: 8px;
-        font-size: 1.8rem;
-        transition: all 0.3s ease;
-    }
-
-    .navbar-brand:hover i {
-        color: white !important;
-        transform: scale(1.1);
-    }
-
-    /* ===== MEJORAS PARA NAVBAR Y DROPDOWN ===== */
-
-    /* Botón del usuario (dropdown toggle) */
-    .navbar-nav .dropdown-toggle {
-        background: linear-gradient(135deg, #5483B3 0%, #052659 100%) !important;
-        border: 2px solid #C1E8FF !important;
-        color: white !important;
-        font-weight: 700 !important;
-        padding: 10px 20px !important;
-        border-radius: 50px !important;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
-    }
-
-    .navbar-nav .dropdown-toggle:hover {
-        background: #5483B3 !important;
-        border-color: white !important;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(84, 131, 179, 0.5) !important;
-    }
-
-    /* Badge del rol en el botón */
-    .navbar-nav .dropdown-toggle .badge {
-        font-size: 0.7rem;
-        padding: 5px 10px;
-        border-radius: 50px;
-        margin-left: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        text-transform: uppercase;
-        font-weight: 800;
-    }
-
-    /* Colores específicos para badges de roles */
-    .navbar-nav .dropdown-toggle .badge.bg-danger {
-        background: #dc3545 !important;
-        color: white !important;
-    }
-
-    .navbar-nav .dropdown-toggle .badge.bg-warning {
-        background: #ffc107 !important;
-        color: #021024 !important;
-    }
-
-    .navbar-nav .dropdown-toggle .badge.bg-info {
-        background: #5483B3 !important;
-        color: white !important;
-    }
-
-    /* Menú desplegable */
-    .dropdown-menu {
-        background: white !important;
-        border: 2px solid #5483B3 !important;
-        border-radius: 15px !important;
-        box-shadow: 0 10px 30px rgba(2, 16, 36, 0.3) !important;
-        padding: 10px !important;
-        min-width: 220px !important;
-        margin-top: 10px !important;
-    }
-
-    /* Flecha del dropdown */
-    .dropdown-menu::before {
-        content: '';
-        position: absolute;
-        top: -10px;
-        right: 20px;
-        width: 0;
-        height: 0;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-bottom: 10px solid #5483B3;
-    }
-
-    /* Items del menú */
-    .dropdown-item {
-        color: #021024 !important;
-        font-weight: 600 !important;
-        padding: 12px 20px !important;
-        border-radius: 10px !important;
-        transition: all 0.3s ease !important;
-        font-size: 0.95rem !important;
-    }
-
-    .dropdown-item i {
-        color: #5483B3 !important;
-        margin-right: 12px !important;
-        font-size: 1.1rem !important;
-        transition: all 0.3s ease;
-    }
-
-    .dropdown-item:hover {
-        background: linear-gradient(135deg, #5483B3 0%, #052659 100%) !important;
-        color: white !important;
-        transform: translateX(5px);
-    }
-
-    .dropdown-item:hover i {
-        color: white !important;
-        transform: scale(1.1);
-    }
-
-    /* Separador */
-    .dropdown-divider {
-        border-top: 2px solid #C1E8FF !important;
-        margin: 8px 0 !important;
-        opacity: 0.5;
-    }
-
-    /* Item de cerrar sesión */
-    .dropdown-item.text-danger {
-        color: #dc3545 !important;
-        font-weight: 700 !important;
-    }
-
-    .dropdown-item.text-danger i {
-        color: #dc3545 !important;
-    }
-
-    .dropdown-item.text-danger:hover {
-        background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%) !important;
-        color: white !important;
-    }
-
-    .dropdown-item.text-danger:hover i {
-        color: white !important;
-    }
-
-    /* Icono del usuario */
-    .navbar-nav .dropdown-toggle i {
-        color: white !important;
-        font-size: 1.2rem;
-        margin-right: 5px;
-    }
-
-    /* Ícono decorativo del navbar */
-    .navbar .container::before {
-        color: #274b60;
-        margin-right: 15px;
-        font-size: 1.5rem;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-    }
-
-    /* Navbar con borde inferior */
-    .navbar {
-        border-bottom: 3px solid #5483B3 !important;
-    }
-
-    /* Responsive para dropdown */
-    @media (max-width: 768px) {
-        .dropdown-menu {
-            width: 100% !important;
-            position: static !important;
-            float: none !important;
-            margin-top: 5px !important;
+    <style>
+        /* ===== MEJORAS DE VISIBILIDAD ===== */
+        
+        /* Badge de usuario más visible */
+        .role-badge {
+            background: #052659 !important;
+            color: white !important;
+            font-weight: 700;
+            padding: 8px 18px;
+            border-radius: 50px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: inline-block;
         }
         
-        .dropdown-menu::before {
-            display: none;
-        }
-        
-        .navbar-nav .dropdown-toggle {
-            width: 100%;
-            text-align: center;
-        }
-    }
-    
-    /* Ajustes responsive generales */
-    @media (max-width: 768px) {
+        /* Estadísticas con mejor contraste */
         .stat-card {
-            margin-bottom: 15px;
+            background: linear-gradient(135deg, #021024 0%, #052659 100%) !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
         
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1), transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .stat-card:hover::after {
+            opacity: 1;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(5, 38, 89, 0.4) !important;
+        }
+        
+        .stat-card h3, .stat-card h6 {
+            color: white !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-weight: 700;
+        }
+        
+        .stat-card .stat-icon {
+            color: rgba(255,255,255,0.3) !important;
+            font-size: 2.5rem;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1);
+            color: rgba(255,255,255,0.5) !important;
+        }
+        
+        /* Badges de información más visibles */
+        .badge.bg-info {
+            background: #5483B3 !important;
+            color: white !important;
+            font-weight: 600;
+            padding: 6px 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .badge.bg-danger {
+            background: #dc3545 !important;
+            color: white !important;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .badge.bg-warning {
+            background: #ffc107 !important;
+            color: #021024 !important;
+            font-weight: 700;
+        }
+        
+        .badge.bg-success {
+            background: #28a745 !important;
+            color: white !important;
+            font-weight: 600;
+        }
+        
+        /* Texto en cards más oscuro */
+        .card-text.text-muted {
+            color: #021024 !important;
+            font-weight: 500;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        /* Títulos de módulos */
         .card-title {
-            font-size: 1.1rem;
+            color: #052659 !important;
+            font-weight: 800;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
         }
         
+        /* Footer más legible */
+        .footer {
+            background: #021024 !important;
+            color: #C1E8FF;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+        
+        .footer h5 {
+            color: white !important;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .footer p, .footer a {
+            color: #C1E8FF !important;
+            opacity: 0.9;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .footer a:hover {
+            color: white !important;
+            opacity: 1;
+            text-decoration: none;
+        }
+        
+        .footer ul li a {
+            color: #C1E8FF !important;
+            text-decoration: none;
+            display: inline-block;
+            padding: 5px 0;
+        }
+        
+        .footer hr {
+            background-color: #C1E8FF !important;
+            opacity: 0.2;
+        }
+        
+        /* Actividad reciente */
+        .activity-item {
+            padding: 12px;
+            border-bottom: 1px solid #C1E8FF;
+            transition: all 0.3s;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-item:hover {
+            background: rgba(193, 232, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .activity-item p {
+            color: #052659 !important;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .activity-item small {
+            color: #5483B3 !important;
+            font-weight: 500;
+        }
+        
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #5483B3, #052659);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+        
+        /* Botones de acciones rápidas */
+        .quick-action-btn {
+            background: white !important;
+            border: 2px solid #5483B3 !important;
+            color: #052659 !important;
+            font-weight: 700;
+            padding: 12px 25px;
+            border-radius: 50px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quick-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(84, 131, 179, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .quick-action-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .quick-action-btn:hover {
+            background: #5483B3 !important;
+            color: white !important;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(84, 131, 179, 0.4);
+        }
+        
+        .quick-action-btn i {
+            margin-right: 8px;
+            transition: all 0.3s;
+        }
+        
+        .quick-action-btn:hover i {
+            transform: scale(1.2);
+        }
+        
+        /* Números de página en paginación */
+        .page-link {
+            color: #052659 !important;
+            font-weight: 600;
+            border: 2px solid #C1E8FF;
+            margin: 0 3px;
+            border-radius: 8px !important;
+        }
+        
+        .page-item.active .page-link {
+            background: #5483B3 !important;
+            color: white !important;
+            border-color: #5483B3;
+        }
+        
+        /* Mejora para el texto "Último acceso" */
+        .text-white-50 {
+            color: #C1E8FF !important;
+            opacity: 1;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        
+        /* Tarjeta de bienvenida */
         .welcome-card {
-            padding: 20px;
+            background: linear-gradient(135deg, #021024 0%, #052659 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(2, 16, 36, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(84, 131, 179, 0.1), transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         
         .welcome-card h2 {
-            font-size: 1.5rem;
+            color: white !important;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
         }
-    }
-    
-    @media (max-width: 576px) {
-        .role-badge {
-            display: block;
-            margin-top: 10px;
+        
+        .welcome-card .lead {
+            color: #C1E8FF !important;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Cards de módulos */
+        .card-hover {
+            transition: all 0.3s ease;
+            border: 2px solid #C1E8FF;
+            border-radius: 15px;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(5, 38, 89, 0.2);
+            border-color: #5483B3;
+        }
+        
+        /* Iconos en módulos */
+        .card-hover .bi {
+            color: #5483B3 !important;
+            transition: all 0.3s;
+        }
+        
+        .card-hover:hover .bi {
+            transform: scale(1.1);
+        }
+        
+        /* Dropdown menu */
+        .dropdown-menu {
+            border: 2px solid #C1E8FF;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(5, 38, 89, 0.2);
+        }
+        
+        .dropdown-item {
+            color: #052659;
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.3s;
+        }
+        
+        .dropdown-item:hover {
+            background: #5483B3;
+            color: white;
+        }
+        
+        .dropdown-item i {
+            margin-right: 10px;
+            color: #5483B3;
+        }
+        
+        .dropdown-item:hover i {
+            color: white;
+        }
+        
+        /* Alertas */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #052659;
+            border-left: 5px solid #28a745;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+
+        /* ===== CORRECCIÓN PARA NAVBAR-BRAND ===== */
+        .navbar-brand {
+            color: #C1E8FF !important;
+            font-weight: 800;
+            font-size: 1.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: transparent !important;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: white !important;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+            transform: translateY(-2px);
+        }
+
+        .navbar-brand i {
+            color: #1d4156 !important;
+            margin-right: 8px;
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover i {
+            color: white !important;
+            transform: scale(1.1);
+        }
+
+        /* ===== MEJORAS PARA NAVBAR Y DROPDOWN ===== */
+
+        /* Botón del usuario (dropdown toggle) */
+        .navbar-nav .dropdown-toggle {
+            background: linear-gradient(135deg, #5483B3 0%, #052659 100%) !important;
+            border: 2px solid #C1E8FF !important;
+            color: white !important;
+            font-weight: 700 !important;
+            padding: 10px 20px !important;
+            border-radius: 50px !important;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .navbar-nav .dropdown-toggle:hover {
+            background: #5483B3 !important;
+            border-color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(84, 131, 179, 0.5) !important;
+        }
+
+        /* Badge del rol en el botón */
+        .navbar-nav .dropdown-toggle .badge {
+            font-size: 0.7rem;
+            padding: 5px 10px;
+            border-radius: 50px;
+            margin-left: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        /* Colores específicos para badges de roles */
+        .navbar-nav .dropdown-toggle .badge.bg-danger {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+
+        .navbar-nav .dropdown-toggle .badge.bg-warning {
+            background: #ffc107 !important;
+            color: #021024 !important;
+        }
+
+        .navbar-nav .dropdown-toggle .badge.bg-info {
+            background: #5483B3 !important;
+            color: white !important;
+        }
+
+        /* Menú desplegable */
+        .dropdown-menu {
+            background: white !important;
+            border: 2px solid #5483B3 !important;
+            border-radius: 15px !important;
+            box-shadow: 0 10px 30px rgba(2, 16, 36, 0.3) !important;
+            padding: 10px !important;
+            min-width: 220px !important;
+            margin-top: 10px !important;
+        }
+
+        /* Flecha del dropdown */
+        .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #5483B3;
+        }
+
+        /* Items del menú */
+        .dropdown-item {
+            color: #021024 !important;
+            font-weight: 600 !important;
+            padding: 12px 20px !important;
+            border-radius: 10px !important;
+            transition: all 0.3s ease !important;
+            font-size: 0.95rem !important;
+        }
+
+        .dropdown-item i {
+            color: #5483B3 !important;
+            margin-right: 12px !important;
+            font-size: 1.1rem !important;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #5483B3 0%, #052659 100%) !important;
+            color: white !important;
+            transform: translateX(5px);
+        }
+
+        .dropdown-item:hover i {
+            color: white !important;
+            transform: scale(1.1);
+        }
+
+        /* Separador */
+        .dropdown-divider {
+            border-top: 2px solid #C1E8FF !important;
+            margin: 8px 0 !important;
+            opacity: 0.5;
+        }
+
+        /* Item de cerrar sesión */
+        .dropdown-item.text-danger {
+            color: #dc3545 !important;
+            font-weight: 700 !important;
+        }
+
+        .dropdown-item.text-danger i {
+            color: #dc3545 !important;
+        }
+
+        .dropdown-item.text-danger:hover {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%) !important;
+            color: white !important;
+        }
+
+        .dropdown-item.text-danger:hover i {
+            color: white !important;
+        }
+
+        /* Icono del usuario */
+        .navbar-nav .dropdown-toggle i {
+            color: white !important;
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+
+        /* Navbar con borde inferior */
+        .navbar {
+            border-bottom: 3px solid #5483B3 !important;
+        }
+
+        /* Toast Notifications */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        }
+        
+        .toast {
+            background: white;
+            border-left: 5px solid;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast.success { border-left-color: #28a745; }
+        .toast.error { border-left-color: #dc3545; }
+        .toast.warning { border-left-color: #ffc107; }
+        .toast.info { border-left-color: #5483B3; }
+        
+        .toast-header {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .toast-body {
+            padding: 12px 15px;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            background: rgba(255,255,255,0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             text-align: center;
         }
         
-        .quick-action-btn {
-            width: 100%;
-            margin-bottom: 10px;
+        .loading-spinner.active {
+            display: block;
         }
-    }
-    
-    /* Animación suave */
-    .stat-card, .card-hover, .quick-action-btn, .navbar-brand {
-        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-    
-</style>
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #C1E8FF;
+            border-top-color: #5483B3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Gráficos */
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* Responsive para dropdown */
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                width: 100% !important;
+                position: static !important;
+                float: none !important;
+                margin-top: 5px !important;
+            }
+            
+            .dropdown-menu::before {
+                display: none;
+            }
+            
+            .navbar-nav .dropdown-toggle {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .card-title {
+                font-size: 1.1rem;
+            }
+            
+            .welcome-card {
+                padding: 20px;
+            }
+            
+            .welcome-card h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .role-badge {
+                display: block;
+                margin-top: 10px;
+                text-align: center;
+            }
+            
+            .quick-action-btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* Animación suave */
+        .stat-card, .card-hover, .quick-action-btn, .navbar-brand {
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+    </style>
 </head>
-<body>
+<body data-user-role="{{.UserRole}}" data-user-id="{{.UserID}}">
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-notification" id="toastContainer"></div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p class="text-muted">Cargando...</p>
+    </div>
 
     <!-- Navbar Superior -->
     <nav class="navbar navbar-expand-lg navbar-dark">
@@ -536,6 +732,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/perfil"><i class="bi bi-person"></i> Mi Perfil</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="refreshDashboard()"><i class="bi bi-arrow-clockwise"></i> Actualizar</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
                         </ul>
@@ -612,15 +809,15 @@
             </div>
         </div>
 
-        <!-- Estadísticas Rápidas -->
+        <!-- Estadísticas Rápidas con Eventos Click -->
         <div class="row mb-4">
             <div class="col-md-3 col-6 mb-3">
-                <div class="card stat-card">
+                <div class="card stat-card" onclick="showStats('personas')">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-white-50 mb-2">Total Personas</h6>
-                                <h3 class="mb-0">{{.Stats.TotalPersonas}}</h3>
+                                <h3 class="mb-0" id="totalPersonas">{{.Stats.TotalPersonas}}</h3>
                             </div>
                             <i class="bi bi-people-fill stat-icon"></i>
                         </div>
@@ -628,12 +825,12 @@
                 </div>
             </div>
             <div class="col-md-3 col-6 mb-3">
-                <div class="card stat-card">
+                <div class="card stat-card" onclick="showStats('imagenes')">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-white-50 mb-2">Imágenes</h6>
-                                <h3 class="mb-0">{{.Stats.TotalImagenes}}</h3>
+                                <h3 class="mb-0" id="totalImagenes">{{.Stats.TotalImagenes}}</h3>
                             </div>
                             <i class="bi bi-images stat-icon"></i>
                         </div>
@@ -641,12 +838,12 @@
                 </div>
             </div>
             <div class="col-md-3 col-6 mb-3">
-                <div class="card stat-card">
+                <div class="card stat-card" onclick="showStats('usuarios')">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-white-50 mb-2">Usuarios</h6>
-                                <h3 class="mb-0">{{.Stats.TotalUsuarios}}</h3>
+                                <h3 class="mb-0" id="totalUsuarios">{{.Stats.TotalUsuarios}}</h3>
                             </div>
                             <i class="bi bi-person-badge stat-icon"></i>
                         </div>
@@ -654,12 +851,12 @@
                 </div>
             </div>
             <div class="col-md-3 col-6 mb-3">
-                <div class="card stat-card">
+                <div class="card stat-card" onclick="showStats('actividad')">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-white-50 mb-2">Actividad</h6>
-                                <h3 class="mb-0">{{.Stats.ActividadHoy}}</h3>
+                                <h3 class="mb-0" id="actividadHoy">{{.Stats.ActividadHoy}}</h3>
                             </div>
                             <i class="bi bi-activity stat-icon"></i>
                         </div>
@@ -673,10 +870,11 @@
             <div class="col-lg-8">
                 <!-- Módulos Principales -->
                 <div class="card shadow mb-4">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
                             <i class="bi bi-grid-3x3-gap-fill"></i> Módulos del Sistema
                         </h5>
+                        <span class="badge bg-light text-primary" id="lastUpdate"></span>
                     </div>
                     <div class="card-body">
                         <div class="row g-4">
@@ -684,8 +882,11 @@
                             <div class="col-md-6">
                                 <div class="card h-100 card-hover">
                                     <div class="card-body text-center">
-                                        <div class="mb-3">
+                                        <div class="mb-3 position-relative">
                                             <i class="bi bi-images" style="font-size: 3.5rem;"></i>
+                                            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-info" id="carruselCount">
+                                                0
+                                            </span>
                                         </div>
                                         <h5 class="card-title">Carrusel de Imágenes</h5>
                                         <p class="card-text text-muted">
@@ -745,23 +946,23 @@
                             </div>
                             {{end}}
 
-                            <!-- Reportes (para todos) -->
+                            <!-- Reportes y Gráficos -->
                             <div class="col-md-6">
                                 <div class="card h-100 card-hover">
-                                    <div class="card-body text-center">
-                                        <div class="mb-3">
-                                            <i class="bi bi-bar-chart-line" style="font-size: 3.5rem;"></i>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <i class="bi bi-bar-chart-line"></i> Actividad
+                                            </h5>
+                                            <select class="form-select form-select-sm w-auto" id="chartPeriod" onchange="updateChart()">
+                                                <option value="7">7 días</option>
+                                                <option value="15">15 días</option>
+                                                <option value="30">30 días</option>
+                                            </select>
                                         </div>
-                                        <h5 class="card-title">Reportes y Estadísticas</h5>
-                                        <p class="card-text text-muted">
-                                            Visualiza gráficos y reportes del sistema.
-                                        </p>
-                                        <div class="mt-3">
-                                            <span class="badge bg-info mb-2">Próximamente</span>
+                                        <div class="chart-container">
+                                            <canvas id="activityChart"></canvas>
                                         </div>
-                                        <button class="btn btn-outline-primary w-100" disabled>
-                                            <i class="bi bi-bar-chart"></i> Ver Reportes
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -774,26 +975,33 @@
             <div class="col-lg-4">
                 <!-- Actividad Reciente -->
                 <div class="card shadow mb-4">
-                    <div class="card-header bg-info text-white">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
                             <i class="bi bi-clock-history"></i> Actividad Reciente
                         </h5>
+                        <button class="btn btn-sm btn-light" onclick="refreshActivity()">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
                     </div>
-                    <div class="card-body">
-                        <div class="activity-timeline">
-                            {{range .RecentActivity}}
-                            <div class="activity-item">
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;" id="activityContainer">
+                        {{range .RecentActivity}}
+                        <div class="activity-item d-flex align-items-center">
+                            <div class="activity-avatar">
+                                {{slice .User 0 1}}
+                            </div>
+                            <div class="flex-grow-1">
                                 <p class="mb-1"><strong>{{.User}}</strong> {{.Action}}</p>
                                 <small class="text-muted">
                                     <i class="bi bi-clock"></i> {{.Time}}
                                 </small>
                             </div>
-                            {{else}}
-                            <p class="text-muted text-center py-3">
-                                <i class="bi bi-inbox"></i> No hay actividad reciente
-                            </p>
-                            {{end}}
                         </div>
+                        {{else}}
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox fs-1 d-block text-muted mb-3"></i>
+                            <p class="text-muted">No hay actividad reciente</p>
+                        </div>
+                        {{end}}
                     </div>
                 </div>
 
@@ -806,21 +1014,24 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="/carrusel/upload" class="btn quick-action-btn">
+                            <a href="/carrusel" class="btn quick-action-btn">
                                 <i class="bi bi-cloud-upload"></i> Subir Imagen
                             </a>
                             {{if eq .UserRole "admin"}}
                             <a href="/admin/users/create" class="btn quick-action-btn">
                                 <i class="bi bi-person-plus"></i> Nuevo Usuario
                             </a>
+                            <button class="btn quick-action-btn" onclick="exportData()">
+                                <i class="bi bi-download"></i> Exportar Datos
+                            </button>
                             {{else}}
                             <a href="/perfil" class="btn quick-action-btn">
                                 <i class="bi bi-person-gear"></i> Mi Perfil
                             </a>
                             {{end}}
-                            <a href="/maintenance" class="btn quick-action-btn">
-                                <i class="bi bi-tools"></i> Mantenimiento
-                            </a>
+                            <button class="btn quick-action-btn" onclick="showHelp()">
+                                <i class="bi bi-question-circle"></i> Ayuda
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -861,47 +1072,289 @@
         </footer>
     </div>
 
+    <!-- Modal de Ayuda -->
+    <div class="modal fade" id="helpModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-question-circle"></i> Centro de Ayuda
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Módulos disponibles:</h6>
+                    <ul>
+                        <li><strong>Carrusel:</strong> Sube y gestiona imágenes</li>
+                        {{if eq .UserRole "admin"}}
+                        <li><strong>Administración:</strong> Gestiona usuarios y roles</li>
+                        {{else}}
+                        <li><strong>Perfil:</strong> Actualiza tu información</li>
+                        {{end}}
+                        <li><strong>Estadísticas:</strong> Visualiza actividad del sistema</li>
+                    </ul>
+                    <hr>
+                    <p class="mb-0">¿Necesitas más ayuda? Contacta al administrador.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/validations.js"></script>
     
     <script>
-    console.log("🔍 DIAGNÓSTICO DEL DASHBOARD");
-    console.log("URL actual:", window.location.href);
-    console.log("Título:", document.title);
-    
-    // Verificar datos del template
-    console.log("Datos recibidos:", {
-        userName: {{.UserName}},
-        userEmail: {{.UserEmail}},
-        userRole: {{.UserRole}},
-        stats: {{.Stats}}
-    });
-    
-    // Detectar si hay redirección
-    let originalUrl = window.location.href;
-    setTimeout(function() {
-        if (window.location.href !== originalUrl) {
-            console.log("❌ REDIRECCIÓN DETECTADA a:", window.location.href);
-        } else {
-            console.log("✅ No hay redirección, dashboard estable");
+        // Variables globales
+        let activityChart = null;
+        let helpModal = null;
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 Inicializando Dashboard...");
+            
+            // Inicializar modal
+            helpModal = new bootstrap.Modal(document.getElementById('helpModal'));
+            
+            // Cargar datos dinámicos
+            loadDashboardData();
+            
+            // Inicializar gráfico
+            initChart();
+            
+            // Actualizar última actualización
+            updateLastUpdate();
+            
+            // Auto-cerrar alertas
+            setTimeout(function() {
+                document.querySelectorAll('.alert').forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+            
+            console.log("✅ Dashboard inicializado");
+        });
+        
+        // Cargar datos del dashboard
+        async function loadDashboardData() {
+            showLoading();
+            try {
+                // Cargar contador del carrusel
+                const carruselResponse = await API.get('/carrusel/api/list');
+                document.getElementById('carruselCount').textContent = carruselResponse.imagenes?.length || 0;
+                
+                // Cargar actividad reciente
+                await loadRecentActivity();
+                
+            } catch (error) {
+                showToast('error', 'Error cargando datos: ' + error.message);
+            } finally {
+                hideLoading();
+            }
         }
-    }, 1000);
-    </script>
-    <script>
+        
+        // Cargar actividad reciente
+        async function loadRecentActivity() {
+            try {
+                // Simular carga de actividad (implementar según tu backend)
+                // const response = await API.get('/api/activity');
+                // actualizarActividad(response);
+            } catch (error) {
+                console.warn('No se pudo cargar actividad reciente');
+            }
+        }
+        
+        // Inicializar gráfico
+        function initChart() {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            
+            // Datos de ejemplo (reemplazar con datos reales)
+            const data = {
+                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                datasets: [{
+                    label: 'Actividad',
+                    data: [12, 19, 15, 17, 24, 10, 8],
+                    backgroundColor: 'rgba(84, 131, 179, 0.2)',
+                    borderColor: '#5483B3',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }]
+            };
+            
+            activityChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(193, 232, 255, 0.2)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Actualizar gráfico según período
+        function updateChart() {
+            const period = document.getElementById('chartPeriod').value;
+            showToast('info', `Actualizando gráfico a ${period} días...`);
+            // Aquí iría la lógica para actualizar datos
+        }
+        
+        // Refrescar dashboard
+        async function refreshDashboard() {
+            showLoading();
+            try {
+                await loadDashboardData();
+                showToast('success', 'Dashboard actualizado');
+            } catch (error) {
+                showToast('error', 'Error al actualizar');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Refrescar actividad
+        async function refreshActivity() {
+            showLoading();
+            try {
+                await loadRecentActivity();
+                showToast('success', 'Actividad actualizada');
+            } catch (error) {
+                showToast('error', 'Error al actualizar actividad');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Mostrar estadísticas detalladas
+        function showStats(type) {
+            const titles = {
+                'personas': 'Estadísticas de Personas',
+                'imagenes': 'Estadísticas de Imágenes',
+                'usuarios': 'Estadísticas de Usuarios',
+                'actividad': 'Estadísticas de Actividad'
+            };
+            
+            showToast('info', `📊 ${titles[type]}`);
+        }
+        
+        // Exportar datos
+        function exportData() {
+            showLoading();
+            try {
+                const data = {
+                    usuarios: {{.Stats.TotalUsuarios}},
+                    imagenes: {{.Stats.TotalImagenes}},
+                    personas: {{.Stats.TotalPersonas}},
+                    fecha: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `dashboard_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                
+                showToast('success', 'Datos exportados correctamente');
+            } catch (error) {
+                showToast('error', 'Error al exportar datos');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Mostrar ayuda
+        function showHelp() {
+            helpModal.show();
+        }
+        
+        // Actualizar última actualización
+        function updateLastUpdate() {
+            document.getElementById('lastUpdate').textContent = 
+                new Date().toLocaleTimeString('es-ES');
+        }
+        
+        // Mostrar loading
+        function showLoading() {
+            document.getElementById('loadingSpinner').classList.add('active');
+        }
+        
+        // Ocultar loading
+        function hideLoading() {
+            setTimeout(() => {
+                document.getElementById('loadingSpinner').classList.remove('active');
+            }, 500);
+        }
+        
+        // Mostrar toast
+        function showToast(type, message) {
+            const container = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const icons = {
+                success: 'bi-check-circle-fill',
+                error: 'bi-exclamation-triangle-fill',
+                warning: 'bi-exclamation-circle-fill',
+                info: 'bi-info-circle-fill'
+            };
+            
+            const titles = {
+                success: 'Éxito',
+                error: 'Error',
+                warning: 'Advertencia',
+                info: 'Información'
+            };
+            
+            const html = `
+                <div class="toast ${type}" id="${toastId}">
+                    <div class="toast-header">
+                        <i class="bi ${icons[type]} me-2"></i>
+                        <strong class="me-auto">${titles[type]}</strong>
+                        <small>ahora</small>
+                        <button type="button" class="btn-close" onclick="document.getElementById('${toastId}').remove()"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+            
+            setTimeout(() => {
+                const toast = document.getElementById(toastId);
+                if (toast) toast.remove();
+            }, 5000);
+        }
+        
         // Inicializar tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
         });
-
-        // Auto-cerrar alertas después de 5 segundos
-        setTimeout(function() {
-            var alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
     </script>
 </body>
 </html>

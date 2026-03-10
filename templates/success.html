@@ -3,19 +3,437 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}}</title>
+    <title>{{.Title}} - Éxito</title>
+    
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- CSS Personalizado -->
     <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #021024 0%, #052659 50%, #5483B3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(84, 131, 179, 0.1) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .success-container {
+            animation: fadeInScale 0.8s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .card {
+            border: none;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(2, 16, 36, 0.5);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            position: relative;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #28a745, #20c997, #28a745);
+            animation: gradientMove 3s linear infinite;
+            background-size: 200% 200%;
+        }
+        
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            padding: 30px;
+            border-bottom: none;
+        }
+        
+        .card-header h3 {
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .card-header i {
+            color: rgba(255,255,255,0.9);
+            margin-right: 10px;
+        }
+        
+        .card-body {
+            padding: 50px;
+        }
+        
+        .success-icon {
+            font-size: 6rem;
+            color: #28a745;
+            margin-bottom: 25px;
+            animation: bounceIn 1s ease, float 3s ease-in-out infinite;
+        }
+        
+        @keyframes bounceIn {
+            0%, 20%, 40%, 60%, 80%, 100% {
+                animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+            }
+            0% {
+                opacity: 0;
+                transform: scale3d(0.3, 0.3, 0.3);
+            }
+            20% {
+                transform: scale3d(1.1, 1.1, 1.1);
+            }
+            40% {
+                transform: scale3d(0.9, 0.9, 0.9);
+            }
+            60% {
+                opacity: 1;
+                transform: scale3d(1.03, 1.03, 1.03);
+            }
+            80% {
+                transform: scale3d(0.97, 0.97, 0.97);
+            }
+            100% {
+                opacity: 1;
+                transform: scale3d(1, 1, 1);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        h4 {
+            color: #052659;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .lead-text {
+            color: #5483B3;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .info-alert {
+            background: linear-gradient(135deg, rgba(193, 232, 255, 0.2), rgba(84, 131, 179, 0.1));
+            border: 2px solid #5483B3;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 30px 0;
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+        
+        .info-alert::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(40, 167, 69, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+        }
+        
+        .info-alert h5 {
+            color: #052659;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info-alert ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info-alert li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(84, 131, 179, 0.2);
+            color: #021024;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-alert li:last-child {
+            border-bottom: none;
+        }
+        
+        .info-alert li i {
+            color: #28a745;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .info-alert li i.bi-envelope {
+            color: #5483B3;
+        }
+        
+        .btn-custom {
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            margin: 5px;
+        }
+        
+        .btn-custom::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-custom:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-success-custom {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-success-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(40, 167, 69, 0.5);
+            color: white;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #5483B3, #052659);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 20px rgba(84, 131, 179, 0.3);
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(84, 131, 179, 0.5);
+            color: white;
+        }
+        
+        .card-footer {
+            background: linear-gradient(135deg, #f8fafc, #ffffff);
+            border-top: 2px solid #C1E8FF;
+            padding: 20px;
+            color: #7DA0CA;
+        }
+        
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 20px;
+            background: #28a745;
+            opacity: 0.7;
+            animation: confettiFall 3s linear infinite;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100%) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .user-details {
+            background: linear-gradient(135deg, #f8fafc, #ffffff);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #C1E8FF;
+        }
+        
+        .user-details h6 {
+            color: #052659;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .user-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .detail-item i {
+            color: #5483B3;
+            font-size: 1.2rem;
+            width: 25px;
+        }
+        
+        .detail-item span {
+            color: #021024;
+            font-weight: 500;
+        }
+        
+        .countdown-timer {
+            margin-top: 30px;
+            padding: 15px;
+            background: linear-gradient(135deg, #021024, #052659);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .countdown-timer small {
+            color: #C1E8FF;
+        }
+        
+        .timer {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffc107;
+            font-family: monospace;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 30px 20px;
+            }
+            
+            .card-header h3 {
+                font-size: 1.5rem;
+            }
+            
+            h4 {
+                font-size: 1.5rem;
+            }
+            
+            .btn-custom {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .user-details-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .mt-4 {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Confetti Animation -->
+    <div class="confetti" id="confetti"></div>
+
     <!-- Migajas de pan -->
-    <nav aria-label="breadcrumb" class="container mt-3">
-        <ol class="breadcrumb">
+    <nav aria-label="breadcrumb" class="container mt-3 position-relative" style="z-index: 2;">
+        <ol class="breadcrumb bg-dark bg-opacity-25 p-3 rounded">
             {{range .breadcrumbs}}
-            <li class="breadcrumb-item">
+            <li class="breadcrumb-item text-white">
                 {{if .url}}
-                <a href="{{.url}}">{{.name}}</a>
+                <a href="{{.url}}" class="text-white">{{.name}}</a>
                 {{else}}
                 {{.name}}
                 {{end}}
@@ -24,51 +442,253 @@
         </ol>
     </nav>
     
-    <div class="container mt-5">
+    <div class="container success-container">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-10 col-lg-8">
                 <div class="card shadow">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header text-center">
                         <h3 class="mb-0">
-                            <i class="bi bi-check-circle-fill"></i> {{.Title}}
+                            <i class="bi bi-check-circle-fill"></i> 
+                            {{.Title}}
                         </h3>
                     </div>
-                    <div class="card-body text-center py-5">
-                        <div class="mb-4">
-                            <i class="bi bi-check-circle text-success" style="font-size: 5rem;"></i>
+                    
+                    <div class="card-body text-center">
+                        <!-- Icono de éxito animado -->
+                        <div class="success-icon">
+                            <i class="bi bi-check-circle-fill"></i>
                         </div>
                         
-                        <h4 class="mb-3">¡Registro completado exitosamente!</h4>
-                        <p class="text-muted mb-4">
-                            Los datos del usuario han sido guardados correctamente en la base de datos.
+                        <!-- Mensaje principal -->
+                        <h4 class="animate__animated animate__fadeInUp">
+                            ¡Registro completado exitosamente!
+                        </h4>
+                        
+                        <p class="lead-text animate__animated animate__fadeInUp animate__delay-1s">
+                            Los datos han sido guardados correctamente en el sistema.
                         </p>
                         
-                        <div class="alert alert-info text-start">
+                        <!-- Detalles del usuario (si están disponibles) -->
+                        {{if .User}}
+                        <div class="user-details animate__animated animate__fadeInUp animate__delay-2s">
+                            <h6><i class="bi bi-person-badge"></i> Datos registrados:</h6>
+                            <div class="user-details-grid">
+                                <div class="detail-item">
+                                    <i class="bi bi-person"></i>
+                                    <span>{{.User.Name}}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>{{.User.Email}}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>{{.User.Phone}}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="bi bi-calendar"></i>
+                                    <span>{{.User.CreatedAt.Format "02/01/2006"}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {{end}}
+                        
+                        <!-- Información adicional -->
+                        <div class="info-alert animate__animated animate__fadeInUp animate__delay-2s">
                             <h5><i class="bi bi-info-circle"></i> Próximos pasos:</h5>
-                            <ul class="mb-0">
-                                <li>Recibirás un correo de confirmación</li>
-                                <li>Puedes iniciar sesión con tus credenciales</li>
-                                <li>Revisa tu bandeja de entrada (y spam)</li>
+                            <ul>
+                                <li>
+                                    <i class="bi bi-envelope"></i>
+                                    Recibirás un correo de confirmación
+                                </li>
+                                <li>
+                                    <i class="bi bi-box-arrow-in-right"></i>
+                                    Puedes iniciar sesión con tus credenciales
+                                </li>
+                                <li>
+                                    <i class="bi bi-shield-check"></i>
+                                    Revisa tu bandeja de entrada (y spam)
+                                </li>
+                                <li>
+                                    <i class="bi bi-clock"></i>
+                                    La sesión se iniciará automáticamente
+                                </li>
                             </ul>
                         </div>
                         
-                        <div class="mt-4">
-                            <a href="/form" class="btn btn-success btn-lg me-3">
-                                <i class="bi bi-person-plus"></i> Registrar otro usuario
+                        <!-- Cuenta regresiva para redirección -->
+                        <div class="countdown-timer animate__animated animate__fadeInUp animate__delay-3s">
+                            <small><i class="bi bi-clock"></i> Redirigiendo al dashboard en...</small>
+                            <div class="timer" id="countdown">10</div>
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+                            <a href="/dashboard" class="btn btn-custom btn-primary-custom" id="dashboardBtn">
+                                <i class="bi bi-speedometer2"></i> Ir al Dashboard
                             </a>
-                            <a href="/" class="btn btn-primary btn-lg">
-                                <i class="bi bi-house-door"></i> Volver al inicio
+                            <a href="/login" class="btn btn-custom btn-success-custom">
+                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
                             </a>
                         </div>
+                        
+                        <!-- Enlaces adicionales -->
+                        <div class="mt-4">
+                            <small class="text-muted">
+                                <i class="bi bi-arrow-left"></i>
+                                <a href="/" class="text-muted text-decoration-none ms-1">Volver al inicio</a>
+                                <span class="mx-2">|</span>
+                                <a href="/form" class="text-muted text-decoration-none">
+                                    Registrar otro usuario <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </small>
+                        </div>
                     </div>
-                    <div class="card-footer text-center text-muted">
-                        <small>© 2026 Sistema de Registro. Todos los derechos reservados.</small>
+                    
+                    <!-- Footer -->
+                    <div class="card-footer text-center">
+                        <small>
+                            <i class="bi bi-check-circle"></i> 
+                            © 2026 Sistema de Gestión. Todos los derechos reservados.
+                            <br>
+                            <span class="text-muted">
+                                ID de transacción: <strong>{{.TransactionID | default "SUC-2026-001"}}</strong>
+                            </span>
+                        </small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/api.js"></script>
+    
+    <script>
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Crear confetti
+            createConfetti();
+            
+            // Iniciar countdown
+            startCountdown(10);
+            
+            // Reproducir sonido de éxito (opcional)
+            // playSuccessSound();
+        });
+
+        // Crear efecto de confetti
+        function createConfetti() {
+            const confettiContainer = document.getElementById('confetti');
+            const colors = ['#28a745', '#20c997', '#5483B3', '#ffc107', '#dc3545'];
+            
+            for (let i = 0; i < 50; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                
+                // Estilo aleatorio
+                const left = Math.random() * 100;
+                const size = Math.random() * 10 + 5;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const delay = Math.random() * 3;
+                const duration = Math.random() * 2 + 2;
+                
+                piece.style.left = left + '%';
+                piece.style.width = size + 'px';
+                piece.style.height = (size * 2) + 'px';
+                piece.style.background = color;
+                piece.style.animationDelay = delay + 's';
+                piece.style.animationDuration = duration + 's';
+                
+                confettiContainer.appendChild(piece);
+            }
+            
+            // Limpiar confetti después de 5 segundos
+            setTimeout(() => {
+                confettiContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Countdown para redirección
+        function startCountdown(seconds) {
+            const countdownElement = document.getElementById('countdown');
+            const dashboardBtn = document.getElementById('dashboardBtn');
+            
+            let timeLeft = seconds;
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                countdownElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    // Redirigir al dashboard
+                    window.location.href = '/dashboard';
+                }
+            }, 1000);
+            
+            // Permitir cancelar la redirección haciendo click en el botón
+            dashboardBtn.addEventListener('click', function(e) {
+                clearInterval(interval);
+            });
+        }
+
+        // Guardar en localStorage que el registro fue exitoso
+        function saveRegistrationSuccess() {
+            const registrations = JSON.parse(localStorage.getItem('successfulRegistrations') || '[]');
+            registrations.push({
+                date: new Date().toISOString(),
+                id: '{{.TransactionID | default "SUC-2026-001"}}'
+            });
+            localStorage.setItem('successfulRegistrations', JSON.stringify(registrations));
+        }
+
+        // Reproducir sonido de éxito (descomentar si quieres usar)
+        function playSuccessSound() {
+            const audio = new Audio('data:audio/wav;base64,UklGRlwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVoAAACAgICAf39/f39/f3+AgICAf39/f39/f3+AgICAf39/f39/f3+AgICAf39/f39/f3+AgICAf39/f39/f3+AgICAf39/f38=');
+            audio.volume = 0.3;
+            audio.play().catch(() => {}); // Ignorar error si el navegador bloquea el audio
+        }
+
+        // Mostrar notificación de éxito
+        function showSuccessNotification() {
+            if (Notification.permission === 'granted') {
+                new Notification('Registro Exitoso', {
+                    body: 'Tu cuenta ha sido creada correctamente',
+                    icon: '/static/images/favicon.ico'
+                });
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        }
+
+        // Solicitar permiso para notificaciones
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Guardar registro exitoso
+        saveRegistrationSuccess();
+
+        // Mostrar notificación si está permitido
+        setTimeout(() => {
+            showSuccessNotification();
+        }, 2000);
+
+        // Función para compartir en redes sociales
+        function shareSuccess() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Registro Exitoso',
+                    text: 'Acabo de registrarme en el Sistema de Gestión',
+                    url: window.location.origin
+                }).catch(() => {});
+            }
+        }
+
+        // Compartir al hacer click en el ícono de éxito (opcional)
+        document.querySelector('.success-icon').addEventListener('click', shareSuccess);
+    </script>
 </body>
 </html>
