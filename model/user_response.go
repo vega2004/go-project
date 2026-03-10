@@ -20,4 +20,6 @@ type UserPaginatedResponse struct {
 	TotalPages int                 `json:"total_pages"`
 	HasNext    bool                `json:"has_next"`
 	HasPrev    bool                `json:"has_prev"`
+	PrevPage   int                 `json:"prev_page"` // ← AGREGAR
+	NextPage   int                 `json:"next_page"` // ← AGREGAR
 }

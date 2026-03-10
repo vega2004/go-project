@@ -152,30 +152,37 @@
             </table>
         </div>
         
-        <!-- Paginación simple -->
+        <!-- PAGINACIÓN CORREGIDA - SIN sub NI add -->
         {{if gt .Users.TotalPages 1}}
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
+                <!-- Primera página -->
                 <li class="page-item {{if eq .Users.Page 1}}disabled{{end}}">
                     <a class="page-link" href="?page=1{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">
                         &laquo;
                     </a>
                 </li>
+                
+                <!-- Página anterior (usando PrevPage en lugar de sub) -->
                 <li class="page-item {{if eq .Users.Page 1}}disabled{{end}}">
-                    <a class="page-link" href="?page={{sub .Users.Page 1}}{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">
+                    <a class="page-link" href="?page={{.Users.PrevPage}}{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">
                         &lsaquo;
                     </a>
                 </li>
                 
+                <!-- Página actual -->
                 <li class="page-item active">
                     <span class="page-link">{{.Users.Page}} / {{.Users.TotalPages}}</span>
                 </li>
                 
+                <!-- Página siguiente (usando NextPage en lugar de add) -->
                 <li class="page-item {{if eq .Users.Page .Users.TotalPages}}disabled{{end}}">
-                    <a class="page-link" href="?page={{add .Users.Page 1}}{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">
+                    <a class="page-link" href="?page={{.Users.NextPage}}{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">
                         &rsaquo;
                     </a>
                 </li>
+                
+                <!-- Última página -->
                 <li class="page-item {{if eq .Users.Page .Users.TotalPages}}disabled{{end}}">
                     <a class="page-link" href="?page={{.Users.TotalPages}}{{if .Filtros.Email}}&email={{.Filtros.Email}}{{end}}{{if .Filtros.Name}}&name={{.Filtros.Name}}{{end}}">
                         &raquo;

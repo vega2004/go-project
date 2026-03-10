@@ -118,7 +118,6 @@ func (r *authRepository) FindByID(id int) (*model.UserAuth, error) {
 // ============================================
 
 // GetAllUsers - Obtiene todos los usuarios con paginación y filtros
-// GetAllUsers - Obtiene todos los usuarios con paginación y filtros
 func (r *authRepository) GetAllUsers(filter *model.UserFilter) (*model.UserPaginatedResponse, error) {
 	// Configurar paginación
 	if filter.Page < 1 {
@@ -192,6 +191,17 @@ func (r *authRepository) GetAllUsers(filter *model.UserFilter) (*model.UserPagin
 
 	totalPages := (total + filter.PageSize - 1) / filter.PageSize
 
+	// ✅ CALCULAR PÁGINA ANTERIOR Y SIGUIENTE
+	prevPage := filter.Page - 1
+	if prevPage < 1 {
+		prevPage = 1
+	}
+
+	nextPage := filter.Page + 1
+	if nextPage > totalPages {
+		nextPage = totalPages
+	}
+
 	return &model.UserPaginatedResponse{
 		Data:       users,
 		Total:      total,
@@ -200,6 +210,8 @@ func (r *authRepository) GetAllUsers(filter *model.UserFilter) (*model.UserPagin
 		TotalPages: totalPages,
 		HasNext:    filter.Page < totalPages,
 		HasPrev:    filter.Page > 1,
+		PrevPage:   prevPage, // ← AGREGADO
+		NextPage:   nextPage, // ← AGREGADO
 	}, nil
 }
 
