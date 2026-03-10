@@ -186,46 +186,45 @@
         </div>
         {{end}}
 
-        <!-- ===== NUEVO SLIDER INTERACTIVO ===== -->
-        {{if .Imagenes}}
-        <div class="mb-5">
-            <h4 class="mb-3"><i class="bi bi-play-circle"></i> Carrusel Interactivo</h4>
-            <div id="carouselSlider" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
-                <!-- Indicadores -->
-                <div class="carousel-indicators">
-                    {{range $index, $img := .Imagenes}}
-                    <button type="button" data-bs-target="#carouselSlider" data-bs-slide-to="{{$index}}" 
-                            class="{{if eq $index 0}}active{{end}}" aria-current="{{if eq $index 0}}true{{end}}" 
-                            aria-label="Slide {{add $index 1}}"></button>
-                    {{end}}
-                </div>
-
-                <!-- Slides -->
-                <div class="carousel-inner rounded shadow">
-                    {{range $index, $img := .Imagenes}}
-                    <div class="carousel-item {{if eq $index 0}}active{{end}}">
-                        <img src="{{$img.Ruta}}" class="d-block w-100" alt="{{$img.Nombre}}">
-                        <div class="carousel-caption d-none d-md-block">
-                            <h5>{{$img.Nombre}}</h5>
-                            <p>Subida el {{$img.CreatedAt.Format "02/01/2006"}}</p>
-                        </div>
-                    </div>
-                    {{end}}
-                </div>
-
-                <!-- Controles -->
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselSlider" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Anterior</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselSlider" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Siguiente</span>
-                </button>
-            </div>
+      <!-- ===== SLIDER INTERACTIVO (SIN add) ===== -->
+{{if .Imagenes}}
+<div class="mb-5">
+    <h4 class="mb-3"><i class="bi bi-play-circle"></i> Carrusel Interactivo</h4>
+    <div id="carouselSlider" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+        <!-- Indicadores -->
+        <div class="carousel-indicators">
+            {{range $index, $img := .Imagenes}}
+            <button type="button" data-bs-target="#carouselSlider" data-bs-slide-to="{{$index}}" 
+                    class="{{if eq $index 0}}active{{end}}" 
+                    aria-label="Slide {{$index}}"></button>
+            {{end}}
         </div>
-        {{end}}
 
+        <!-- Slides -->
+        <div class="carousel-inner rounded shadow">
+            {{range $index, $img := .Imagenes}}
+            <div class="carousel-item {{if eq $index 0}}active{{end}}">
+                <img src="{{$img.Ruta}}" class="d-block w-100" alt="{{$img.Nombre}}" style="height: 400px; object-fit: cover;">
+                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+                    <h5>{{$img.Nombre}}</h5>
+                    <p>Subida el {{$img.CreatedAt.Format "02/01/2006"}}</p>
+                </div>
+            </div>
+            {{end}}
+        </div>
+
+        <!-- Controles -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselSlider" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselSlider" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    </div>
+</div>
+{{end}}
         <!-- Grid de Imágenes (se mantiene igual) -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4><i class="bi bi-grid"></i> Todas las imágenes</h4>
