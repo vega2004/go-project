@@ -20,6 +20,44 @@ import (
 	echomiddleware "github.com/labstack/echo/v4/middleware"
 )
 
+// ============================================
+// FUNCIONES PERSONALIZADAS PARA TEMPLATES
+// ============================================
+
+var templateFuncs = template.FuncMap{
+	"add": func(a, b int) int {
+		return a + b
+	},
+	"sub": func(a, b int) int {
+		return a - b
+	},
+	"mul": func(a, b int) int {
+		return a * b
+	},
+	"div": func(a, b int) int {
+		if b == 0 {
+			return 0
+		}
+		return a / b
+	},
+	"toString": func(v interface{}) string {
+		if v == nil {
+			return ""
+		}
+		return fmt.Sprintf("%v", v)
+	},
+	"default": func(defaultValue string, v interface{}) string {
+		if v == nil {
+			return defaultValue
+		}
+		s := fmt.Sprintf("%v", v)
+		if s == "" {
+			return defaultValue
+		}
+		return s
+	},
+}
+
 type TemplateRenderer struct {
 	templates *template.Template
 }
@@ -63,14 +101,23 @@ func main() {
 	// Rate limiting
 	e.Use(echomiddleware.RateLimiter(echomiddleware.NewRateLimiterMemoryStore(20)))
 
-	// Templates
+	// ============================================
+	// TEMPLATES CON FUNCIONES PERSONALIZADAS
+	// ============================================
 	cwd, _ := os.Getwd()
 	templatesDir := filepath.Join(cwd, "web", "templates")
-	templates, err := template.ParseGlob(filepath.Join(templatesDir, "**/*.html"))
+
+	// Crear un nuevo template con funciones personalizadas
+	tmpl := template.New("").Funcs(templateFuncs)
+
+	// Parsear todos los templates
+	templates, err := tmpl.ParseGlob(filepath.Join(templatesDir, "**/*.html"))
 	if err != nil {
 		log.Fatal("❌ Error cargando templates:", err)
 	}
+
 	e.Renderer = &TemplateRenderer{templates: templates}
+	log.Println("✅ Templates cargados con funciones personalizadas")
 
 	// Archivos estáticos
 	e.Static("/static", filepath.Join(cwd, "web", "static"))
@@ -92,21 +139,16 @@ func main() {
 	// Session Manager
 	sessionManager := utils.NewSessionManager(env.SessionSecret, env.IsProduction())
 
-	// ============================================
-	// NUEVO: JWT MANAGER
-	// ============================================
-	jwtManager := utils.NewJWTManager(env.SessionSecret, 24) // 24 horas de expiración
+	// JWT Manager
+	jwtManager := utils.NewJWTManager(env.SessionSecret, 24)
 
-	// ============================================
-	// MIDDLEWARES PERSONALIZADOS (ACTUALIZADOS)
-	// ============================================
-	// AuthMiddleware con soporte JWT
+	// Middlewares personalizados
 	authMiddleware := middleware.NewAuthMiddleware(
 		sessionManager,
-		jwtManager, // ← NUEVO: pasar JWT manager
+		jwtManager,
 		authRepo,
 		permisoRepo,
-		true, // ← HABILITAR JWT (true) o DESHABILITAR (false)
+		true,
 	)
 
 	rbacMiddleware := middleware.NewRBACMiddleware(permisoRepo)
@@ -119,10 +161,8 @@ func main() {
 	e.Use(errorMiddleware.Recover)
 	e.RouteNotFound("/*", errorMiddleware.NotFound)
 
-	// ============================================
-	// HANDLERS (ACTUALIZADOS)
-	// ============================================
-	authHandler := handlers.NewAuthHandler(authService, sessionManager, jwtManager, env) // ← NUEVO: pasar jwtManager
+	// Handlers
+	authHandler := handlers.NewAuthHandler(authService, sessionManager, jwtManager, env)
 	dashboardHandler := handlers.NewDashboardHandler(db)
 	perfilHandler := handlers.NewPerfilHandler(perfilService)
 	moduloHandler := handlers.NewModuloHandler(moduloService)
@@ -170,15 +210,11 @@ func main() {
 	// API Permisos
 	protected.GET("/api/permisos", rbacMiddleware.GetUserPermissions)
 
-	// ============================================
-	// RUTAS API CON JWT (Ejemplo)
-	// ============================================
+	// API con JWT
 	api := protected.Group("/api")
-	api.GET("/perfil", perfilHandler.ShowPerfilJSON) // Endpoint que devuelve JSON
+	api.GET("/perfil", perfilHandler.ShowPerfilJSON)
 
-	// ============================================
 	// MÓDULO: PERFILES
-	// ============================================
 	pg := protected.Group("/seguridad/perfiles")
 	pg.Use(rbacMiddleware.CheckPermission("perfiles", "ver"))
 	pg.GET("", perfilHandler.Index)
@@ -188,9 +224,7 @@ func main() {
 	pg.POST("/actualizar/:id", perfilHandler.Update, rbacMiddleware.CheckPermission("perfiles", "editar"), csrfMiddleware.Protect)
 	pg.DELETE("/eliminar/:id", perfilHandler.Delete, rbacMiddleware.CheckPermission("perfiles", "eliminar"), csrfMiddleware.Protect)
 
-	// ============================================
 	// MÓDULO: MÓDULOS
-	// ============================================
 	mg := protected.Group("/seguridad/modulos")
 	mg.Use(rbacMiddleware.CheckPermission("modulos", "ver"))
 	mg.GET("", moduloHandler.Index)
@@ -200,18 +234,14 @@ func main() {
 	mg.POST("/actualizar/:id", moduloHandler.Update, rbacMiddleware.CheckPermission("modulos", "editar"), csrfMiddleware.Protect)
 	mg.DELETE("/eliminar/:id", moduloHandler.Delete, rbacMiddleware.CheckPermission("modulos", "eliminar"), csrfMiddleware.Protect)
 
-	// ============================================
 	// MÓDULO: PERMISOS-PERFIL
-	// ============================================
 	permGroup := protected.Group("/seguridad/permisos-perfil")
 	permGroup.Use(rbacMiddleware.RequireAdmin)
 	permGroup.GET("", permisoHandler.Index)
 	permGroup.POST("/cargar", permisoHandler.LoadPermissions)
 	permGroup.POST("/guardar", permisoHandler.SavePermissions, csrfMiddleware.Protect)
 
-	// ============================================
 	// MÓDULO: USUARIOS
-	// ============================================
 	ug := protected.Group("/seguridad/usuarios")
 	ug.Use(rbacMiddleware.CheckPermission("usuarios", "ver"))
 	ug.GET("", userHandler.Index)
@@ -223,9 +253,7 @@ func main() {
 	ug.GET("/detalle/:id", userHandler.Detail, rbacMiddleware.CheckPermission("usuarios", "detalle"))
 	ug.POST("/toggle-status/:id", userHandler.ToggleStatus, rbacMiddleware.CheckPermission("usuarios", "editar"), csrfMiddleware.Protect)
 
-	// ============================================
 	// MÓDULOS PRINCIPALES
-	// ============================================
 	protected.GET("/principal/clientes", principalHandler.Principal11, rbacMiddleware.RequireModuleAccess("principal11"))
 	protected.GET("/principal/productos", principalHandler.Principal12, rbacMiddleware.RequireModuleAccess("principal12"))
 	protected.GET("/principal/facturas", principalHandler.Principal21, rbacMiddleware.RequireModuleAccess("principal21"))
