@@ -9,6 +9,8 @@ vendor/
 
 # Environment variables
 .env
+.env.local
+.env.*.local
 *.env
 
 # Archivos del sistema
@@ -33,3 +35,9 @@ desktop.ini
 # Go test files
 *_test.go
 *.test
+
+# Node modules (para Tailwind)
+node_modules/
+
+# CSS compilado (opcional, si no quieres subirlo)
+web/static/dist/

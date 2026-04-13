@@ -1,0 +1,131 @@
+{{define "content"}}
+<div class="flex flex-col md:flex-row gap-6">
+    <!-- Columna izquierda - Foto y datos básicos -->
+    <div class="w-full md:w-1/3">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6 text-center">
+                <!-- Foto de perfil -->
+                <div class="flex justify-center mb-4">
+                    <img src="{{.FotoPath}}" alt="Avatar" class="rounded-full w-36 h-36 object-cover border-4 border-primary-500">
+                </div>
+                
+                <h4 class="text-xl font-bold text-gray-800">{{.UserName}}</h4>
+                <p class="text-gray-500 text-sm mt-1">{{.UserEmail}}</p>
+                
+                <!-- Badge de rol -->
+                <div class="my-3">
+                    {{if eq .UserRole "administrador"}}
+                    <span class="badge bg-red-100 text-red-800">Administrador</span>
+                    {{else if eq .UserRole "editor"}}
+                    <span class="badge bg-yellow-100 text-yellow-800">Editor</span>
+                    {{else}}
+                    <span class="badge bg-blue-100 text-blue-800">Usuario</span>
+                    {{end}}
+                </div>
+                
+                <!-- Formulario de subida de foto -->
+                <form action="/perfil/upload" method="POST" enctype="multipart/form-data" id="uploadForm" class="mt-4">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <div class="mb-3">
+                        <label for="foto" class="form-label text-sm">Cambiar foto</label>
+                        <input type="file" class="form-input text-sm py-1" id="foto" name="foto" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn-primary w-full text-sm">
+                        <i class="bi bi-cloud-upload"></i> Subir foto
+                    </button>
+                </form>
+                
+                {{if ne .FotoPath "/static/uploads/perfil/default-avatar.png"}}
+                <a href="/perfil/delete-foto" class="btn-danger w-full mt-2 text-sm inline-block text-center" 
+                   onclick="return confirm('¿Eliminar foto de perfil?')">
+                    <i class="bi bi-trash"></i> Eliminar foto
+                </a>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna derecha - Información Personal -->
+    <div class="w-full md:w-2/3">
+        <!-- Datos del Perfil -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+            <div class="bg-primary-600 text-white px-6 py-3">
+                <h5 class="font-semibold"><i class="bi bi-person-gear mr-2"></i> Información Personal</h5>
+            </div>
+            <div class="p-6">
+                <form method="POST" action="/perfil/update" id="perfilForm">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <div class="mb-4">
+                        <label class="form-label">Biografía</label>
+                        <textarea class="form-input" name="bio" rows="3">{{.Perfil.Bio}}</textarea>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4 mb-4">
+                        <div class="flex-1">
+                            <label class="form-label">Ubicación</label>
+                            <input type="text" class="form-input" name="ubicacion" value="{{.Perfil.Direccion}}">
+                        </div>
+                        <div class="flex-1">
+                            <label class="form-label">Teléfono Alterno</label>
+                            <input type="tel" class="form-input" name="telefono_alterno" value="{{.Perfil.TelefonoAlterno}}">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="bi bi-save"></i> Guardar Cambios
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cambio de Contraseña -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-yellow-500 text-white px-6 py-3">
+                <h5 class="font-semibold"><i class="bi bi-key mr-2"></i> Cambiar Contraseña</h5>
+            </div>
+            <div class="p-6">
+                <form method="POST" action="/perfil/change-password" id="passwordForm">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <div class="mb-4">
+                        <label class="form-label">Contraseña Actual</label>
+                        <input type="password" class="form-input" name="actual" required>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4 mb-4">
+                        <div class="flex-1">
+                            <label class="form-label">Nueva Contraseña</label>
+                            <input type="password" class="form-input" name="nueva" required minlength="6">
+                        </div>
+                        <div class="flex-1">
+                            <label class="form-label">Confirmar Contraseña</label>
+                            <input type="password" class="form-input" name="confirmar" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition">
+                        <i class="bi bi-shield-lock"></i> Cambiar Contraseña
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+        const nueva = document.querySelector('[name="nueva"]').value;
+        const confirmar = document.querySelector('[name="confirmar"]').value;
+        
+        if (nueva !== confirmar) {
+            e.preventDefault();
+            Swal.fire('Error', 'Las contraseñas no coinciden', 'error');
+        }
+    });
+    
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        const file = document.getElementById('foto').files[0];
+        if (file && file.size > 5 * 1024 * 1024) {
+            e.preventDefault();
+            Swal.fire('Error', 'La imagen no puede superar los 5MB', 'error');
+        }
+    });
+</script>
+{{end}}

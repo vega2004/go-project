@@ -1,0 +1,310 @@
+{{define "content"}}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">
+        <i class="bi bi-people mr-2"></i> {{.Title}}
+    </h2>
+    <a href="/seguridad/usuarios/nuevo" class="btn-success">
+        <i class="bi bi-plus-circle"></i> Nuevo Usuario
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+    <div class="p-4">
+        <form method="GET" action="/seguridad/usuarios" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <div>
+                <label class="form-label text-sm">Nombre</label>
+                <input type="text" class="form-input" name="name" value="{{.Filtros.Name}}" 
+                       placeholder="Nombre...">
+            </div>
+            <div>
+                <label class="form-label text-sm">Email</label>
+                <input type="text" class="form-input" name="email" value="{{.Filtros.Email}}" 
+                       placeholder="Email...">
+            </div>
+            <div>
+                <label class="form-label text-sm">Perfil</label>
+                <select class="form-select" name="perfil_id">
+                    <option value="">Todos</option>
+                    {{range .Perfiles}}
+                    <option value="{{.ID}}" {{if eq $.Filtros.PerfilID .ID}}selected{{end}}>{{.Nombre}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div>
+                <label class="form-label text-sm">Estado</label>
+                <select class="form-select" name="activo">
+                    <option value="">Todos</option>
+                    <option value="true" {{if eq (toString $.Filtros.Activo) "true"}}selected{{end}}>Activo</option>
+                    <option value="false" {{if eq (toString $.Filtros.Activo) "false"}}selected{{end}}>Inactivo</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="btn-primary w-full">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de usuarios -->
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-primary-600">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Foto</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nombre</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Email</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Teléfono</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Perfil</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Estado</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Fecha Reg.</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {{range .Usuarios.Data}}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-4 py-3">
+                    <img src="{{.FotoPath}}" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+                </td>
+                <td class="px-4 py-3 font-medium text-gray-800">{{.Name}}</td>
+                <td class="px-4 py-3 text-gray-600">{{.Email}}</td>
+                <td class="px-4 py-3 text-gray-600">{{.Phone}}</td>
+                <td class="px-4 py-3">
+                    {{if eq .PerfilID 1}}
+                    <span class="badge bg-red-100 text-red-800">{{.PerfilNombre}}</span>
+                    {{else if eq .PerfilID 3}}
+                    <span class="badge bg-yellow-100 text-yellow-800">{{.PerfilNombre}}</span>
+                    {{else}}
+                    <span class="badge bg-blue-100 text-blue-800">{{.PerfilNombre}}</span>
+                    {{end}}
+                </td>
+                <td class="px-4 py-3">
+                    {{if .Activo}}
+                    <span class="badge bg-green-100 text-green-800">Activo</span>
+                    {{else}}
+                    <span class="badge bg-gray-100 text-gray-600">Inactivo</span>
+                    {{end}}
+                </td>
+                <td class="px-4 py-3 text-gray-500 text-sm">{{.CreatedAt.Format "02/01/2006"}}</td>
+                <td class="px-4 py-3">
+                    <div class="flex gap-1 justify-center">
+                        <button class="bg-info hover:bg-info/80 text-white p-1.5 rounded-lg transition" onclick="verDetalle({{.ID}})" title="Detalle">
+                            <i class="bi bi-eye text-sm"></i>
+                        </button>
+                        <a href="/seguridad/usuarios/editar/{{.ID}}" class="bg-yellow-500 hover:bg-yellow-600 text-white p-1.5 rounded-lg transition" title="Editar">
+                            <i class="bi bi-pencil text-sm"></i>
+                        </a>
+                        <button class="bg-error hover:bg-error/80 text-white p-1.5 rounded-lg transition" onclick="eliminarUsuario({{.ID}})" title="Eliminar">
+                            <i class="bi bi-trash text-sm"></i>
+                        </button>
+                        <button class="{{if .Activo}}bg-gray-500 hover:bg-gray-600{{else}}bg-success hover:bg-success/80{{end}} text-white p-1.5 rounded-lg transition" 
+                                onclick="toggleStatus({{.ID}}, {{.Activo}})" title="{{if .Activo}}Desactivar{{else}}Activar{{end}}">
+                            <i class="bi {{if .Activo}}bi-person-x{{else}}bi-person-check{{end}} text-sm"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="8" class="text-center py-8">
+                    <i class="bi bi-inbox text-5xl text-gray-300"></i>
+                    <h5 class="text-gray-400 mt-2">No hay usuarios registrados</h5>
+                    <a href="/seguridad/usuarios/nuevo" class="btn-primary mt-4 inline-block">
+                        <i class="bi bi-plus-circle"></i> Crear primer usuario
+                    </a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginación -->
+{{if gt .Usuarios.TotalPages 1}}
+<div class="flex justify-center mt-6">
+    <nav class="pagination">
+        <ul class="flex gap-1">
+            <li class="page-item {{if eq .Usuarios.Page 1}}disabled{{end}}">
+                <a class="page-link" href="?page=1{{range $key, $value := .Filtros.ToParams}}&{{$key}}={{$value}}{{end}}">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item {{if eq .Usuarios.Page 1}}disabled{{end}}">
+                <a class="page-link" href="?page={{sub .Usuarios.Page 1}}{{range $key, $value := .Filtros.ToParams}}&{{$key}}={{$value}}{{end}}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            <li class="page-item active">
+                <span class="page-link bg-primary-600 text-white border-primary-600">{{.Usuarios.Page}} / {{.Usuarios.TotalPages}}</span>
+            </li>
+            <li class="page-item {{if eq .Usuarios.Page .Usuarios.TotalPages}}disabled{{end}}">
+                <a class="page-link" href="?page={{add .Usuarios.Page 1}}{{range $key, $value := .Filtros.ToParams}}&{{$key}}={{$value}}{{end}}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            <li class="page-item {{if eq .Usuarios.Page .Usuarios.TotalPages}}disabled{{end}}">
+                <a class="page-link" href="?page={{.Usuarios.TotalPages}}{{range $key, $value := .Filtros.ToParams}}&{{$key}}={{$value}}{{end}}">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{{end}}
+
+<div class="text-gray-400 text-xs mt-4">
+    Mostrando {{len .Usuarios.Data}} de {{.Usuarios.Total}} usuarios
+</div>
+
+<!-- Modal de Detalle (Tailwind) -->
+<div id="detalleModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-auto">
+            <div class="bg-info text-white px-6 py-4 rounded-t-lg">
+                <h3 class="text-lg font-semibold"><i class="bi bi-person-circle mr-2"></i> Detalle de Usuario</h3>
+            </div>
+            <div class="p-6" id="detalleContent">
+                Cargando...
+            </div>
+            <div class="bg-gray-50 px-6 py-3 rounded-b-lg flex justify-end">
+                <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition" onclick="closeModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+function verDetalle(id) {
+    fetch('/seguridad/usuarios/detalle/' + id)
+        .then(response => response.json())
+        .then(data => {
+            const html = `
+                <div class="space-y-3">
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-semibold text-gray-600">Nombre:</span>
+                        <span class="text-gray-800">${escapeHtml(data.name)}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-semibold text-gray-600">Email:</span>
+                        <span class="text-gray-800">${escapeHtml(data.email)}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-semibold text-gray-600">Teléfono:</span>
+                        <span class="text-gray-800">${data.phone || '-'}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-semibold text-gray-600">Perfil:</span>
+                        <span class="text-gray-800">${escapeHtml(data.perfil_nombre)}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-semibold text-gray-600">Estado:</span>
+                        <span class="text-gray-800">${data.activo ? 'Activo' : 'Inactivo'}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="font-semibold text-gray-600">Registro:</span>
+                        <span class="text-gray-800">${data.created_at}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-semibold text-gray-600">Actualización:</span>
+                        <span class="text-gray-800">${data.updated_at}</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('detalleContent').innerHTML = html;
+            document.getElementById('detalleModal').classList.remove('hidden');
+        })
+        .catch(error => {
+            Swal.fire('Error', 'Error al cargar detalle', 'error');
+        });
+}
+
+function closeModal() {
+    document.getElementById('detalleModal').classList.add('hidden');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function eliminarUsuario(id) {
+    Swal.fire({
+        title: '¿Eliminar usuario?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/seguridad/usuarios/eliminar/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                } else {
+                    Swal.fire('Eliminado', data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                }
+            });
+        }
+    });
+}
+
+function toggleStatus(id, currentStatus) {
+    const newStatus = !currentStatus;
+    const action = newStatus ? 'activar' : 'desactivar';
+    
+    Swal.fire({
+        title: `${action.charAt(0).toUpperCase() + action.slice(1)} usuario?`,
+        text: `¿Estás seguro de ${action} este usuario?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: newStatus ? '#28a745' : '#dc3545',
+        confirmButtonText: `Sí, ${action}`,
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/seguridad/usuarios/toggle-status/' + id, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ activo: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                } else {
+                    Swal.fire('Actualizado', `Usuario ${action} correctamente`, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                }
+            });
+        }
+    });
+}
+
+// Cerrar modal con ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+</script>
+{{end}}

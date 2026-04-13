@@ -1,0 +1,153 @@
+{{define "content"}}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">
+        <i class="bi bi-person-badge mr-2"></i> {{.Title}}
+    </h2>
+    <a href="/seguridad/perfiles/nuevo" class="btn-success">
+        <i class="bi bi-plus-circle"></i> Nuevo Perfil
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+    <div class="p-4">
+        <form method="GET" action="/seguridad/perfiles" class="flex flex-col md:flex-row gap-3">
+            <div class="flex-1">
+                <label class="form-label text-sm">Buscar por nombre</label>
+                <input type="text" class="form-input" name="nombre" value="{{.Filtros.Nombre}}" 
+                       placeholder="Nombre del perfil...">
+            </div>
+            <div class="flex gap-2 items-end">
+                <button type="submit" class="btn-primary">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+                <a href="/seguridad/perfiles" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition">
+                    <i class="bi bi-eraser"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de perfiles -->
+<div class="overflow-x-auto">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Fecha Creación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Perfiles.Data}}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="font-medium">{{.ID}}</td>
+                <td><strong>{{.Nombre}}</strong></td>
+                <td>{{.Descripcion}}</td>
+                <td>{{.CreatedAt.Format "02/01/2006"}}</td>
+                <td>
+                    <div class="flex gap-1">
+                        <a href="/seguridad/perfiles/editar/{{.ID}}" class="bg-yellow-500 hover:bg-yellow-600 text-white p-1.5 rounded-lg transition" title="Editar">
+                            <i class="bi bi-pencil text-sm"></i>
+                        </a>
+                        {{if ne .ID 1}}
+                        <button onclick="eliminarPerfil({{.ID}})" class="bg-error hover:bg-error/80 text-white p-1.5 rounded-lg transition" title="Eliminar">
+                            <i class="bi bi-trash text-sm"></i>
+                        </button>
+                        {{end}}
+                    </div>
+                </td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="5" class="text-center py-8">
+                    <i class="bi bi-inbox text-5xl text-gray-300"></i>
+                    <h5 class="text-gray-400 mt-2">No hay perfiles registrados</h5>
+                    <a href="/seguridad/perfiles/nuevo" class="btn-primary mt-4 inline-block">
+                        <i class="bi bi-plus-circle"></i> Crear primer perfil
+                    </a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginación -->
+{{if gt .Perfiles.TotalPages 1}}
+<div class="flex justify-center mt-6">
+    <nav class="pagination">
+        <ul class="flex gap-1">
+            <li class="page-item {{if eq .Perfiles.Page 1}}disabled{{end}}">
+                <a class="page-link" href="?page=1{{if .Filtros.Nombre}}&nombre={{.Filtros.Nombre}}{{end}}">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item {{if eq .Perfiles.Page 1}}disabled{{end}}">
+                <a class="page-link" href="?page={{sub .Perfiles.Page 1}}{{if .Filtros.Nombre}}&nombre={{.Filtros.Nombre}}{{end}}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            <li class="page-item active">
+                <span class="page-link bg-primary-600 text-white border-primary-600">{{.Perfiles.Page}} / {{.Perfiles.TotalPages}}</span>
+            </li>
+            <li class="page-item {{if eq .Perfiles.Page .Perfiles.TotalPages}}disabled{{end}}">
+                <a class="page-link" href="?page={{add .Perfiles.Page 1}}{{if .Filtros.Nombre}}&nombre={{.Filtros.Nombre}}{{end}}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            <li class="page-item {{if eq .Perfiles.Page .Perfiles.TotalPages}}disabled{{end}}">
+                <a class="page-link" href="?page={{.Perfiles.TotalPages}}{{if .Filtros.Nombre}}&nombre={{.Filtros.Nombre}}{{end}}">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{{end}}
+
+<div class="text-gray-400 text-xs mt-4">
+    Mostrando {{len .Perfiles.Data}} de {{.Perfiles.Total}} perfiles
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+function eliminarPerfil(id) {
+    Swal.fire({
+        title: '¿Eliminar perfil?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/seguridad/perfiles/eliminar/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                } else {
+                    Swal.fire('Eliminado', data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                }
+            })
+            .catch(error => {
+                Swal.fire('Error', 'Error al eliminar el perfil', 'error');
+            });
+        }
+    });
+}
+</script>
+{{end}}

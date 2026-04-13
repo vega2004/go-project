@@ -1,0 +1,43 @@
+{{define "content"}}
+<div class="flex justify-center items-center min-h-[calc(100vh-200px)]">
+    <div class="w-full max-w-lg">
+        <div class="bg-white rounded-xl shadow-2xl overflow-hidden text-center">
+            <div class="p-8">
+                <!-- Icono de mantenimiento -->
+                <div class="text-7xl text-warning mb-4">
+                    <i class="bi bi-gear-wide-connected"></i>
+                </div>
+                
+                <h1 class="text-4xl font-bold text-warning mb-3">
+                    ¡Estamos en Mantenimiento!
+                </h1>
+                
+                <p class="text-gray-500 mb-6">
+                    Lo sentimos, estamos realizando mejoras para brindarte un mejor servicio.
+                </p>
+                
+                <!-- Detalles del mantenimiento -->
+                <div class="bg-blue-50 border-l-4 border-info text-left p-4 rounded mb-6">
+                    <h5 class="font-semibold text-info mb-2">
+                        <i class="bi bi-clock-history mr-2"></i> Detalles del mantenimiento:
+                    </h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li><strong>Inicio:</strong> {{.StartTime | default "10:00 AM"}}</li>
+                        <li><strong>Fin estimado:</strong> {{.EndTime | default "12:00 PM"}}</li>
+                        <li><strong>Contacto:</strong> <a href="mailto:soporte@sistema.com" class="text-info hover:underline">soporte@sistema.com</a></li>
+                    </ul>
+                </div>
+                
+                <div class="flex justify-center gap-3 mt-4">
+                    <button onclick="location.reload()" class="btn-primary">
+                        <i class="bi bi-arrow-clockwise"></i> Reintentar
+                    </button>
+                    <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition">
+                        <i class="bi bi-house-door"></i> Volver al inicio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

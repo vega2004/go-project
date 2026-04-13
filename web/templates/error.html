@@ -1,0 +1,120 @@
+{{define "content"}}
+<div class="flex justify-center items-center min-h-[calc(100vh-200px)]">
+    <div class="w-full max-w-lg">
+        <div class="bg-white rounded-xl shadow-2xl overflow-hidden text-center">
+            <div class="p-8">
+                <!-- Icono según código de error -->
+                <div class="text-7xl mb-4">
+                    {{if eq .Code 404}}
+                        <i class="bi bi-file-earmark-x-fill text-warning"></i>
+                    {{else if eq .Code 401}}
+                        <i class="bi bi-shield-lock-fill text-error"></i>
+                    {{else if eq .Code 403}}
+                        <i class="bi bi-shield-exclamation-fill text-error"></i>
+                    {{else if eq .Code 500}}
+                        <i class="bi bi-bug-fill text-error"></i>
+                    {{else}}
+                        <i class="bi bi-exclamation-triangle-fill text-error"></i>
+                    {{end}}
+                </div>
+                
+                <!-- Código de error -->
+                <h1 class="text-7xl font-bold 
+                    {{if eq .Code 404}}text-warning
+                    {{else if eq .Code 401}}text-error
+                    {{else if eq .Code 403}}text-error
+                    {{else if eq .Code 500}}text-error
+                    {{else}}text-gray-500{{end}} mb-3">
+                    {{.Code}}
+                </h1>
+                
+                <!-- Título -->
+                <h2 class="text-xl font-semibold text-gray-800 mb-3">{{.Title}}</h2>
+                
+                <!-- Mensaje principal -->
+                <p class="text-gray-500 mb-6">{{.Message}}</p>
+                
+                <!-- Detalles del error (solo en desarrollo) -->
+                {{if .Details}}
+                <div class="bg-blue-50 border-l-4 border-info text-left p-4 rounded mb-4">
+                    <i class="bi bi-info-circle-fill text-info mr-2"></i>
+                    <strong class="text-info">Detalle:</strong>
+                    <span class="text-gray-700">{{.Details}}</span>
+                </div>
+                {{end}}
+                
+                <!-- Stack trace (solo en desarrollo) -->
+                {{if .StackTrace}}
+                <div class="text-left mt-4">
+                    <details class="cursor-pointer">
+                        <summary class="text-gray-500 hover:text-gray-700">
+                            <i class="bi bi-code-square"></i> Ver detalles técnicos
+                        </summary>
+                        <pre class="bg-gray-900 text-gray-100 p-3 rounded mt-2 text-xs overflow-x-auto max-h-80"><code>{{.StackTrace}}</code></pre>
+                    </details>
+                </div>
+                {{end}}
+                
+                <!-- Información del error -->
+                <div class="text-gray-400 text-xs mt-6 pt-4 border-t border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <div class="text-left">
+                            <i class="bi bi-hash"></i> ID: <span class="font-mono">{{.ErrorID}}</span>
+                        </div>
+                        <div class="text-right">
+                            <i class="bi bi-clock"></i> {{.Timestamp}}
+                        </div>
+                    </div>
+                    {{if .Path}}
+                    <div class="text-left mt-2">
+                        <i class="bi bi-link"></i> {{.Path}}
+                    </div>
+                    {{end}}
+                    {{if .Method}}
+                    <div class="text-left mt-1">
+                        <i class="bi bi-arrow-repeat"></i> {{.Method}}
+                    </div>
+                    {{end}}
+                </div>
+                
+                <!-- Botones de acción -->
+                <div class="mt-6 flex justify-center gap-3 flex-wrap">
+                    <a href="/dashboard" class="btn-primary">
+                        <i class="bi bi-speedometer2"></i> Ir al Dashboard
+                    </a>
+                    <button onclick="history.back()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition">
+                        <i class="bi bi-arrow-left"></i> Volver atrás
+                    </button>
+                    <button onclick="location.reload()" class="bg-info hover:bg-info/80 text-white font-semibold py-2 px-4 rounded-lg transition">
+                        <i class="bi bi-arrow-clockwise"></i> Reintentar
+                    </button>
+                </div>
+                
+                <!-- Enlace de soporte -->
+                <div class="mt-6">
+                    <small class="text-gray-400">
+                        ¿Necesitas ayuda? <a href="/contacto" class="text-info hover:underline">Contacta con soporte</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+    // Log del error en consola para desarrollo
+    {{if .IsDev}}
+    console.group('🔴 Error {{.Code}}');
+    console.log('ID:', '{{.ErrorID}}');
+    console.log('Mensaje:', '{{.Message}}');
+    console.log('Path:', '{{.Path}}');
+    {{if .StackTrace}}
+    console.log('Stack Trace:');
+    console.log('{{.StackTrace}}');
+    {{end}}
+    console.groupEnd();
+    {{end}}
+</script>
+{{end}}
