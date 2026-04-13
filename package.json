@@ -2,8 +2,8 @@
   "name": "go-project",
   "version": "1.0.0",
   "scripts": {
-    "build:css": "tailwindcss -i ./web/static/css/style.css -o ./web/static/css/output.css --minify",
-    "watch:css": "tailwindcss -i ./web/static/css/style.css -o ./web/static/css/output.css --watch"
+    "build:css": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css --minify",
+    "watch:css": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css --watch"
   },
   "devDependencies": {
     "autoprefixer": "^10.5.0",
