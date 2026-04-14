@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"tu-proyecto/internal/config"
 	"tu-proyecto/internal/handlers"
@@ -68,10 +69,11 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	tmpl := t.templates.Lookup(name)
 	if tmpl == nil {
 		log.Printf("[RENDER ERROR] Template '%s' no encontrado", name)
-		// Listar templates disponibles para diagnóstico
 		log.Printf("[RENDER ERROR] Templates disponibles:")
 		for _, t := range t.templates.Templates() {
-			log.Printf("  - %s", t.Name())
+			if t.Name() != "" && t.Name() != " " {
+				log.Printf("  - %s", t.Name())
+			}
 		}
 		return fmt.Errorf("template '%s' no encontrado", name)
 	}
@@ -126,7 +128,7 @@ func main() {
 	e.Use(echomiddleware.RateLimiter(echomiddleware.NewRateLimiterMemoryStore(20)))
 
 	// ============================================
-	// TEMPLATES CON FUNCIONES PERSONALIZADAS
+	// TEMPLATES CON FUNCIONES PERSONALIZADAS - CORREGIDO
 	// ============================================
 	log.Println("[TEMPLATES] Configurando motor de plantillas...")
 
@@ -139,7 +141,6 @@ func main() {
 	templatesDir := filepath.Join(cwd, "web", "templates")
 	log.Printf("[TEMPLATES] Buscando templates en: %s", templatesDir)
 
-	// Verificar si el directorio existe
 	if _, err := os.Stat(templatesDir); os.IsNotExist(err) {
 		log.Fatalf("[TEMPLATES] ❌ Directorio de templates no encontrado: %s", templatesDir)
 	}
@@ -149,22 +150,50 @@ func main() {
 	tmpl := template.New("").Funcs(templateFuncs)
 	log.Println("[TEMPLATES] Funciones personalizadas registradas")
 
-	// Parsear todos los templates
-	pattern := filepath.Join(templatesDir, "**/*.html")
-	log.Printf("[TEMPLATES] Parseando templates con patrón: %s", pattern)
+	// Cargar templates recursivamente usando filepath.Walk
+	templateCount := 0
+	err = filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		// Solo procesar archivos .html
+		if !info.IsDir() && strings.HasSuffix(path, ".html") {
+			// Obtener el nombre del template relativo a la carpeta templates
+			relPath, err := filepath.Rel(templatesDir, path)
+			if err != nil {
+				return err
+			}
+			// Usar la ruta relativa como nombre del template
+			templateName := filepath.ToSlash(relPath)
 
-	templates, err := tmpl.ParseGlob(pattern)
+			// Leer y parsear el template
+			content, err := os.ReadFile(path)
+			if err != nil {
+				return fmt.Errorf("error leyendo %s: %w", path, err)
+			}
+
+			if _, err := tmpl.New(templateName).Parse(string(content)); err != nil {
+				return fmt.Errorf("error parseando %s: %w", templateName, err)
+			}
+			templateCount++
+			log.Printf("[TEMPLATES] Cargado: %s", templateName)
+		}
+		return nil
+	})
+
 	if err != nil {
 		log.Fatal("❌ Error cargando templates:", err)
 	}
 
-	// Listar templates cargados
-	log.Printf("[TEMPLATES] ✅ Templates cargados: %d", len(templates.Templates()))
-	for _, t := range templates.Templates() {
-		log.Printf("  - %s", t.Name())
+	log.Printf("[TEMPLATES] ✅ Templates cargados: %d", templateCount)
+	log.Println("[TEMPLATES] Templates disponibles:")
+	for _, t := range tmpl.Templates() {
+		if t.Name() != "" && t.Name() != " " {
+			log.Printf("  - %s", t.Name())
+		}
 	}
 
-	e.Renderer = &TemplateRenderer{templates: templates}
+	e.Renderer = &TemplateRenderer{templates: tmpl}
 	log.Println("[TEMPLATES] ✅ Renderer configurado")
 
 	// Archivos estáticos
