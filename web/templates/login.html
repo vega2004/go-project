@@ -11,6 +11,27 @@
                 <form method="POST" action="/do-login" id="loginForm">
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     
+                    <!-- ============================================ -->
+                    <!-- DIV DE PRUEBA 1: Estilo inline (SIEMPRE visible) -->
+                    <!-- ============================================ -->
+                    <div style="background-color: red; color: white; padding: 10px; text-align: center; margin-bottom: 10px; border-radius: 5px;">
+                        🔴 TEST 1: Si ves esto, el HTML se renderiza correctamente
+                    </div>
+                    
+                    <!-- ============================================ -->
+                    <!-- DIV DE PRUEBA 2: Tailwind (debe verse AZUL) -->
+                    <!-- ============================================ -->
+                    <div class="bg-blue-500 text-white p-3 text-center rounded mb-4">
+                        🔵 TEST 2: Si ves esto, Tailwind CSS funciona correctamente
+                    </div>
+                    
+                    <!-- ============================================ -->
+                    <!-- DIV DE PRUEBA 3: Otra clase Tailwind -->
+                    <!-- ============================================ -->
+                    <div class="bg-green-500 text-white p-3 text-center rounded mb-4">
+                        🟢 TEST 3: Si ves esto, Tailwind tiene múltiples clases funcionando
+                    </div>
+                    
                     <div class="mb-4">
                         <label class="form-label">Correo Electrónico</label>
                         <input type="email" name="email" class="form-input" required 
