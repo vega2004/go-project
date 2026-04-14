@@ -1,85 +1,103 @@
 {{define "content"}}
-<div class="space-y-6">
+<div class="row">
     <!-- Tarjeta de Bienvenida -->
-    <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl shadow-lg p-6 text-white">
-        <div class="flex items-center gap-3">
-            <i class="bi bi-person-circle text-3xl"></i>
-            <h4 class="text-xl font-semibold">¡Bienvenido, {{.UserName}}!</h4>
+    <div class="col-12 mb-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h4 class="mb-0">
+                    <i class="bi bi-person-circle"></i> ¡Bienvenido, {{.UserName}}!
+                </h4>
+                <p class="mb-0 mt-2">
+                    <i class="bi bi-envelope"></i> {{.UserEmail}} | 
+                    <i class="bi bi-person-badge"></i> {{.UserRole}}
+                </p>
+            </div>
         </div>
-        <p class="mt-2 text-primary-100">
-            <i class="bi bi-envelope mr-2"></i> {{.UserEmail}} | 
-            <i class="bi bi-person-badge mr-2"></i> {{.UserRole}}
-        </p>
     </div>
 
     <!-- Tarjetas de Estadísticas -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition">
-            <i class="bi bi-people-fill text-4xl text-primary-500"></i>
-            <h3 class="text-2xl font-bold text-gray-800 mt-2">{{.Stats.TotalUsuarios}}</h3>
-            <p class="text-gray-500 text-sm">Usuarios</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition">
-            <i class="bi bi-person-badge-fill text-4xl text-success"></i>
-            <h3 class="text-2xl font-bold text-gray-800 mt-2">{{.Stats.TotalPerfiles}}</h3>
-            <p class="text-gray-500 text-sm">Perfiles</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition">
-            <i class="bi bi-grid-3x3-gap-fill text-4xl text-warning"></i>
-            <h3 class="text-2xl font-bold text-gray-800 mt-2">{{.Stats.TotalModulos}}</h3>
-            <p class="text-gray-500 text-sm">Módulos</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition">
-            <i class="bi bi-person-check-fill text-4xl text-info"></i>
-            <h3 class="text-2xl font-bold text-gray-800 mt-2">{{.Stats.UsuariosActivos}}</h3>
-            <p class="text-gray-500 text-sm">Activos</p>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-people-fill fs-1 text-primary"></i>
+                <h3 class="mt-2">{{.Stats.TotalUsuarios}}</h3>
+                <p class="text-muted">Usuarios</p>
+            </div>
         </div>
     </div>
-
-    <!-- Módulos del Sistema -->
-    <div>
-        <div class="flex items-center gap-2 mb-4">
-            <i class="bi bi-grid text-2xl text-primary-600"></i>
-            <h4 class="text-xl font-semibold text-gray-800">Módulos del Sistema</h4>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-person-badge-fill fs-1 text-success"></i>
+                <h3 class="mt-2">{{.Stats.TotalPerfiles}}</h3>
+                <p class="text-muted">Perfiles</p>
+            </div>
         </div>
-        <hr class="border-gray-200 mb-4">
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {{range .Modulos}}
-            <div class="bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg transition group">
-                <i class="bi {{.icono}} text-4xl text-{{.color}}-500"></i>
-                <h5 class="font-semibold text-gray-800 mt-2">{{.nombre}}</h5>
-                <a href="{{.ruta}}" class="inline-block mt-3 px-4 py-2 bg-{{.color}}-500 hover:bg-{{.color}}-600 text-white text-sm font-semibold rounded-lg transition">
-                    <i class="bi bi-arrow-right-circle mr-1"></i> Acceder
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-grid-3x3-gap-fill fs-1 text-warning"></i>
+                <h3 class="mt-2">{{.Stats.TotalModulos}}</h3>
+                <p class="text-muted">Módulos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-person-check-fill fs-1 text-info"></i>
+                <h3 class="mt-2">{{.Stats.UsuariosActivos}}</h3>
+                <p class="text-muted">Activos</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Módulos del Sistema -->
+<div class="row mt-4">
+    <div class="col-12">
+        <h4><i class="bi bi-grid"></i> Módulos del Sistema</h4>
+        <hr>
+    </div>
+    
+    {{range .Modulos}}
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="bi {{.icono}} fs-1 text-{{.color}}"></i>
+                <h5 class="card-title mt-2">{{.nombre}}</h5>
+                <a href="{{.ruta}}" class="btn btn-sm btn-{{.color}} mt-2">
+                    <i class="bi bi-arrow-right-circle"></i> Acceder
                 </a>
             </div>
-            {{end}}
         </div>
     </div>
+    {{end}}
+</div>
 
-    <!-- Actividad Reciente -->
-    <div>
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="bg-secondary-500 text-white px-6 py-3">
-                <h5 class="font-semibold"><i class="bi bi-clock-history mr-2"></i> Actividad Reciente</h5>
+<!-- Actividad Reciente -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Actividad Reciente</h5>
             </div>
-            <div class="divide-y divide-gray-100">
+            <div class="card-body">
                 {{if .RecentActivity}}
+                <ul class="list-group list-group-flush">
                     {{range .RecentActivity}}
-                    <div class="flex justify-between items-center p-4 hover:bg-gray-50 transition">
-                        <div class="flex items-center gap-2">
-                            <i class="bi bi-person-circle text-gray-400"></i>
-                            <strong class="text-gray-700">{{.usuario}}</strong>
-                            <span class="text-gray-500 text-sm">{{.accion}}</span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-person-circle"></i> <strong>{{.usuario}}</strong>
+                            <span class="text-muted ms-2">{{.accion}}</span>
                         </div>
-                        <small class="text-gray-400 text-xs">{{.tiempo}}</small>
-                    </div>
+                        <small class="text-muted">{{.tiempo}}</small>
+                    </li>
                     {{end}}
+                </ul>
                 {{else}}
-                <div class="text-center py-8">
-                    <i class="bi bi-inbox text-5xl text-gray-300"></i>
-                    <p class="text-gray-400 mt-2">No hay actividad reciente</p>
-                </div>
+                <p class="text-muted text-center">No hay actividad reciente</p>
                 {{end}}
             </div>
         </div>

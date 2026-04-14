@@ -1,58 +1,49 @@
 {{define "content"}}
-<div class="flex justify-center items-center min-h-[calc(100vh-200px)]">
-    <div class="w-full max-w-3xl">
-        <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
-            <div class="bg-primary-600 text-white px-6 py-4">
-                <h4 class="text-xl font-bold">
-                    <i class="bi {{if .Modulo.ID}}bi-pencil-square{{else}}bi-plus-circle{{end}} mr-2"></i> 
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi {{if .Modulo.ID}}bi-pencil-square{{else}}bi-plus-circle{{end}}"></i> 
                     {{.Title}}
                 </h4>
             </div>
-            <div class="p-6">
+            <div class="card-body">
                 <form method="POST" action="/seguridad/modulos/{{if .Modulo.ID}}actualizar/{{.Modulo.ID}}{{else}}crear{{end}}" id="moduloForm">
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     
-                    <!-- Fila 1: Nombre y Nombre Mostrar -->
-                    <div class="flex flex-col md:flex-row gap-4 mb-4">
-                        <div class="flex-1">
-                            <label class="form-label">
-                                Nombre del Módulo <span class="text-error">*</span>
-                            </label>
-                            <input type="text" name="nombre" class="form-input" 
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre del Módulo <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre" class="form-control" 
                                    value="{{.Modulo.Nombre}}" required minlength="3" maxlength="100">
-                            <div class="text-xs text-gray-400 mt-1">Identificador único (ej: usuarios, perfiles)</div>
+                            <div class="form-text">Identificador único (ej: usuarios, perfiles)</div>
                         </div>
-                        <div class="flex-1">
-                            <label class="form-label">
-                                Nombre para Mostrar <span class="text-error">*</span>
-                            </label>
-                            <input type="text" name="nombre_mostrar" class="form-input" 
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre para Mostrar <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre_mostrar" class="form-control" 
                                    value="{{.Modulo.NombreMostrar}}" required>
-                            <div class="text-xs text-gray-400 mt-1">Texto que verá el usuario (ej: Usuarios, Perfiles)</div>
+                            <div class="form-text">Texto que verá el usuario (ej: Usuarios, Perfiles)</div>
                         </div>
                     </div>
                     
-                    <!-- Fila 2: Ruta e Icono -->
-                    <div class="flex flex-col md:flex-row gap-4 mb-4">
-                        <div class="flex-1">
-                            <label class="form-label">
-                                Ruta <span class="text-error">*</span>
-                            </label>
-                            <input type="text" name="ruta" class="form-input" 
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ruta <span class="text-danger">*</span></label>
+                            <input type="text" name="ruta" class="form-control" 
                                    value="{{.Modulo.Ruta}}" required placeholder="/seguridad/usuarios">
-                            <div class="text-xs text-gray-400 mt-1">URL del módulo (debe comenzar con /)</div>
+                            <div class="form-text">URL del módulo (debe comenzar con /)</div>
                         </div>
-                        <div class="flex-1">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Icono</label>
-                            <input type="text" name="icono" class="form-input" 
+                            <input type="text" name="icono" class="form-control" 
                                    value="{{.Modulo.Icono}}" placeholder="bi-people">
-                            <div class="text-xs text-gray-400 mt-1">Clase de Bootstrap Icon (ej: bi-people, bi-grid)</div>
+                            <div class="form-text">Clase de Bootstrap Icon (ej: bi-people, bi-grid)</div>
                         </div>
                     </div>
                     
-                    <!-- Fila 3: Categoría, Orden, Estado -->
-                    <div class="flex flex-col md:flex-row gap-4 mb-6">
-                        <div class="flex-1">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Categoría</label>
                             <select name="categoria" class="form-select">
                                 <option value="seguridad" {{if eq .Modulo.Categoria "seguridad"}}selected{{end}}>Seguridad</option>
@@ -60,28 +51,27 @@
                                 <option value="principal2" {{if eq .Modulo.Categoria "principal2"}}selected{{end}}>Principal 2</option>
                             </select>
                         </div>
-                        <div class="flex-1">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Orden</label>
-                            <input type="number" name="orden" class="form-input" 
+                            <input type="number" name="orden" class="form-control" 
                                    value="{{.Modulo.Orden}}" min="0">
-                            <div class="text-xs text-gray-400 mt-1">Orden de aparición (menor = más arriba)</div>
+                            <div class="form-text">Orden de aparición (menor = más arriba)</div>
                         </div>
-                        <div class="flex-1">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Estado</label>
-                            <div class="flex items-center mt-2">
-                                <input type="checkbox" name="activo" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500" 
+                            <div class="form-check mt-2">
+                                <input type="checkbox" name="activo" class="form-check-input" 
                                        {{if .Modulo.Activo}}checked{{end}}>
-                                <label class="ml-2 text-gray-700">Módulo activo</label>
+                                <label class="form-check-label">Módulo activo</label>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Botones -->
-                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                        <a href="/seguridad/modulos" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/seguridad/modulos" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Cancelar
                         </a>
-                        <button type="submit" class="btn-primary">
+                        <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-circle"></i> Guardar
                         </button>
                     </div>

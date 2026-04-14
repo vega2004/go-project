@@ -1,45 +1,42 @@
 {{define "content"}}
-<div class="flex justify-center items-center min-h-[calc(100vh-200px)]">
-    <div class="w-full max-w-2xl">
-        <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
-            <div class="bg-primary-600 text-white px-6 py-4">
-                <h4 class="text-xl font-bold">
-                    <i class="bi {{if .Perfil.ID}}bi-pencil-square{{else}}bi-plus-circle{{end}} mr-2"></i> 
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi {{if .Perfil.ID}}bi-pencil-square{{else}}bi-plus-circle{{end}}"></i> 
                     {{.Title}}
                 </h4>
             </div>
-            <div class="p-6">
+            <div class="card-body">
                 <form method="POST" action="/seguridad/perfiles/{{if .Perfil.ID}}actualizar/{{.Perfil.ID}}{{else}}crear{{end}}" id="perfilForm">
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     
-                    <div class="mb-4">
-                        <label class="form-label">
-                            Nombre del Perfil <span class="text-error">*</span>
-                        </label>
-                        <input type="text" name="nombre" class="form-input" 
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Perfil <span class="text-danger">*</span></label>
+                        <input type="text" name="nombre" class="form-control" 
                                value="{{.Perfil.Nombre}}" required minlength="3" maxlength="50"
                                placeholder="Ej: Administrador, Usuario, Editor">
-                        <div class="text-xs text-gray-400 mt-1">Nombre único del perfil (3-50 caracteres)</div>
+                        <div class="form-text">Nombre único del perfil (3-50 caracteres)</div>
                     </div>
                     
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label class="form-label">Descripción</label>
-                        <textarea name="descripcion" class="form-input" rows="4" 
+                        <textarea name="descripcion" class="form-control" rows="4" 
                                   placeholder="Descripción del perfil y sus responsabilidades...">{{.Perfil.Descripcion}}</textarea>
                     </div>
                     
                     {{if eq .Perfil.ID 1}}
-                    <div class="bg-blue-50 border-l-4 border-info text-blue-800 p-4 rounded mb-4">
-                        <i class="bi bi-info-circle mr-2"></i> 
-                        El perfil de Administrador no se puede eliminar, pero puedes editar su descripción.
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> El perfil de Administrador no se puede eliminar, pero puedes editar su descripción.
                     </div>
                     {{end}}
                     
-                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                        <a href="/seguridad/perfiles" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/seguridad/perfiles" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Cancelar
                         </a>
-                        <button type="submit" class="btn-primary">
+                        <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-circle"></i> Guardar
                         </button>
                     </div>

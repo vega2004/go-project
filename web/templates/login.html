@@ -1,62 +1,37 @@
 {{define "content"}}
-<div class="flex justify-center items-center min-h-[calc(100vh-200px)]">
-    <div class="w-full max-w-md">
-        <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
-            <div class="bg-primary-600 text-white text-center py-4">
-                <h4 class="text-xl font-bold">
-                    <i class="bi bi-box-arrow-in-right mr-2"></i> Iniciar Sesión
-                </h4>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h4 class="mb-0"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</h4>
             </div>
-            <div class="p-6">
+            <div class="card-body p-4">
                 <form method="POST" action="/do-login" id="loginForm">
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     
-                    <!-- ============================================ -->
-                    <!-- DIV DE PRUEBA 1: Estilo inline (SIEMPRE visible) -->
-                    <!-- ============================================ -->
-                    <div style="background-color: red; color: white; padding: 10px; text-align: center; margin-bottom: 10px; border-radius: 5px;">
-                        🔴 TEST 1: Si ves esto, el HTML se renderiza correctamente
-                    </div>
-                    
-                    <!-- ============================================ -->
-                    <!-- DIV DE PRUEBA 2: Tailwind (debe verse AZUL) -->
-                    <!-- ============================================ -->
-                    <div class="bg-blue-500 text-white p-3 text-center rounded mb-4">
-                        🔵 TEST 2: Si ves esto, Tailwind CSS funciona correctamente
-                    </div>
-                    
-                    <!-- ============================================ -->
-                    <!-- DIV DE PRUEBA 3: Otra clase Tailwind -->
-                    <!-- ============================================ -->
-                    <div class="bg-green-500 text-white p-3 text-center rounded mb-4">
-                        🟢 TEST 3: Si ves esto, Tailwind tiene múltiples clases funcionando
-                    </div>
-                    
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label class="form-label">Correo Electrónico</label>
-                        <input type="email" name="email" class="form-input" required 
+                        <input type="email" name="email" class="form-control" required 
                                placeholder="correo@ejemplo.com">
                     </div>
                     
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label class="form-label">Contraseña</label>
-                        <input type="password" name="password" class="form-input" required>
+                        <input type="password" name="password" class="form-control" required>
                     </div>
                     
-                    <div class="mb-4">
-                        <div class="g-recaptcha flex justify-center" data-sitekey="{{.RecaptchaKey}}"></div>
+                    <div class="mb-3">
+                        <div class="g-recaptcha" data-sitekey="{{.RecaptchaKey}}"></div>
                         <input type="hidden" name="recaptchaToken" id="recaptchaToken">
                     </div>
                     
-                    <button type="submit" class="btn-primary w-full">
+                    <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-box-arrow-in-right"></i> Ingresar
                     </button>
                 </form>
                 
-                <div class="text-center mt-4">
-                    <a href="/register" class="text-sm text-gray-500 hover:text-primary-600 transition">
-                        ¿No tienes cuenta? Regístrate
-                    </a>
+                <div class="text-center mt-3">
+                    <a href="/register" class="text-muted">¿No tienes cuenta? Regístrate</a>
                 </div>
             </div>
         </div>
@@ -71,7 +46,7 @@
         const token = grecaptcha.getResponse();
         if (!token) {
             e.preventDefault();
-            Swal.fire('Error', 'Por favor, completa el reCAPTCHA', 'error');
+            alert('Por favor, completa el reCAPTCHA');
             return;
         }
         document.getElementById('recaptchaToken').value = token;
