@@ -107,7 +107,7 @@ func (s *authService) Login(email, password, recaptchaToken string) (*models.Use
 	}
 
 	// Validar reCAPTCHA - Para v2 (casilla), usar minScore=0 y action vacío
-	isValid, err := utils.ValidateRecaptcha(recaptchaToken, s.recaptchaSecret, 0, "")
+	isValid, err := utils.ValidateRecaptcha(recaptchaToken, s.recaptchaSecret, -1, "")
 	if err != nil || !isValid {
 		s.RecordFailedAttempt(email)
 		return nil, errors.New("verificación reCAPTCHA fallida")
