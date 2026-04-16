@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"tu-proyecto/internal/models"
 
 	"github.com/labstack/echo/v4"
 )
@@ -35,7 +36,7 @@ func (h *DashboardHandler) ShowDashboard(c echo.Context) error {
 		userEmail = "correo@no.disponible"
 	}
 
-	userPerfil := c.Get("user_perfil") // ← Cambiado de user_role a user_perfil
+	userPerfil := c.Get("user_perfil")
 	if userPerfil == nil {
 		userPerfil = "usuario"
 	}
@@ -43,6 +44,12 @@ func (h *DashboardHandler) ShowDashboard(c echo.Context) error {
 	csrfToken := c.Get("csrf_token")
 	if csrfToken == nil {
 		csrfToken = ""
+	}
+
+	// ✅ Obtener permisos REALES del contexto (cargados por el middleware de autenticación)
+	permisos, ok := c.Get("permisos").(map[string]models.Permiso)
+	if !ok {
+		permisos = make(map[string]models.Permiso)
 	}
 
 	// Obtener estadísticas reales de la BD
@@ -58,7 +65,8 @@ func (h *DashboardHandler) ShowDashboard(c echo.Context) error {
 		{"usuario": userName, "accion": "Inició sesión", "tiempo": "Hace unos momentos"},
 	}
 
-	modulos := h.getModulosByPerfil(userPerfil.(string)) // ← Cambiado de getModulosByRole a getModulosByPerfil
+	// ✅ Obtener módulos filtrados por permisos REALES
+	modulos := h.getModulosConPermisos(permisos)
 
 	log.Printf("[INFO] Dashboard cargado para usuario %d (%s) con perfil %s", userID, userName, userPerfil)
 
@@ -67,10 +75,11 @@ func (h *DashboardHandler) ShowDashboard(c echo.Context) error {
 		"UserID":         userID,
 		"UserName":       userName,
 		"UserEmail":      userEmail,
-		"UserPerfil":     userPerfil, // ← Cambiado de UserRole a UserPerfil
+		"UserPerfil":     userPerfil,
 		"Stats":          stats,
 		"RecentActivity": recentActivity,
 		"Modulos":        modulos,
+		"Permisos":       permisos, // ✅ Pasamos los permisos al template
 		"CurrentDate":    time.Now().Format("02/01/2006"),
 		"CurrentTime":    time.Now().Format("15:04:05"),
 		"CSRFToken":      csrfToken,
@@ -79,6 +88,75 @@ func (h *DashboardHandler) ShowDashboard(c echo.Context) error {
 			{"name": "Dashboard", "url": "/dashboard"},
 		},
 	})
+}
+
+// ✅ NUEVO: Obtener módulos según permisos reales
+func (h *DashboardHandler) getModulosConPermisos(permisos map[string]models.Permiso) []map[string]interface{} {
+	modulos := []map[string]interface{}{}
+
+	// Dashboard y Mi Perfil siempre visibles
+	modulos = append(modulos, map[string]interface{}{
+		"nombre": "Dashboard",
+		"ruta":   "/dashboard",
+		"icono":  "bi-speedometer2",
+		"color":  "primary",
+	})
+	modulos = append(modulos, map[string]interface{}{
+		"nombre": "Mi Perfil",
+		"ruta":   "/perfil",
+		"icono":  "bi-person-circle",
+		"color":  "info",
+	})
+
+	// Módulos de Seguridad - solo si tiene permiso de ver
+	modulosSeguridad := []struct {
+		nombre string
+		ruta   string
+		icono  string
+		color  string
+	}{
+		{"Perfiles", "/seguridad/perfiles", "bi-person-badge", "danger"},
+		{"Módulos", "/seguridad/modulos", "bi-grid-3x3", "warning"},
+		{"Permisos", "/seguridad/permisos-perfil", "bi-shield-lock", "dark"},
+		{"Usuarios", "/seguridad/usuarios", "bi-people", "success"},
+	}
+
+	for _, m := range modulosSeguridad {
+		if p, ok := permisos[m.nombre]; ok && p.PuedeVer {
+			modulos = append(modulos, map[string]interface{}{
+				"nombre": m.nombre,
+				"ruta":   m.ruta,
+				"icono":  m.icono,
+				"color":  m.color,
+			})
+		}
+	}
+
+	// Módulos principales - solo si tiene permiso de ver
+	modulosPrincipales := []struct {
+		nombre string
+		ruta   string
+		icono  string
+		color  string
+	}{
+		{"Principal 1.1", "/principal/clientes", "bi-building", "secondary"},
+		{"Principal 1.2", "/principal/productos", "bi-box", "secondary"},
+		{"Principal 2.1", "/principal/facturas", "bi-receipt", "secondary"},
+		{"Principal 2.2", "/principal/proveedores", "bi-truck", "secondary"},
+	}
+
+	for _, m := range modulosPrincipales {
+		if p, ok := permisos[m.nombre]; ok && p.PuedeVer {
+			modulos = append(modulos, map[string]interface{}{
+				"nombre": m.nombre,
+				"ruta":   m.ruta,
+				"icono":  m.icono,
+				"color":  m.color,
+			})
+		}
+	}
+
+	return modulos
 }
 
 func (h *DashboardHandler) getTotalUsers() int {
@@ -115,43 +193,4 @@ func (h *DashboardHandler) getActiveUsers() int {
 	var count int
 	h.db.QueryRow("SELECT COUNT(*) FROM users WHERE activo = true").Scan(&count)
 	return count
-}
-
-// getModulosByPerfil - Obtiene módulos según el perfil del usuario
-func (h *DashboardHandler) getModulosByPerfil(perfil string) []map[string]interface{} {
-	modulos := []map[string]interface{}{}
-
-	modulos = append(modulos, map[string]interface{}{
-		"nombre": "Dashboard",
-		"ruta":   "/dashboard",
-		"icono":  "bi-speedometer2",
-		"color":  "primary",
-	})
-
-	modulos = append(modulos, map[string]interface{}{
-		"nombre": "Mi Perfil",
-		"ruta":   "/perfil",
-		"icono":  "bi-person-circle",
-		"color":  "info",
-	})
-
-	// Si es administrador, mostrar módulos de seguridad
-	if perfil == "administrador" {
-		modulos = append(modulos, []map[string]interface{}{
-			{"nombre": "Perfiles", "ruta": "/seguridad/perfiles", "icono": "bi-person-badge", "color": "danger"},
-			{"nombre": "Módulos", "ruta": "/seguridad/modulos", "icono": "bi-grid-3x3", "color": "warning"},
-			{"nombre": "Permisos", "ruta": "/seguridad/permisos-perfil", "icono": "bi-shield-lock", "color": "dark"},
-			{"nombre": "Usuarios", "ruta": "/seguridad/usuarios", "icono": "bi-people", "color": "success"},
-		}...)
-	}
-
-	// Módulos principales (siempre visibles)
-	modulos = append(modulos, []map[string]interface{}{
-		{"nombre": "Principal 1.1", "ruta": "/principal/clientes", "icono": "bi-building", "color": "secondary"},
-		{"nombre": "Principal 1.2", "ruta": "/principal/productos", "icono": "bi-box", "color": "secondary"},
-		{"nombre": "Principal 2.1", "ruta": "/principal/facturas", "icono": "bi-receipt", "color": "secondary"},
-		{"nombre": "Principal 2.2", "ruta": "/principal/proveedores", "icono": "bi-truck", "color": "secondary"},
-	}...)
-
-	return modulos
 }
