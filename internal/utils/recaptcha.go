@@ -17,14 +17,12 @@ type RecaptchaResponse struct {
 	Score       float64   `json:"score"`
 }
 
-// ValidateRecaptcha - Valida token de reCAPTCHA (v2 o v3)
 func ValidateRecaptcha(token, secretKey string, minScore float64, expectedAction string) (bool, error) {
 	if token == "" {
 		return false, fmt.Errorf("token de reCAPTCHA vacío")
 	}
 
 	if secretKey == "" {
-		// En desarrollo, permitir si no hay clave
 		return true, nil
 	}
 
@@ -44,11 +42,16 @@ func ValidateRecaptcha(token, secretKey string, minScore float64, expectedAction
 		return false, fmt.Errorf("error decodificando respuesta reCAPTCHA: %w", err)
 	}
 
+	// LOGS PARA DEPURAR
+	fmt.Printf("[RECAPTCHA DEBUG] Success: %v\n", recaptchaResp.Success)
+	fmt.Printf("[RECAPTCHA DEBUG] Hostname: %s\n", recaptchaResp.Hostname)
+	fmt.Printf("[RECAPTCHA DEBUG] ErrorCodes: %v\n", recaptchaResp.ErrorCodes)
+	fmt.Printf("[RECAPTCHA DEBUG] Score: %f\n", recaptchaResp.Score)
+
 	if !recaptchaResp.Success {
 		return false, fmt.Errorf("verificación reCAPTCHA fallida: %v", recaptchaResp.ErrorCodes)
 	}
 
-	// Si se especifica minScore, validar v3
 	if minScore > 0 {
 		if recaptchaResp.Score < minScore {
 			return false, fmt.Errorf("score demasiado bajo: %.2f (mínimo: %.2f)", recaptchaResp.Score, minScore)

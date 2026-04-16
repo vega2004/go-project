@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 	"tu-proyecto/internal/models"
 
@@ -46,15 +47,23 @@ func NewPerfilRepository(db *sql.DB) PerfilRepository {
 // ============================================
 
 // Create - Crear un nuevo perfil/rol
+// Create - Crear un nuevo perfil/rol
 func (r *perfilRepository) Create(perfil *models.Perfil) error {
+	log.Printf("[DEBUG] Repository.Create - Insertando perfil: Nombre='%s', Descripcion='%s'", perfil.Nombre, perfil.Descripcion)
+
 	query := `INSERT INTO perfiles (nombre, descripcion) VALUES ($1, $2) RETURNING id, created_at`
 	err := r.db.QueryRow(query, perfil.Nombre, perfil.Descripcion).Scan(&perfil.ID, &perfil.CreatedAt)
+
 	if err != nil {
+		log.Printf("[ERROR] Repository.Create - Error: %v", err)
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			log.Printf("[DEBUG] Error de duplicado - ya existe un perfil con nombre '%s'", perfil.Nombre)
 			return fmt.Errorf("ya existe un perfil con el nombre '%s'", perfil.Nombre)
 		}
 		return fmt.Errorf("error al crear perfil: %w", err)
 	}
+
+	log.Printf("[DEBUG] Repository.Create - Perfil creado exitosamente con ID: %d", perfil.ID)
 	return nil
 }
 
@@ -193,14 +202,23 @@ func (r *perfilRepository) IsInUse(id int) (bool, error) {
 // ============================================
 
 // GetPerfilByUserID - Obtiene el perfil de un usuario (foto, bio, dirección)
+// GetPerfilByUserID - Obtiene el perfil de un usuario (foto, bio, dirección)
 func (r *perfilRepository) GetPerfilByUserID(userID int) (*models.PerfilUsuario, error) {
 	perfil := &models.PerfilUsuario{}
 	query := `
-		SELECT user_id, foto_path, foto_nombre_original, foto_mime_type, foto_size_bytes, 
-		       COALESCE(bio, ''), COALESCE(direccion, ''), COALESCE(telefono_alterno, ''), updated_at
-		FROM perfiles_usuario 
-		WHERE user_id = $1
-	`
+        SELECT 
+            user_id, 
+            COALESCE(foto_path, '/static/uploads/perfil/default-avatar.png') as foto_path,
+            COALESCE(foto_nombre_original, '') as foto_nombre_original,
+            COALESCE(foto_mime_type, '') as foto_mime_type,
+            COALESCE(foto_size_bytes, 0) as foto_size_bytes,
+            COALESCE(bio, '') as bio,
+            COALESCE(direccion, '') as direccion,
+            COALESCE(telefono_alterno, '') as telefono_alterno,
+            updated_at
+        FROM perfiles_usuario 
+        WHERE user_id = $1
+    `
 	err := r.db.QueryRow(query, userID).Scan(
 		&perfil.UserID, &perfil.FotoPath, &perfil.FotoNombreOriginal, &perfil.FotoMimeType, &perfil.FotoSizeBytes,
 		&perfil.Bio, &perfil.Direccion, &perfil.TelefonoAlterno, &perfil.UpdatedAt,

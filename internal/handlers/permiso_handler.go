@@ -1,11 +1,15 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+	"tu-proyecto/internal/config"
+	"tu-proyecto/internal/middleware"
 	"tu-proyecto/internal/models"
 	"tu-proyecto/internal/service"
 
@@ -15,17 +19,24 @@ import (
 type PermisoHandler struct {
 	permisoService service.PermisoService
 	perfilService  service.PerfilService
+	env            *config.Env
+	csrfMiddleware *middleware.CSRFMiddleware
 }
 
-func NewPermisoHandler(ps service.PermisoService, pfs service.PerfilService) *PermisoHandler {
+func NewPermisoHandler(ps service.PermisoService, pfs service.PerfilService, env *config.Env) *PermisoHandler {
 	return &PermisoHandler{
 		permisoService: ps,
 		perfilService:  pfs,
+		env:            env,
+		csrfMiddleware: middleware.NewCSRFMiddleware(env.IsProduction()),
 	}
 }
 
 // Index - Muestra la página principal de gestión de permisos
 func (h *PermisoHandler) Index(c echo.Context) error {
+	// Generar token CSRF
+	h.csrfMiddleware.SetToken(c)
+
 	// Obtener lista de perfiles para el selector
 	perfiles, err := h.perfilService.GetAll(&models.PerfilFilter{Page: 1, PageSize: 100})
 	if err != nil {
@@ -75,7 +86,7 @@ func (h *PermisoHandler) LoadPermissions(c echo.Context) error {
 	})
 }
 
-// SavePermissions - Guarda los permisos de un perfil
+// SavePermissions - Guarda los permisos de un perfil (CORREGIDO para JSON)
 func (h *PermisoHandler) SavePermissions(c echo.Context) error {
 	// Obtener usuario que realiza la acción (para auditoría)
 	auditorID, ok := c.Get("user_id").(int)
@@ -85,24 +96,41 @@ func (h *PermisoHandler) SavePermissions(c echo.Context) error {
 		})
 	}
 
-	// Parsear perfil_id
-	perfilID, err := strconv.Atoi(c.FormValue("perfil_id"))
-	if err != nil || perfilID <= 0 {
+	// Leer el body completo para depurar
+	body, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		log.Printf("[ERROR] Error leyendo body: %v", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Error al leer datos",
+		})
+	}
+	log.Printf("[DEBUG] Body recibido: %s", string(body))
+
+	// Parsear JSON
+	var req struct {
+		PerfilID  int                         `json:"perfil_id"`
+		Permisos  []models.PermisoItemRequest `json:"permisos"`
+		CsrfToken string                      `json:"csrf_token"`
+	}
+
+	if err := json.Unmarshal(body, &req); err != nil {
+		log.Printf("[ERROR] Error parseando JSON: %v", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Error al parsear datos: " + err.Error(),
+		})
+	}
+
+	log.Printf("[DEBUG] PerfilID: %d", req.PerfilID)
+	log.Printf("[DEBUG] Cantidad de permisos: %d", len(req.Permisos))
+
+	if req.PerfilID <= 0 {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "ID de perfil inválido",
 		})
 	}
 
-	// Parsear permisos del formulario
-	permisos, err := h.parsePermisosForm(c)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
-	}
-
 	// Guardar permisos
-	err = h.permisoService.SavePermissions(perfilID, permisos, auditorID)
+	err = h.permisoService.SavePermissions(req.PerfilID, req.Permisos, auditorID)
 	if err != nil {
 		log.Printf("[ERROR] SavePermissions: %v", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -110,22 +138,20 @@ func (h *PermisoHandler) SavePermissions(c echo.Context) error {
 		})
 	}
 
-	log.Printf("[AUDIT] Usuario %d guardó permisos para perfil %d", auditorID, perfilID)
+	log.Printf("[AUDIT] Usuario %d guardó permisos para perfil %d", auditorID, req.PerfilID)
 
 	return c.JSON(http.StatusOK, map[string]string{
 		"success": "Permisos guardados exitosamente",
 	})
 }
 
-// parsePermisosForm - Parsea los permisos enviados desde el formulario
+// parsePermisosForm - Ya no se usa con JSON, pero lo mantenemos por si acaso
 func (h *PermisoHandler) parsePermisosForm(c echo.Context) ([]models.PermisoItemRequest, error) {
-	// Obtener los IDs de módulo desde el formulario
 	moduloIDs := c.FormValue("modulo_ids")
 	if moduloIDs == "" {
 		return nil, fmt.Errorf("no se recibieron módulos")
 	}
 
-	// Parsear IDs (vienen como "1,2,3,4")
 	idStrings := strings.Split(moduloIDs, ",")
 	var permisos []models.PermisoItemRequest
 

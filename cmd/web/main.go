@@ -57,6 +57,14 @@ var templateFuncs = template.FuncMap{
 		}
 		return s
 	},
+	// ✅ AGREGA ESTA FUNCIÓN:
+	"iterate": func(count int) []int {
+		var result []int
+		for i := 0; i < count; i++ {
+			result = append(result, i)
+		}
+		return result
+	},
 }
 
 type TemplateRenderer struct {
@@ -66,6 +74,7 @@ type TemplateRenderer struct {
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	log.Printf("[RENDER] Iniciando renderizado del template: %s", name)
 
+	// Verificar si el template existe
 	tmpl := t.templates.Lookup(name)
 	if tmpl == nil {
 		log.Printf("[RENDER ERROR] Template '%s' no encontrado", name)
@@ -128,9 +137,9 @@ func main() {
 	e.Use(echomiddleware.RateLimiter(echomiddleware.NewRateLimiterMemoryStore(20)))
 
 	// ============================================
-	// TEMPLATES CON FUNCIONES PERSONALIZADAS - CORREGIDO
+	// TEMPLATES CON HERENCIA CORREGIDA
 	// ============================================
-	log.Println("[TEMPLATES] Configurando motor de plantillas...")
+	log.Println("[TEMPLATES] Configurando motor de plantillas con herencia...")
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -150,7 +159,7 @@ func main() {
 	tmpl := template.New("").Funcs(templateFuncs)
 	log.Println("[TEMPLATES] Funciones personalizadas registradas")
 
-	// Cargar templates recursivamente usando filepath.Walk
+	// Cargar TODOS los templates .html y mantener sus nombres para herencia
 	templateCount := 0
 	err = filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -166,13 +175,15 @@ func main() {
 			// Usar la ruta relativa como nombre del template
 			templateName := filepath.ToSlash(relPath)
 
-			// Leer y parsear el template
+			// Leer el contenido del archivo
 			content, err := os.ReadFile(path)
 			if err != nil {
 				return fmt.Errorf("error leyendo %s: %w", path, err)
 			}
 
-			if _, err := tmpl.New(templateName).Parse(string(content)); err != nil {
+			// Parsear el template con su nombre
+			_, err = tmpl.New(templateName).Parse(string(content))
+			if err != nil {
 				return fmt.Errorf("error parseando %s: %w", templateName, err)
 			}
 			templateCount++
@@ -185,16 +196,17 @@ func main() {
 		log.Fatal("❌ Error cargando templates:", err)
 	}
 
-	log.Printf("[TEMPLATES] ✅ Templates cargados: %d", templateCount)
-	log.Println("[TEMPLATES] Templates disponibles:")
+	log.Printf("[TEMPLATES] ✅ Total templates cargados: %d", templateCount)
+	log.Println("[TEMPLATES] Templates disponibles para herencia:")
 	for _, t := range tmpl.Templates() {
 		if t.Name() != "" && t.Name() != " " {
 			log.Printf("  - %s", t.Name())
 		}
 	}
 
+	// Configurar el renderer
 	e.Renderer = &TemplateRenderer{templates: tmpl}
-	log.Println("[TEMPLATES] ✅ Renderer configurado")
+	log.Println("[TEMPLATES] ✅ Renderer configurado correctamente")
 
 	// Archivos estáticos
 	staticDir := filepath.Join(cwd, "web", "static")
@@ -253,21 +265,23 @@ func main() {
 	log.Println("[HANDLERS] Inicializando handlers...")
 	authHandler := handlers.NewAuthHandler(authService, sessionManager, jwtManager, env)
 	dashboardHandler := handlers.NewDashboardHandler(db)
-	perfilHandler := handlers.NewPerfilHandler(perfilService)
-	moduloHandler := handlers.NewModuloHandler(moduloService)
-	permisoHandler := handlers.NewPermisoHandler(permisoService, perfilService)
-	userHandler := handlers.NewUserHandler(userService, perfilService)
+	perfilHandler := handlers.NewPerfilHandler(perfilService, env) // ← Agregar env
+	moduloHandler := handlers.NewModuloHandler(moduloService, env) // ← Agregar
+	permisoHandler := handlers.NewPermisoHandler(permisoService, perfilService, env)
+	userHandler := handlers.NewUserHandler(userService, perfilService, env) // ← Agregar env
 	principalHandler := handlers.NewPrincipalHandler(permisoService)
 	log.Println("[HANDLERS] ✅ Handlers inicializados")
 
 	// ============================================
+	// ============================================
 	// RUTAS PÚBLICAS
 	// ============================================
 	log.Println("[ROUTES] Configurando rutas públicas...")
+
 	e.GET("/", func(c echo.Context) error {
-		log.Println("[ROUTE] GET / - Redirigiendo a /login")
 		return c.Redirect(http.StatusSeeOther, "/login")
 	})
+
 	e.GET("/login", authHandler.ShowLogin)
 	e.POST("/do-login", authHandler.DoLogin, csrfMiddleware.Protect)
 	e.GET("/register", authHandler.ShowRegister)
@@ -275,21 +289,23 @@ func main() {
 	e.GET("/logout", authHandler.Logout)
 	e.GET("/maintenance", authHandler.Maintenance)
 	e.GET("/success", authHandler.Success)
+
+	// ✅ Rutas para breadcrumbs - Redirigen a mantenimiento
+	e.GET("/seguridad", func(c echo.Context) error {
+		return c.Redirect(http.StatusSeeOther, "/maintenance?from=seguridad")
+	})
+
+	e.GET("/principal", func(c echo.Context) error {
+		return c.Redirect(http.StatusSeeOther, "/maintenance?from=principal")
+	})
+
 	e.GET("/health", func(c echo.Context) error {
-		log.Println("[ROUTE] GET /health - Verificando salud")
 		if err := db.Ping(); err != nil {
-			log.Printf("[HEALTH] ❌ DB Error: %v", err)
 			return c.String(http.StatusServiceUnavailable, "❌ DB Error")
 		}
-		log.Println("[HEALTH] ✅ OK")
 		return c.String(http.StatusOK, "✅ OK")
 	})
 
-	// Ruta de prueba para diagnóstico
-	e.GET("/ping", func(c echo.Context) error {
-		log.Println("[ROUTE] GET /ping - Pong!")
-		return c.String(http.StatusOK, "pong")
-	})
 	log.Println("[ROUTES] ✅ Rutas públicas configuradas")
 
 	// ============================================
@@ -321,27 +337,25 @@ func main() {
 	api.GET("/perfil", perfilHandler.ShowPerfilJSON)
 	log.Println("[ROUTES]   - API routes")
 
-	// MÓDULO: PERFILES
+	// MÓDULO: PERFILES - Cambiar "perfiles" por "Perfiles"
 	pg := protected.Group("/seguridad/perfiles")
-	pg.Use(rbacMiddleware.CheckPermission("perfiles", "ver"))
+	pg.Use(rbacMiddleware.CheckPermission("Perfiles", "ver")) // ← Cambiado
 	pg.GET("", perfilHandler.Index)
-	pg.GET("/nuevo", perfilHandler.CreateForm, rbacMiddleware.CheckPermission("perfiles", "crear"))
-	pg.POST("/crear", perfilHandler.Create, rbacMiddleware.CheckPermission("perfiles", "crear"), csrfMiddleware.Protect)
-	pg.GET("/editar/:id", perfilHandler.EditForm, rbacMiddleware.CheckPermission("perfiles", "editar"))
-	pg.POST("/actualizar/:id", perfilHandler.Update, rbacMiddleware.CheckPermission("perfiles", "editar"), csrfMiddleware.Protect)
-	pg.DELETE("/eliminar/:id", perfilHandler.Delete, rbacMiddleware.CheckPermission("perfiles", "eliminar"), csrfMiddleware.Protect)
-	log.Println("[ROUTES]   - Perfiles CRUD")
+	pg.GET("/nuevo", perfilHandler.CreateForm, rbacMiddleware.CheckPermission("Perfiles", "crear")) // ← Cambiado
+	pg.POST("/crear", perfilHandler.Create, rbacMiddleware.CheckPermission("Perfiles", "crear"), csrfMiddleware.Protect)
+	pg.GET("/editar/:id", perfilHandler.EditForm, rbacMiddleware.CheckPermission("Perfiles", "editar")) // ← Cambiado
+	pg.POST("/actualizar/:id", perfilHandler.Update, rbacMiddleware.CheckPermission("Perfiles", "editar"), csrfMiddleware.Protect)
+	pg.DELETE("/eliminar/:id", perfilHandler.Delete, rbacMiddleware.CheckPermission("Perfiles", "eliminar"), csrfMiddleware.Protect)
 
-	// MÓDULO: MÓDULOS
 	mg := protected.Group("/seguridad/modulos")
-	mg.Use(rbacMiddleware.CheckPermission("modulos", "ver"))
+	mg.Use(rbacMiddleware.CheckPermission("Módulos", "ver")) // ← Cambiado
 	mg.GET("", moduloHandler.Index)
-	mg.GET("/nuevo", moduloHandler.CreateForm, rbacMiddleware.CheckPermission("modulos", "crear"))
-	mg.POST("/crear", moduloHandler.Create, rbacMiddleware.CheckPermission("modulos", "crear"), csrfMiddleware.Protect)
-	mg.GET("/editar/:id", moduloHandler.EditForm, rbacMiddleware.CheckPermission("modulos", "editar"))
-	mg.POST("/actualizar/:id", moduloHandler.Update, rbacMiddleware.CheckPermission("modulos", "editar"), csrfMiddleware.Protect)
-	mg.DELETE("/eliminar/:id", moduloHandler.Delete, rbacMiddleware.CheckPermission("modulos", "eliminar"), csrfMiddleware.Protect)
-	log.Println("[ROUTES]   - Módulos CRUD")
+	mg.GET("/nuevo", moduloHandler.CreateForm, rbacMiddleware.CheckPermission("Módulos", "crear")) // ← Cambiado
+	mg.GET("/detalle/:id", moduloHandler.Detalle, rbacMiddleware.CheckPermission("Módulos", "ver"))
+	mg.POST("/crear", moduloHandler.Create, rbacMiddleware.CheckPermission("Módulos", "crear"), csrfMiddleware.Protect)
+	mg.GET("/editar/:id", moduloHandler.EditForm, rbacMiddleware.CheckPermission("Módulos", "editar")) // ← Cambiado
+	mg.POST("/actualizar/:id", moduloHandler.Update, rbacMiddleware.CheckPermission("Módulos", "editar"), csrfMiddleware.Protect)
+	mg.DELETE("/eliminar/:id", moduloHandler.Delete, rbacMiddleware.CheckPermission("Módulos", "eliminar"), csrfMiddleware.Protect)
 
 	// MÓDULO: PERMISOS-PERFIL
 	permGroup := protected.Group("/seguridad/permisos-perfil")
@@ -351,24 +365,25 @@ func main() {
 	permGroup.POST("/guardar", permisoHandler.SavePermissions, csrfMiddleware.Protect)
 	log.Println("[ROUTES]   - Permisos")
 
-	// MÓDULO: USUARIOS
+	// MÓDULO: USUARIOS// MÓDULO: MÓDULOS - Cambiar "modulos" por "Módulos" - Cambiar "usuarios" por "Usuarios"
 	ug := protected.Group("/seguridad/usuarios")
-	ug.Use(rbacMiddleware.CheckPermission("usuarios", "ver"))
+	ug.Use(rbacMiddleware.CheckPermission("Usuarios", "ver")) // ← Cambiado
 	ug.GET("", userHandler.Index)
-	ug.GET("/nuevo", userHandler.CreateForm, rbacMiddleware.CheckPermission("usuarios", "crear"))
-	ug.POST("/crear", userHandler.Create, rbacMiddleware.CheckPermission("usuarios", "crear"), csrfMiddleware.Protect)
-	ug.GET("/editar/:id", userHandler.EditForm, rbacMiddleware.CheckPermission("usuarios", "editar"))
-	ug.POST("/actualizar/:id", userHandler.Update, rbacMiddleware.CheckPermission("usuarios", "editar"), csrfMiddleware.Protect)
-	ug.DELETE("/eliminar/:id", userHandler.Delete, rbacMiddleware.CheckPermission("usuarios", "eliminar"), csrfMiddleware.Protect)
-	ug.GET("/detalle/:id", userHandler.Detail, rbacMiddleware.CheckPermission("usuarios", "detalle"))
-	ug.POST("/toggle-status/:id", userHandler.ToggleStatus, rbacMiddleware.CheckPermission("usuarios", "editar"), csrfMiddleware.Protect)
-	log.Println("[ROUTES]   - Usuarios CRUD")
+	ug.GET("/nuevo", userHandler.CreateForm, rbacMiddleware.CheckPermission("Usuarios", "crear")) // ← Cambiado
+	ug.POST("/crear", userHandler.Create, rbacMiddleware.CheckPermission("Usuarios", "crear"), csrfMiddleware.Protect)
+	ug.GET("/editar/:id", userHandler.EditForm, rbacMiddleware.CheckPermission("Usuarios", "editar")) // ← Cambiado
+	ug.POST("/actualizar/:id", userHandler.Update, rbacMiddleware.CheckPermission("Usuarios", "editar"), csrfMiddleware.Protect)
+	ug.DELETE("/eliminar/:id", userHandler.Delete, rbacMiddleware.CheckPermission("Usuarios", "eliminar"), csrfMiddleware.Protect)
+	ug.GET("/detalle/:id", userHandler.Detail, rbacMiddleware.CheckPermission("Usuarios", "detalle")) // ← Cambiado
+	ug.POST("/toggle-status/:id", userHandler.ToggleStatus, rbacMiddleware.CheckPermission("Usuarios", "editar"), csrfMiddleware.Protect)
 
 	// MÓDULOS PRINCIPALES
-	protected.GET("/principal/clientes", principalHandler.Principal11, rbacMiddleware.RequireModuleAccess("principal11"))
-	protected.GET("/principal/productos", principalHandler.Principal12, rbacMiddleware.RequireModuleAccess("principal12"))
-	protected.GET("/principal/facturas", principalHandler.Principal21, rbacMiddleware.RequireModuleAccess("principal21"))
-	protected.GET("/principal/proveedores", principalHandler.Principal22, rbacMiddleware.RequireModuleAccess("principal22"))
+	// ✅ CORRECTO (coincide con los nombres en BD)
+	protected.GET("/principal/clientes", principalHandler.Principal11, rbacMiddleware.RequireModuleAccess("Principal 1.1"))
+	protected.GET("/principal/productos", principalHandler.Principal12, rbacMiddleware.RequireModuleAccess("Principal 1.2"))
+	protected.GET("/principal/facturas", principalHandler.Principal21, rbacMiddleware.RequireModuleAccess("Principal 2.1"))
+	protected.GET("/principal/proveedores", principalHandler.Principal22, rbacMiddleware.RequireModuleAccess("Principal 2.2"))
+
 	log.Println("[ROUTES]   - Módulos principales")
 
 	log.Println("[ROUTES] ✅ Todas las rutas configuradas")

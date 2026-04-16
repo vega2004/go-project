@@ -1,247 +1,486 @@
-{{define "content"}}
-<div class="row">
-    <div class="col-12">
-        <h2><i class="bi bi-shield-lock"></i> {{.Title}}</h2>
-        <hr>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-3">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-person-badge"></i> Seleccionar Perfil</h5>
-            </div>
-            <div class="card-body">
-                <select class="form-select" id="perfilSelect">
-                    <option value="">-- Seleccione un perfil --</option>
-                    {{range .Perfiles}}
-                    <option value="{{.ID}}">{{.Nombre}}</option>
-                    {{end}}
-                </select>
-                <button class="btn btn-primary w-100 mt-3" id="btnCargar">
-                    <i class="bi bi-cloud-download"></i> Cargar Permisos
-                </button>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} · Sistema de Gestión</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #f4f7f9; }
+        
+        /* ========== NAVBAR ========== */
+        .navbar-corporate {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+        }
+        .navbar-corporate .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            color: white !important;
+        }
+        .navbar-corporate .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 8px 16px !important;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+        .navbar-corporate .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white !important;
+        }
+        .navbar-corporate .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .navbar-corporate .dropdown-item {
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .navbar-corporate .dropdown-item:hover {
+            background: linear-gradient(135deg, #4F7785 0%, #376474 100%);
+            color: white;
+        }
+        .navbar-corporate .dropdown-item.text-danger:hover {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+        
+        /* ========== BREADCRUMBS ========== */
+        .breadcrumb-corporate {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .breadcrumb-corporate .breadcrumb-item a {
+            color: #4F7785;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .breadcrumb-corporate .breadcrumb-item.active {
+            color: #152931;
+            font-weight: 600;
+        }
+        
+        /* ========== CARDS ========== */
+        .card-corporate {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            background: white;
+        }
+        .card-header-corporate {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            border: none;
+            padding: 16px 20px;
+            color: white;
+            font-weight: 600;
+        }
+        .card-header-success {
+            background: linear-gradient(135deg, #1e7e34 0%, #28a745 100%);
+            border: none;
+            padding: 16px 20px;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* ========== TABLE ========== */
+        .table-corporate {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .table-corporate thead {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            color: white;
+        }
+        .table-corporate thead th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding: 12px 8px;
+            border: none;
+            text-align: center;
+        }
+        .table-corporate tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        .table-corporate tbody tr:hover {
+            background: #f8fafc;
+        }
+        .table-corporate tbody td {
+            padding: 12px 8px;
+            vertical-align: middle;
+            color: #1a202c;
+        }
+        
+        /* ========== FORM CONTROLS ========== */
+        .form-select-corporate {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        .form-select-corporate:focus {
+            border-color: #4F7785;
+            box-shadow: 0 0 0 3px rgba(79, 119, 133, 0.1);
+            outline: none;
+        }
+        
+        /* ========== BUTTONS ========== */
+        .btn-corporate {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-corporate:hover {
+            background: linear-gradient(135deg, #1a3a4a 0%, #4F7785 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(21, 41, 49, 0.25);
+            color: white;
+        }
+        .btn-success-corporate {
+            background: linear-gradient(135deg, #1e7e34 0%, #28a745 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-success-corporate:hover {
+            background: linear-gradient(135deg, #218838 0%, #34ce57 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.25);
+            color: white;
+        }
+        .btn-outline-corporate {
+            background: transparent;
+            border: 1.5px solid #4F7785;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #4F7785;
+            transition: all 0.2s ease;
+        }
+        .btn-outline-corporate:hover {
+            background: #4F7785;
+            color: white;
+        }
+        .btn-outline-secondary-corporate {
+            background: transparent;
+            border: 1.5px solid #6c757d;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.2s ease;
+        }
+        .btn-outline-secondary-corporate:hover {
+            background: #6c757d;
+            color: white;
+        }
+        
+        /* ========== CHECKBOX ========== */
+        .form-check-input:checked {
+            background-color: #4F7785;
+            border-color: #4F7785;
+        }
+        
+        /* ========== ALERTS ========== */
+        .alert-info-corporate {
+            background: #e8f0f2;
+            color: #152931;
+            border-left: 4px solid #4F7785;
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+        .alert-success-corporate {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-weight: 500;
+        }
+        .alert-danger-corporate {
+            background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-weight: 500;
+        }
+        .alert .btn-close { filter: brightness(0) invert(1); }
+        
+        /* ========== FOOTER ========== */
+        .footer-corporate {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 60px;
+        }
+        .footer-corporate .text-muted {
+            color: #4F7785 !important;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar navbar-expand-lg navbar-corporate">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="bi bi-building me-2"></i>Sistema de Gestión
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i> {{.UserName}}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/perfil">
+                                <i class="bi bi-person me-2"></i>Mi Perfil
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
+    </nav>
+
+    <!-- ========== BREADCRUMBS ========== -->
+    <div class="container mt-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-corporate p-3">
+                <li class="breadcrumb-item"><a href="/dashboard">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="/seguridad">Seguridad</a></li>
+                <li class="breadcrumb-item active">{{.Title}}</li>
+            </ol>
+        </nav>
     </div>
-    
-    <div class="col-md-9">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0"><i class="bi bi-table"></i> Permisos del Perfil</h5>
+
+    <!-- ========== CONTENIDO PRINCIPAL ========== -->
+    <main class="container mt-4">
+        {{if .SuccessMsg}}
+        <div class="alert alert-success-corporate alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{.SuccessMsg}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {{end}}
+        
+        {{if .ErrorMsg}}
+        <div class="alert alert-danger-corporate alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{.ErrorMsg}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {{end}}
+
+        <div class="row">
+            <div class="col-12">
+                <h2 style="color: #152931; font-weight: 700;"><i class="bi bi-shield-lock me-2"></i>{{.Title}}</h2>
+                <hr style="border-color: #e2e8f0;">
             </div>
-            <div class="card-body" id="permisosContainer">
-                <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle"></i> Seleccione un perfil y presione "Cargar Permisos"
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card-corporate">
+                    <div class="card-header-corporate">
+                        <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Seleccionar Perfil</h5>
+                    </div>
+                    <div class="card-body p-3">
+                        <select class="form-select-corporate" id="perfilSelect">
+                            <option value="">-- Seleccione un perfil --</option>
+                            {{range .Perfiles}}
+                            <option value="{{.ID}}" {{if eq .ID 1}}data-admin="true"{{end}}>
+                                {{.Nombre}} {{if eq .ID 1}}🔒{{end}}
+                            </option>
+                            {{end}}
+                        </select>
+                        <button class="btn-corporate w-100 mt-3" id="btnCargar">
+                            <i class="bi bi-cloud-download me-2"></i>Cargar Permisos
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="card-footer text-end" id="btnGuardarContainer" style="display: none;">
-                <button class="btn btn-success" id="btnGuardar">
-                    <i class="bi bi-save"></i> Guardar Cambios
-                </button>
+            
+            <div class="col-md-9">
+                <div class="card-corporate">
+                    <div class="card-header-success">
+                        <h5 class="mb-0"><i class="bi bi-table me-2"></i>Permisos del Perfil</h5>
+                    </div>
+                    <div class="card-body p-3" id="permisosContainer">
+                        <div class="alert-info-corporate text-center" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>Seleccione un perfil y presione "Cargar Permisos"
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light p-3 text-end" id="btnGuardarContainer" style="display: none;">
+                        <button class="btn-success-corporate" id="btnGuardar">
+                            <i class="bi bi-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    </main>
 
-<input type="hidden" name="csrf_token" id="csrfToken" value="{{.CSRFToken}}">
-{{end}}
-
-{{define "scripts"}}
-<script>
-let currentPerfilID = 0;
-let currentPermisos = [];
-
-document.getElementById('btnCargar').addEventListener('click', function() {
-    const perfilID = document.getElementById('perfilSelect').value;
-    if (!perfilID) {
-        Swal.fire('Atención', 'Seleccione un perfil primero', 'warning');
-        return;
-    }
-    
-    currentPerfilID = parseInt(perfilID);
-    
-    Swal.fire({
-        title: 'Cargando...',
-        text: 'Obteniendo permisos del perfil',
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-    });
-    
-    fetch('/seguridad/permisos-perfil/cargar', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRF-Token': document.getElementById('csrfToken').value
-        },
-        body: 'perfil_id=' + perfilID
-    })
-    .then(response => response.json())
-    .then(data => {
-        Swal.close();
-        if (data.error) {
-            Swal.fire('Error', data.error, 'error');
-        } else {
-            renderPermisos(data.data.permisos);
-            document.getElementById('btnGuardarContainer').style.display = 'block';
-        }
-    })
-    .catch(error => {
-        Swal.close();
-        Swal.fire('Error', 'Error al cargar permisos', 'error');
-    });
-});
-
-function renderPermisos(permisos) {
-    currentPermisos = permisos;
-    const container = document.getElementById('permisosContainer');
-    
-    let html = `
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Módulo</th>
-                        <th class="text-center">Ver</th>
-                        <th class="text-center">Crear</th>
-                        <th class="text-center">Editar</th>
-                        <th class="text-center">Eliminar</th>
-                        <th class="text-center">Detalle</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-    
-    permisos.forEach((permiso, index) => {
-        html += `
-            <tr>
-                <td><strong>${permiso.modulo.nombre_mostrar}</strong><br>
-                    <small class="text-muted">${permiso.modulo.nombre}</small>
-                </td>
-                <td class="text-center">
-                    <input type="checkbox" class="form-check-input permiso-check" 
-                           data-index="${index}" data-permiso="ver" 
-                           ${permiso.puede_ver ? 'checked' : ''}>
-                </td>
-                <td class="text-center">
-                    <input type="checkbox" class="form-check-input permiso-check" 
-                           data-index="${index}" data-permiso="crear" 
-                           ${permiso.puede_crear ? 'checked' : ''}>
-                </td>
-                <td class="text-center">
-                    <input type="checkbox" class="form-check-input permiso-check" 
-                           data-index="${index}" data-permiso="editar" 
-                           ${permiso.puede_editar ? 'checked' : ''}>
-                </td>
-                <td class="text-center">
-                    <input type="checkbox" class="form-check-input permiso-check" 
-                           data-index="${index}" data-permiso="eliminar" 
-                           ${permiso.puede_eliminar ? 'checked' : ''}>
-                </td>
-                <td class="text-center">
-                    <input type="checkbox" class="form-check-input permiso-check" 
-                           data-index="${index}" data-permiso="detalle" 
-                           ${permiso.puede_detalle ? 'checked' : ''}>
-                </td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary" onclick="seleccionarTodo(${index})">
-                        <i class="bi bi-check-all"></i> Todo
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="seleccionarNada(${index})">
-                        <i class="bi bi-x"></i> Nada
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-    
-    html += `
-                </tbody>
-            </table>
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer-corporate py-4">
+        <div class="container text-center">
+            <span class="text-muted">
+                <i class="bi bi-c-circle me-1"></i> {{.CurrentYear}} Sistema de Gestión. Todos los derechos reservados.
+            </span>
         </div>
-    `;
+    </footer>
+
+    <input type="hidden" name="csrf_token" id="csrfToken" value="{{.CSRFToken}}">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    container.innerHTML = html;
-    
-    // Agregar event listeners a los checkboxes
-    document.querySelectorAll('.permiso-check').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const index = parseInt(this.dataset.index);
-            const permiso = this.dataset.permiso;
-            currentPermisos[index][`puede_${permiso}`] = this.checked;
+    <script>
+        let currentPerfilID = 0;
+        let currentPermisos = [];
+
+        document.getElementById('btnCargar').addEventListener('click', function() {
+            const perfilSelect = document.getElementById('perfilSelect');
+            const perfilID = perfilSelect.value;
+            const selectedOption = perfilSelect.options[perfilSelect.selectedIndex];
+            
+            if (!perfilID) {
+                Swal.fire({ icon: 'warning', title: 'Atención', text: 'Seleccione un perfil primero', confirmButtonColor: '#4F7785' });
+                return;
+            }
+            
+            if (selectedOption.dataset.admin === 'true') {
+                Swal.fire({
+                    title: '⚠️ Perfil Administrador',
+                    text: 'Estás editando los permisos del Administrador. Ten cuidado de no quitar permisos críticos.',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido, continuar',
+                    confirmButtonColor: '#4F7785'
+                });
+            }
+            
+            currentPerfilID = parseInt(perfilID);
+            
+            Swal.fire({ title: 'Cargando...', text: 'Obteniendo permisos del perfil', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            
+            fetch('/seguridad/permisos-perfil/cargar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': document.getElementById('csrfToken').value },
+                body: 'perfil_id=' + perfilID
+            })
+            .then(r => r.json())
+            .then(data => {
+                Swal.close();
+                if (data.error) Swal.fire('Error', data.error, 'error');
+                else { renderPermisos(data.data.permisos); document.getElementById('btnGuardarContainer').style.display = 'block'; }
+            })
+            .catch(() => { Swal.close(); Swal.fire('Error', 'Error al cargar permisos', 'error'); });
         });
-    });
-}
 
-function seleccionarTodo(index) {
-    currentPermisos[index].puede_ver = true;
-    currentPermisos[index].puede_crear = true;
-    currentPermisos[index].puede_editar = true;
-    currentPermisos[index].puede_eliminar = true;
-    currentPermisos[index].puede_detalle = true;
-    
-    const row = document.querySelectorAll('tbody tr')[index];
-    row.querySelectorAll('.permiso-check').forEach(cb => {
-        cb.checked = true;
-    });
-}
-
-function seleccionarNada(index) {
-    currentPermisos[index].puede_ver = false;
-    currentPermisos[index].puede_crear = false;
-    currentPermisos[index].puede_editar = false;
-    currentPermisos[index].puede_eliminar = false;
-    currentPermisos[index].puede_detalle = false;
-    
-    const row = document.querySelectorAll('tbody tr')[index];
-    row.querySelectorAll('.permiso-check').forEach(cb => {
-        cb.checked = false;
-    });
-}
-
-document.getElementById('btnGuardar').addEventListener('click', function() {
-    const permisosToSend = currentPermisos.map(p => ({
-        modulo_id: p.modulo.id,
-        puede_ver: p.puede_ver,
-        puede_crear: p.puede_crear,
-        puede_editar: p.puede_editar,
-        puede_eliminar: p.puede_eliminar,
-        puede_detalle: p.puede_detalle
-    }));
-    
-    Swal.fire({
-        title: 'Guardando...',
-        text: 'Actualizando permisos',
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-    });
-    
-    fetch('/seguridad/permisos-perfil/guardar', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': document.getElementById('csrfToken').value
-        },
-        body: JSON.stringify({
-            perfil_id: currentPerfilID,
-            permisos: permisosToSend
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        Swal.close();
-        if (data.error) {
-            Swal.fire('Error', data.error, 'error');
-        } else {
-            Swal.fire('Éxito', 'Permisos guardados correctamente', 'success');
+        function renderPermisos(permisos) {
+            const modulosExcluidos = ['Inicio', 'Seguridad', 'Principal 1', 'Principal 2'];
+            const permisosFiltrados = permisos.filter(p => !modulosExcluidos.includes(p.modulo.nombre));
+            currentPermisos = permisosFiltrados;
+            const container = document.getElementById('permisosContainer');
+            
+            let html = `<div class="table-responsive"><table class="table table-corporate"><thead><tr><th>Módulo</th><th class="text-center">Ver</th><th class="text-center">Crear</th><th class="text-center">Editar</th><th class="text-center">Eliminar</th><th class="text-center">Detalle</th><th class="text-center">Acciones</th></tr></thead><tbody>`;
+            
+            permisosFiltrados.forEach((permiso, index) => {
+                html += `<tr><td><strong>${permiso.modulo.nombre}</strong></td>`;
+                ['ver', 'crear', 'editar', 'eliminar', 'detalle'].forEach(p => {
+                    html += `<td class="text-center"><input type="checkbox" class="form-check-input permiso-check" data-index="${index}" data-permiso="${p}" ${permiso[`puede_${p}`] ? 'checked' : ''}></td>`;
+                });
+                html += `<td class="text-center">
+                    <button class="btn-outline-corporate me-1" onclick="seleccionarTodo(${index})"><i class="bi bi-check-all"></i></button>
+                    <button class="btn-outline-secondary-corporate" onclick="seleccionarNada(${index})"><i class="bi bi-x"></i></button>
+                </td></tr>`;
+            });
+            
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+            
+            document.querySelectorAll('.permiso-check').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const idx = parseInt(this.dataset.index);
+                    const perm = this.dataset.permiso;
+                    currentPermisos[idx][`puede_${perm}`] = this.checked;
+                });
+            });
         }
-    })
-    .catch(error => {
-        Swal.close();
-        Swal.fire('Error', 'Error al guardar permisos', 'error');
-    });
-});
-</script>
-{{end}}
+
+        function seleccionarTodo(index) {
+            ['ver', 'crear', 'editar', 'eliminar', 'detalle'].forEach(p => currentPermisos[index][`puede_${p}`] = true);
+            document.querySelectorAll('tbody tr')[index].querySelectorAll('.permiso-check').forEach(cb => cb.checked = true);
+        }
+
+        function seleccionarNada(index) {
+            ['ver', 'crear', 'editar', 'eliminar', 'detalle'].forEach(p => currentPermisos[index][`puede_${p}`] = false);
+            document.querySelectorAll('tbody tr')[index].querySelectorAll('.permiso-check').forEach(cb => cb.checked = false);
+        }
+
+        document.getElementById('btnGuardar').addEventListener('click', function() {
+            const permisosToSend = currentPermisos.map(p => ({
+                modulo_id: p.modulo.id,
+                puede_ver: p.puede_ver, puede_crear: p.puede_crear, puede_editar: p.puede_editar,
+                puede_eliminar: p.puede_eliminar, puede_detalle: p.puede_detalle
+            }));
+            const csrfToken = document.getElementById('csrfToken').value;
+            
+            Swal.fire({ title: 'Guardando...', text: 'Actualizando permisos', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            
+            fetch('/seguridad/permisos-perfil/guardar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+                body: JSON.stringify({ perfil_id: currentPerfilID, permisos: permisosToSend, csrf_token: csrfToken })
+            })
+            .then(r => r.json())
+            .then(data => {
+                Swal.close();
+                if (data.error) Swal.fire('Error', data.error, 'error');
+                else Swal.fire({ icon: 'success', title: '¡Permisos guardados!', html: 'Los cambios se aplicarán <strong>inmediatamente</strong>.', confirmButtonText: 'Entendido', confirmButtonColor: '#4F7785' });
+            })
+            .catch(() => { Swal.close(); Swal.fire('Error', 'Error de conexión', 'error'); });
+        });
+
+        setTimeout(() => { document.querySelectorAll('.alert').forEach(a => new bootstrap.Alert(a).close()); }, 5000);
+    </script>
+</body>
+</html>

@@ -12,13 +12,13 @@ import (
 )
 
 // ============================================
-// INTERFAZ - ACTUALIZADA
+// INTERFAZ
 // ============================================
 type AuthService interface {
-	Register(form *models.RegisterForm, ipAddress string) error             // ← AÑADIR ipAddress
-	Login(email, password, recaptchaToken string) (*models.UserAuth, error) // ← SIN ipAddress
+	Register(form *models.RegisterForm, ipAddress string) error
+	Login(email, password, recaptchaToken string) (*models.UserAuth, error)
 	GetUserByID(id int) (*models.UserAuth, error)
-	GetRolName(roleID int) string
+	GetPerfilNombre(perfilID int) string
 	RecordFailedAttempt(email string) error
 	ResetFailedAttempts(email string) error
 	IsBlocked(email string) (bool, error)
@@ -43,11 +43,18 @@ func NewAuthService(repo repository.AuthRepository, recaptchaSecret string) Auth
 	}
 }
 
-// Register - Registro de nuevo usuario (ACTUALIZADO con ipAddress)
+// ============================================
+// REGISTER - Registro de nuevo usuario
+// ============================================
+// ============================================
+// REGISTER - Registro de nuevo usuario
+// ============================================
 func (s *authService) Register(form *models.RegisterForm, ipAddress string) error {
-	// Validar reCAPTCHA
-	isValid, err := utils.ValidateRecaptcha(form.RecaptchaToken, s.recaptchaSecret, 0.5, "register")
+	// Validar reCAPTCHA - Para v2 (casilla), usar minScore=0 y action vacío
+	log.Printf("[RECAPTCHA] Validando token...")
+	isValid, err := utils.ValidateRecaptcha(form.RecaptchaToken, s.recaptchaSecret, 0, "") // ← Cambiado
 	if err != nil || !isValid {
+		log.Printf("[RECAPTCHA] Error: %v, isValid: %v", err, isValid)
 		return errors.New("verificación reCAPTCHA fallida")
 	}
 
@@ -56,29 +63,39 @@ func (s *authService) Register(form *models.RegisterForm, ipAddress string) erro
 		return err
 	}
 
+	// Validar que las contraseñas coincidan
+	if form.Password != form.ConfirmPassword {
+		return errors.New("las contraseñas no coinciden")
+	}
+
 	// Verificar si el email ya existe
 	existing, _ := s.repo.FindByEmail(form.Email)
 	if existing != nil {
 		return errors.New("el email ya está registrado")
 	}
 
-	// Crear usuario con role_id=2 (usuario normal)
+	// Obtener ID del perfil "usuario" (por defecto)
+	perfilID := s.getDefaultPerfilID()
+
+	// Crear usuario con perfil por defecto
 	user := &models.UserAuth{
 		Name:      strings.TrimSpace(form.Name),
 		Email:     strings.TrimSpace(form.Email),
 		Phone:     strings.TrimSpace(form.Phone),
 		Password:  form.Password,
-		RoleID:    2,
+		PerfilID:  perfilID, // ← Cambiado de RoleID a PerfilID
 		Activo:    true,
 		CreatedAt: time.Now(),
 	}
 
-	log.Printf("[AUDIT] Registro de nuevo usuario desde IP %s: %s", ipAddress, form.Email)
+	log.Printf("[AUDIT] Registro de nuevo usuario desde IP %s: %s (perfil_id: %d)", ipAddress, form.Email, perfilID)
 
 	return s.repo.CreateUser(user)
 }
 
-// Login - Inicio de sesión (SIN ipAddress)
+// ============================================
+// LOGIN - Inicio de sesión
+// ============================================
 func (s *authService) Login(email, password, recaptchaToken string) (*models.UserAuth, error) {
 	// Verificar si está bloqueado
 	blocked, err := s.IsBlocked(email)
@@ -89,8 +106,8 @@ func (s *authService) Login(email, password, recaptchaToken string) (*models.Use
 		return nil, errors.New("demasiados intentos fallidos. Espere 15 minutos")
 	}
 
-	// Validar reCAPTCHA
-	isValid, err := utils.ValidateRecaptcha(recaptchaToken, s.recaptchaSecret, 0.5, "login")
+	// Validar reCAPTCHA - Para v2 (casilla), usar minScore=0 y action vacío
+	isValid, err := utils.ValidateRecaptcha(recaptchaToken, s.recaptchaSecret, 0, "")
 	if err != nil || !isValid {
 		s.RecordFailedAttempt(email)
 		return nil, errors.New("verificación reCAPTCHA fallida")
@@ -117,25 +134,35 @@ func (s *authService) Login(email, password, recaptchaToken string) (*models.Use
 	// Resetear intentos fallidos
 	s.ResetFailedAttempts(email)
 
+	log.Printf("[AUDIT] Usuario %d (%s) inició sesión exitosamente", user.ID, user.Email)
+
 	return user, nil
 }
 
-// RecordFailedAttempt - Registra intento fallido
+// ============================================
+// RECORD FAILED ATTEMPT
+// ============================================
 func (s *authService) RecordFailedAttempt(email string) error {
 	return s.repo.RecordFailedAttempt(email, "")
 }
 
-// ResetFailedAttempts - Resetea intentos fallidos
+// ============================================
+// RESET FAILED ATTEMPTS
+// ============================================
 func (s *authService) ResetFailedAttempts(email string) error {
 	return s.repo.ResetFailedAttempts(email)
 }
 
-// IsBlocked - Verifica si está bloqueado
+// ============================================
+// IS BLOCKED
+// ============================================
 func (s *authService) IsBlocked(email string) (bool, error) {
 	return s.repo.IsBlocked(email, s.maxAttempts, s.blockDuration)
 }
 
-// GetUserByID - Obtiene usuario por ID
+// ============================================
+// GET USER BY ID
+// ============================================
 func (s *authService) GetUserByID(id int) (*models.UserAuth, error) {
 	if id <= 0 {
 		return nil, errors.New("ID inválido")
@@ -143,9 +170,11 @@ func (s *authService) GetUserByID(id int) (*models.UserAuth, error) {
 	return s.repo.FindByID(id)
 }
 
-// GetRolName - Obtiene nombre del rol
-func (s *authService) GetRolName(roleID int) string {
-	switch roleID {
+// ============================================
+// GET PERFIL NOMBRE
+// ============================================
+func (s *authService) GetPerfilNombre(perfilID int) string {
+	switch perfilID {
 	case 1:
 		return "administrador"
 	case 2:
@@ -157,7 +186,18 @@ func (s *authService) GetRolName(roleID int) string {
 	}
 }
 
-// validateRegisterForm - Validaciones del formulario de registro
+// ============================================
+// GET DEFAULT PERFIL ID
+// ============================================
+func (s *authService) getDefaultPerfilID() int {
+	// Buscar el perfil "usuario" en la BD
+	// Por ahora retornamos 2, pero idealmente deberías consultar
+	return 2
+}
+
+// ============================================
+// VALIDATE REGISTER FORM
+// ============================================
 func (s *authService) validateRegisterForm(form *models.RegisterForm) error {
 	if !utils.ValidateName(form.Name) {
 		return errors.New("nombre inválido: solo letras y espacios (2-50 caracteres)")

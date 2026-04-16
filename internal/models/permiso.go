@@ -7,6 +7,7 @@ type Permiso struct {
 	ID            int       `json:"id"`
 	PerfilID      int       `json:"perfil_id"`
 	ModuloID      int       `json:"modulo_id"`
+	ModuloNombre  string    `json:"modulo_nombre"` // ← Agregado
 	PuedeVer      bool      `json:"puede_ver"`
 	PuedeCrear    bool      `json:"puede_crear"`
 	PuedeEditar   bool      `json:"puede_editar"`

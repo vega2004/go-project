@@ -15,10 +15,14 @@ type PermisoRepository interface {
 	// Asignar/Actualizar permisos
 	AssignPermissions(perfilID int, permisos []models.PermisoItemRequest) error
 
-	// Obtener permisos de un perfil
+	// Obtener permisos de un perfil (como lista)
 	GetPermissionsByPerfil(perfilID int) ([]models.ModuloConPermisos, error)
 
+	// Obtener permisos de un perfil (como mapa) - PARA MIDDLEWARE
+	GetPermisosByPerfil(perfilID int) (map[string]models.Permiso, error)
+
 	// Verificar permisos de un usuario
+
 	UserHasPermission(userID int, moduloNombre string, permiso string) (bool, error)
 	GetUserPermissions(userID int) (map[string]map[string]bool, error)
 	IsAdmin(userID int) (bool, error)
@@ -69,9 +73,9 @@ func (r *permisoRepository) AssignPermissions(perfilID int, permisos []models.Pe
 	}
 
 	query := `
-        INSERT INTO permisos (perfil_id, modulo_id, puede_ver, puede_crear, puede_editar, puede_eliminar, puede_detalle)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-    `
+		INSERT INTO permisos (perfil_id, modulo_id, puede_ver, puede_crear, puede_editar, puede_eliminar, puede_detalle)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+	`
 
 	for _, p := range permisos {
 		_, err = tx.Exec(query, perfilID, p.ModuloID, p.PuedeVer, p.PuedeCrear,
@@ -91,7 +95,7 @@ func (r *permisoRepository) AssignPermissions(perfilID int, permisos []models.Pe
 }
 
 // ============================================
-// GET PERMISSIONS BY PERFIL
+// GET PERMISSIONS BY PERFIL (como lista) - CORREGIDO
 // ============================================
 func (r *permisoRepository) GetPermissionsByPerfil(perfilID int) ([]models.ModuloConPermisos, error) {
 	if perfilID <= 0 {
@@ -99,18 +103,18 @@ func (r *permisoRepository) GetPermissionsByPerfil(perfilID int) ([]models.Modul
 	}
 
 	query := `
-        SELECT 
-            m.id, m.nombre, m.nombre_mostrar, m.ruta, m.icono, m.categoria, m.orden, m.activo, m.created_at,
-            COALESCE(p.puede_ver, false) as puede_ver,
-            COALESCE(p.puede_crear, false) as puede_crear,
-            COALESCE(p.puede_editar, false) as puede_editar,
-            COALESCE(p.puede_eliminar, false) as puede_eliminar,
-            COALESCE(p.puede_detalle, false) as puede_detalle
-        FROM modulos m
-        LEFT JOIN permisos p ON p.modulo_id = m.id AND p.perfil_id = $1
-        WHERE m.activo = true
-        ORDER BY m.categoria, m.orden, m.id
-    `
+		SELECT 
+			m.id, m.nombre, m.activo, m.created_at,
+			COALESCE(p.puede_ver, false) as puede_ver,
+			COALESCE(p.puede_crear, false) as puede_crear,
+			COALESCE(p.puede_editar, false) as puede_editar,
+			COALESCE(p.puede_eliminar, false) as puede_eliminar,
+			COALESCE(p.puede_detalle, false) as puede_detalle
+		FROM modulos m
+		LEFT JOIN permisos p ON p.modulo_id = m.id AND p.perfil_id = $1
+		WHERE m.activo = true
+		ORDER BY m.id
+	`
 
 	rows, err := r.db.Query(query, perfilID)
 	if err != nil {
@@ -122,14 +126,59 @@ func (r *permisoRepository) GetPermissionsByPerfil(perfilID int) ([]models.Modul
 	for rows.Next() {
 		var mp models.ModuloConPermisos
 		err := rows.Scan(
-			&mp.Modulo.ID, &mp.Modulo.Nombre, &mp.Modulo.NombreMostrar, &mp.Modulo.Ruta,
-			&mp.Modulo.Icono, &mp.Modulo.Categoria, &mp.Modulo.Orden, &mp.Modulo.Activo, &mp.Modulo.CreatedAt,
+			&mp.Modulo.ID, &mp.Modulo.Nombre, &mp.Modulo.Activo, &mp.Modulo.CreatedAt,
 			&mp.PuedeVer, &mp.PuedeCrear, &mp.PuedeEditar, &mp.PuedeEliminar, &mp.PuedeDetalle,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("error escaneando resultado: %w", err)
 		}
 		resultados = append(resultados, mp)
+	}
+	return resultados, nil
+}
+
+// ============================================
+// GET PERMISOS BY PERFIL (como mapa) - PARA MIDDLEWARE
+// ============================================
+func (r *permisoRepository) GetPermisosByPerfil(perfilID int) (map[string]models.Permiso, error) {
+	if perfilID <= 0 {
+		return nil, fmt.Errorf("ID de perfil inválido: %d", perfilID)
+	}
+
+	query := `
+		SELECT 
+			m.id, m.nombre,
+			COALESCE(p.puede_ver, false) as puede_ver,
+			COALESCE(p.puede_crear, false) as puede_crear,
+			COALESCE(p.puede_editar, false) as puede_editar,
+			COALESCE(p.puede_eliminar, false) as puede_eliminar,
+			COALESCE(p.puede_detalle, false) as puede_detalle
+		FROM modulos m
+		LEFT JOIN permisos p ON p.modulo_id = m.id AND p.perfil_id = $1
+		WHERE m.activo = true
+		ORDER BY m.id
+	`
+
+	rows, err := r.db.Query(query, perfilID)
+	if err != nil {
+		return nil, fmt.Errorf("error obteniendo permisos: %w", err)
+	}
+	defer rows.Close()
+
+	resultados := make(map[string]models.Permiso)
+	for rows.Next() {
+		var permiso models.Permiso
+		var moduloNombre string
+		err := rows.Scan(
+			&permiso.ModuloID, &moduloNombre,
+			&permiso.PuedeVer, &permiso.PuedeCrear,
+			&permiso.PuedeEditar, &permiso.PuedeEliminar, &permiso.PuedeDetalle,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error escaneando resultado: %w", err)
+		}
+		permiso.ModuloNombre = moduloNombre
+		resultados[moduloNombre] = permiso
 	}
 	return resultados, nil
 }
@@ -146,20 +195,24 @@ func (r *permisoRepository) UserHasPermission(userID int, moduloNombre string, p
 	}
 
 	query := `
-        SELECT 
-            CASE $3
-                WHEN 'ver' THEN p.puede_ver
-                WHEN 'crear' THEN p.puede_crear
-                WHEN 'editar' THEN p.puede_editar
-                WHEN 'eliminar' THEN p.puede_eliminar
-                WHEN 'detalle' THEN p.puede_detalle
-                ELSE false
-            END
-        FROM users u
-        JOIN perfiles per ON u.perfil_id = per.id
-        JOIN permisos p ON p.perfil_id = per.id
-        JOIN modulos m ON p.modulo_id = m.id
-        WHERE u.id = $1 AND m.nombre = $2
+       SELECT 
+    CASE $3
+        WHEN 'ver' THEN COALESCE(p.puede_ver, false)
+        WHEN 'crear' THEN COALESCE(p.puede_crear, false)
+        WHEN 'editar' THEN COALESCE(p.puede_editar, false)
+        WHEN 'eliminar' THEN COALESCE(p.puede_eliminar, false)
+        WHEN 'detalle' THEN COALESCE(p.puede_detalle, false)
+        ELSE false
+    END
+FROM users u
+JOIN perfiles per ON u.perfil_id = per.id
+LEFT JOIN permisos p ON p.perfil_id = per.id
+LEFT JOIN modulos m ON p.modulo_id = m.id AND m.nombre = $2
+WHERE u.id = $1
+ORDER BY 
+    CASE WHEN m.nombre = $2 THEN 0 ELSE 1 END,
+    COALESCE(p.puede_ver, false) DESC
+LIMIT 1
     `
 
 	var tienePermiso bool
@@ -182,19 +235,19 @@ func (r *permisoRepository) GetUserPermissions(userID int) (map[string]map[strin
 	}
 
 	query := `
-        SELECT 
-            m.nombre,
-            p.puede_ver,
-            p.puede_crear,
-            p.puede_editar,
-            p.puede_eliminar,
-            p.puede_detalle
-        FROM users u
-        JOIN perfiles per ON u.perfil_id = per.id
-        JOIN permisos p ON p.perfil_id = per.id
-        JOIN modulos m ON p.modulo_id = m.id
-        WHERE u.id = $1 AND m.activo = true
-    `
+    SELECT 
+        m.nombre,
+        COALESCE(p.puede_ver, false) as puede_ver,
+        COALESCE(p.puede_crear, false) as puede_crear,
+        COALESCE(p.puede_editar, false) as puede_editar,
+        COALESCE(p.puede_eliminar, false) as puede_eliminar,
+        COALESCE(p.puede_detalle, false) as puede_detalle
+    FROM users u
+JOIN perfiles per ON u.perfil_id = per.id
+LEFT JOIN permisos p ON p.perfil_id = per.id
+LEFT JOIN modulos m ON p.modulo_id = m.id
+WHERE u.id = $1 AND m.activo = true
+`
 
 	rows, err := r.db.Query(query, userID)
 	if err != nil {
@@ -233,10 +286,10 @@ func (r *permisoRepository) IsAdmin(userID int) (bool, error) {
 
 	query := `
         SELECT EXISTS(
-            SELECT 1 FROM users u
-            JOIN perfiles per ON u.perfil_id = per.id
-            WHERE u.id = $1 AND per.nombre = 'Administrador'
-        )
+    SELECT 1 FROM users u
+    JOIN perfiles per ON u.perfil_id = per.id
+    WHERE u.id = $1 AND per.nombre = 'Administrador'
+)
     `
 	var isAdmin bool
 	err := r.db.QueryRow(query, userID).Scan(&isAdmin)
@@ -263,7 +316,7 @@ func (r *permisoRepository) DeletePermissionsByPerfil(perfilID int) error {
 }
 
 // ============================================
-// GET USER PERMISSIONS BY USER ID
+// GET USER PERMISSIONS BY USER ID - CORREGIDO
 // ============================================
 func (r *permisoRepository) GetUserPermissionsByUserID(userID int) ([]models.ModuloConPermisos, error) {
 	if userID <= 0 {
@@ -271,21 +324,19 @@ func (r *permisoRepository) GetUserPermissionsByUserID(userID int) ([]models.Mod
 	}
 
 	query := `
-        SELECT 
-            m.id, m.nombre, m.nombre_mostrar, m.ruta, m.icono, m.categoria, m.orden, m.activo, m.created_at,
-            COALESCE(p.puede_ver, false) as puede_ver,
-            COALESCE(p.puede_crear, false) as puede_crear,
-            COALESCE(p.puede_editar, false) as puede_editar,
-            COALESCE(p.puede_eliminar, false) as puede_eliminar,
-            COALESCE(p.puede_detalle, false) as puede_detalle
-        FROM users u
-        JOIN perfiles per ON u.perfil_id = per.id
-        CROSS JOIN modulos m
-        LEFT JOIN permisos p ON p.modulo_id = m.id AND p.perfil_id = per.id
-        WHERE u.id = $1 AND m.activo = true
-        ORDER BY m.categoria, m.orden, m.id
-    `
-
+    SELECT 
+        m.id, m.nombre, m.activo, m.created_at,
+        COALESCE(p.puede_ver, false) as puede_ver,
+        COALESCE(p.puede_crear, false) as puede_crear,
+        COALESCE(p.puede_editar, false) as puede_editar,
+        COALESCE(p.puede_eliminar, false) as puede_eliminar,
+        COALESCE(p.puede_detalle, false) as puede_detalle
+    FROM users u
+JOIN perfiles per ON u.perfil_id = per.id
+CROSS JOIN modulos m
+LEFT JOIN permisos p ON p.modulo_id = m.id AND p.perfil_id = per.id
+WHERE u.id = $1 AND m.activo = true
+`
 	rows, err := r.db.Query(query, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error obteniendo permisos del usuario: %w", err)
@@ -296,8 +347,7 @@ func (r *permisoRepository) GetUserPermissionsByUserID(userID int) ([]models.Mod
 	for rows.Next() {
 		var mp models.ModuloConPermisos
 		err := rows.Scan(
-			&mp.Modulo.ID, &mp.Modulo.Nombre, &mp.Modulo.NombreMostrar, &mp.Modulo.Ruta,
-			&mp.Modulo.Icono, &mp.Modulo.Categoria, &mp.Modulo.Orden, &mp.Modulo.Activo, &mp.Modulo.CreatedAt,
+			&mp.Modulo.ID, &mp.Modulo.Nombre, &mp.Modulo.Activo, &mp.Modulo.CreatedAt,
 			&mp.PuedeVer, &mp.PuedeCrear, &mp.PuedeEditar, &mp.PuedeEliminar, &mp.PuedeDetalle,
 		)
 		if err != nil {
@@ -319,11 +369,11 @@ func (r *permisoRepository) GetUserRole(userID int) (int, string, error) {
 	var roleID int
 	var roleName string
 	query := `
-        SELECT u.perfil_id, p.nombre
-        FROM users u
-        JOIN perfiles p ON u.perfil_id = p.id
-        WHERE u.id = $1
-    `
+    SELECT per.id, per.nombre
+FROM users u
+JOIN perfiles per ON u.perfil_id = per.id
+WHERE u.id = $1
+`
 	err := r.db.QueryRow(query, userID).Scan(&roleID, &roleName)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -346,18 +396,20 @@ func (r *permisoRepository) HasAnyPermission(userID int, moduloNombre string) (b
 	}
 
 	query := `
-        SELECT EXISTS(
-            SELECT 1 
-            FROM users u
-            JOIN perfiles per ON u.perfil_id = per.id
-            JOIN permisos p ON p.perfil_id = per.id
-            JOIN modulos m ON p.modulo_id = m.id
-            WHERE u.id = $1 
-                AND m.nombre = $2
-                AND (p.puede_ver = true OR p.puede_crear = true OR p.puede_editar = true 
-                     OR p.puede_eliminar = true OR p.puede_detalle = true)
-        )
-    `
+    SELECT EXISTS(
+        SELECT 1 
+        FROM users u
+JOIN perfiles per ON u.perfil_id = per.id
+LEFT JOIN permisos p ON p.perfil_id = per.id
+LEFT JOIN modulos m ON p.modulo_id = m.id
+WHERE u.id = $1 AND m.nombre = $2
+            AND (COALESCE(p.puede_ver, false) = true 
+                OR COALESCE(p.puede_crear, false) = true 
+                OR COALESCE(p.puede_editar, false) = true 
+                OR COALESCE(p.puede_eliminar, false) = true 
+                OR COALESCE(p.puede_detalle, false) = true)
+    )
+`
 	var hasPermission bool
 	err := r.db.QueryRow(query, userID, moduloNombre).Scan(&hasPermission)
 	if err != nil {

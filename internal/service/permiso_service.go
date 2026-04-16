@@ -118,18 +118,57 @@ func (s *permisoService) SavePermissions(perfilID int, permisos []models.Permiso
 }
 
 // UserHasPermission - Verifica si un usuario tiene un permiso específico
+// UserHasPermission - Verifica si un usuario tiene un permiso específico
 func (s *permisoService) UserHasPermission(userID int, moduloNombre string, permiso string) (bool, error) {
 	if userID <= 0 {
 		return false, fmt.Errorf("ID de usuario inválido")
 	}
+
+	// ✅ VERIFICAR SI ES ADMINISTRADOR PRIMERO
+	isAdmin, err := s.permisoRepo.IsAdmin(userID)
+	if err == nil && isAdmin {
+		log.Printf("[DEBUG] UserHasPermission - Usuario %d es ADMIN, concediendo permiso '%s' en '%s'",
+			userID, permiso, moduloNombre)
+		return true, nil
+	}
+
+	// Si no es admin, verificar en BD
 	return s.permisoRepo.UserHasPermission(userID, moduloNombre, permiso)
 }
 
+// GetUserPermissions - Obtiene todos los permisos de un usuario (para frontend)
 // GetUserPermissions - Obtiene todos los permisos de un usuario (para frontend)
 func (s *permisoService) GetUserPermissions(userID int) (map[string]map[string]bool, error) {
 	if userID <= 0 {
 		return nil, fmt.Errorf("ID de usuario inválido")
 	}
+
+	// ✅ Si es Administrador, devolver todos los permisos en true
+	isAdmin, err := s.permisoRepo.IsAdmin(userID)
+	if err == nil && isAdmin {
+		log.Printf("[DEBUG] GetUserPermissions - Usuario %d es ADMIN, devolviendo todos los permisos", userID)
+
+		// Obtener todos los módulos
+		filter := &models.ModuloFilter{Page: 1, PageSize: 100}
+		modulos, err := s.moduloRepo.FindAll(filter)
+		if err != nil {
+			return nil, err
+		}
+
+		// Crear mapa con todos los permisos en true
+		result := make(map[string]map[string]bool)
+		for _, m := range modulos.Data {
+			result[m.Nombre] = map[string]bool{
+				"ver":      true,
+				"crear":    true,
+				"editar":   true,
+				"eliminar": true,
+				"detalle":  true,
+			}
+		}
+		return result, nil
+	}
+
 	return s.permisoRepo.GetUserPermissions(userID)
 }
 

@@ -35,9 +35,9 @@ func (h *DashboardHandler) ShowDashboard(c echo.Context) error {
 		userEmail = "correo@no.disponible"
 	}
 
-	userRole := c.Get("user_role")
-	if userRole == nil {
-		userRole = "usuario"
+	userPerfil := c.Get("user_perfil") // ← Cambiado de user_role a user_perfil
+	if userPerfil == nil {
+		userPerfil = "usuario"
 	}
 
 	csrfToken := c.Get("csrf_token")
@@ -58,16 +58,16 @@ func (h *DashboardHandler) ShowDashboard(c echo.Context) error {
 		{"usuario": userName, "accion": "Inició sesión", "tiempo": "Hace unos momentos"},
 	}
 
-	modulos := h.getModulosByRole(userRole.(string))
+	modulos := h.getModulosByPerfil(userPerfil.(string)) // ← Cambiado de getModulosByRole a getModulosByPerfil
 
-	log.Printf("[INFO] Dashboard cargado para usuario %d (%s) con rol %s", userID, userName, userRole)
+	log.Printf("[INFO] Dashboard cargado para usuario %d (%s) con perfil %s", userID, userName, userPerfil)
 
 	return c.Render(http.StatusOK, "dashboard.html", map[string]interface{}{
 		"Title":          "Dashboard Principal",
 		"UserID":         userID,
 		"UserName":       userName,
 		"UserEmail":      userEmail,
-		"UserRole":       userRole,
+		"UserPerfil":     userPerfil, // ← Cambiado de UserRole a UserPerfil
 		"Stats":          stats,
 		"RecentActivity": recentActivity,
 		"Modulos":        modulos,
@@ -117,7 +117,8 @@ func (h *DashboardHandler) getActiveUsers() int {
 	return count
 }
 
-func (h *DashboardHandler) getModulosByRole(role string) []map[string]interface{} {
+// getModulosByPerfil - Obtiene módulos según el perfil del usuario
+func (h *DashboardHandler) getModulosByPerfil(perfil string) []map[string]interface{} {
 	modulos := []map[string]interface{}{}
 
 	modulos = append(modulos, map[string]interface{}{
@@ -134,7 +135,8 @@ func (h *DashboardHandler) getModulosByRole(role string) []map[string]interface{
 		"color":  "info",
 	})
 
-	if role == "administrador" {
+	// Si es administrador, mostrar módulos de seguridad
+	if perfil == "administrador" {
 		modulos = append(modulos, []map[string]interface{}{
 			{"nombre": "Perfiles", "ruta": "/seguridad/perfiles", "icono": "bi-person-badge", "color": "danger"},
 			{"nombre": "Módulos", "ruta": "/seguridad/modulos", "icono": "bi-grid-3x3", "color": "warning"},
@@ -143,6 +145,7 @@ func (h *DashboardHandler) getModulosByRole(role string) []map[string]interface{
 		}...)
 	}
 
+	// Módulos principales (siempre visibles)
 	modulos = append(modulos, []map[string]interface{}{
 		{"nombre": "Principal 1.1", "ruta": "/principal/clientes", "icono": "bi-building", "color": "secondary"},
 		{"nombre": "Principal 1.2", "ruta": "/principal/productos", "icono": "bi-box", "color": "secondary"},

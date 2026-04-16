@@ -56,9 +56,20 @@ func (h *PrincipalHandler) getPermisosSeguro(c echo.Context, moduloNombre string
 
 // renderPrincipalTemplate - Función auxiliar para renderizar templates
 func (h *PrincipalHandler) renderPrincipalTemplate(c echo.Context, title, moduloNombre, descripcion, templateName string) error {
-	userID := c.Get("user_id").(int)
-	userName := c.Get("user_name").(string)
-	userRole := c.Get("user_role").(string)
+	userID, ok := c.Get("user_id").(int)
+	if !ok {
+		userID = 0
+	}
+
+	userName := c.Get("user_name")
+	if userName == nil {
+		userName = "Usuario"
+	}
+
+	userPerfil := c.Get("user_perfil") // ← Cambiado de user_role
+	if userPerfil == nil {
+		userPerfil = "usuario"
+	}
 
 	permisos := h.getPermisosSeguro(c, moduloNombre)
 
@@ -69,12 +80,12 @@ func (h *PrincipalHandler) renderPrincipalTemplate(c echo.Context, title, modulo
 		"ModuloNombre":      moduloNombre,
 		"ModuloDescripcion": descripcion,
 		"UserName":          userName,
-		"UserRole":          userRole,
+		"UserPerfil":        userPerfil, // ← Cambiado de UserRole
 		"Permisos":          permisos,
 		"breadcrumbs": []map[string]string{
 			{"name": "Inicio", "url": "/"},
 			{"name": "Dashboard", "url": "/dashboard"},
-			{"name": moduloNombre, "url": ""},
+			{"name": title, "url": ""},
 		},
 	})
 }
@@ -83,7 +94,7 @@ func (h *PrincipalHandler) renderPrincipalTemplate(c echo.Context, title, modulo
 func (h *PrincipalHandler) Principal11(c echo.Context) error {
 	return h.renderPrincipalTemplate(c,
 		"Principal 1.1 - Clientes",
-		"principal11",
+		"Principal 1.1", // ← CAMBIAR A ESTO
 		"Pantalla estática con acciones visibles según permisos.",
 		"principal/principal11.html",
 	)
@@ -93,7 +104,7 @@ func (h *PrincipalHandler) Principal11(c echo.Context) error {
 func (h *PrincipalHandler) Principal12(c echo.Context) error {
 	return h.renderPrincipalTemplate(c,
 		"Principal 1.2 - Productos",
-		"principal12",
+		"Principal 1.2", // ← CAMBIAR A ESTO
 		"Pantalla estática con acciones visibles según permisos.",
 		"principal/principal12.html",
 	)
@@ -103,7 +114,7 @@ func (h *PrincipalHandler) Principal12(c echo.Context) error {
 func (h *PrincipalHandler) Principal21(c echo.Context) error {
 	return h.renderPrincipalTemplate(c,
 		"Principal 2.1 - Facturas",
-		"principal21",
+		"Principal 2.1", // ← CAMBIAR A ESTO
 		"Pantalla estática con acciones visibles según permisos.",
 		"principal/principal21.html",
 	)
@@ -113,7 +124,7 @@ func (h *PrincipalHandler) Principal21(c echo.Context) error {
 func (h *PrincipalHandler) Principal22(c echo.Context) error {
 	return h.renderPrincipalTemplate(c,
 		"Principal 2.2 - Proveedores",
-		"principal22",
+		"Principal 2.2", // ← CAMBIAR A ESTO
 		"Pantalla estática con acciones visibles según permisos.",
 		"principal/principal22.html",
 	)

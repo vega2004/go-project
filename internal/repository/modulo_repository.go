@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 	"tu-proyecto/internal/models"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // ============================================
-// INTERFAZ PRINCIPAL (definida UNA SOLA VEZ)
+// INTERFAZ PRINCIPAL
 // ============================================
 type ModuloRepository interface {
 	// CRUD Básico
@@ -20,13 +21,9 @@ type ModuloRepository interface {
 	FindByID(id int) (*models.Modulo, error)
 	FindAll(filter *models.ModuloFilter) (*models.ModuloPaginatedResponse, error)
 
-	// Consultas específicas
-	GetByCategoria(categoria string) ([]models.Modulo, error)
+	// Métodos simplificados
 	HasAssociatedPermissions(id int) (bool, error)
-	GetMaxOrdenByCategoria(categoria string) (int, error)
-	ExistsByRuta(ruta string, excludeID int) (bool, error)
-	UpdateOrder(id, orden int) error          // ← Agregado para Reordenar
-	GetCategoriasDistinct() ([]string, error) // ← NUEVO MÉTODO
+	ExistsByNombre(nombre string, excludeID int) (bool, error)
 }
 
 // ============================================
@@ -37,114 +34,156 @@ type moduloRepository struct {
 }
 
 func NewModuloRepository(db *sql.DB) ModuloRepository {
+	log.Println("[DEBUG] 📦 ModuloRepository inicializado")
 	return &moduloRepository{db: db}
 }
 
 // Create - Crear nuevo módulo
 func (r *moduloRepository) Create(modulo *models.Modulo) error {
-	query := `INSERT INTO modulos (nombre, nombre_mostrar, ruta, icono, categoria, orden, activo) 
-              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at`
+	log.Println("[DEBUG] 📦 Repository.Create - INICIANDO")
+	log.Printf("[DEBUG] 📦 Datos recibidos: Nombre='%s', Descripcion='%s', Activo=%v",
+		modulo.Nombre, modulo.Descripcion, modulo.Activo)
+
+	query := `INSERT INTO modulos (nombre, descripcion, activo) 
+              VALUES ($1, $2, $3) RETURNING id, created_at`
+
+	log.Printf("[DEBUG] 📦 Ejecutando query: %s", query)
+	log.Printf("[DEBUG] 📦 Parámetros: $1='%s', $2='%s', $3=%v",
+		modulo.Nombre, modulo.Descripcion, modulo.Activo)
 
 	err := r.db.QueryRow(query,
 		modulo.Nombre,
-		modulo.NombreMostrar,
-		modulo.Ruta,
-		modulo.Icono,
-		modulo.Categoria,
-		modulo.Orden,
+		modulo.Descripcion,
 		modulo.Activo,
 	).Scan(&modulo.ID, &modulo.CreatedAt)
 
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
-			return fmt.Errorf("ya existe un módulo con el nombre '%s'", modulo.Nombre)
+		log.Printf("[ERROR] 📦 Error en INSERT: %v", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			log.Printf("[ERROR] 📦 Código PostgreSQL: %s, Mensaje: %s", pqErr.Code, pqErr.Message)
+			if pqErr.Code == "23505" {
+				log.Printf("[WARN] 📦 Violación de UNIQUE constraint - Ya existe módulo con nombre '%s'", modulo.Nombre)
+				return fmt.Errorf("ya existe un módulo con el nombre '%s'", modulo.Nombre)
+			}
 		}
 		return fmt.Errorf("error al crear módulo: %w", err)
 	}
+
+	log.Printf("[DEBUG] 📦 ✅ Módulo creado exitosamente en BD")
+	log.Printf("[DEBUG] 📦 ID asignado: %d, CreatedAt: %v", modulo.ID, modulo.CreatedAt)
 	return nil
 }
 
 // Update - Actualizar módulo existente
 func (r *moduloRepository) Update(modulo *models.Modulo) error {
+	log.Println("[DEBUG] 📦 Repository.Update - INICIANDO")
+	log.Printf("[DEBUG] 📦 Datos recibidos: ID=%d, Nombre='%s', Descripcion='%s', Activo=%v",
+		modulo.ID, modulo.Nombre, modulo.Descripcion, modulo.Activo)
+
 	query := `UPDATE modulos SET 
-                nombre=$1, 
-                nombre_mostrar=$2, 
-                ruta=$3, 
-                icono=$4, 
-                categoria=$5, 
-                orden=$6, 
-                activo=$7 
-              WHERE id=$8`
+                nombre = $1, 
+                descripcion = $2, 
+                activo = $3 
+              WHERE id = $4`
+
+	log.Printf("[DEBUG] 📦 Ejecutando query: %s", query)
+	log.Printf("[DEBUG] 📦 Parámetros: $1='%s', $2='%s', $3=%v, $4=%d",
+		modulo.Nombre, modulo.Descripcion, modulo.Activo, modulo.ID)
 
 	result, err := r.db.Exec(query,
 		modulo.Nombre,
-		modulo.NombreMostrar,
-		modulo.Ruta,
-		modulo.Icono,
-		modulo.Categoria,
-		modulo.Orden,
+		modulo.Descripcion,
 		modulo.Activo,
 		modulo.ID,
 	)
 
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
-			return fmt.Errorf("ya existe un módulo con el nombre '%s'", modulo.Nombre)
+		log.Printf("[ERROR] 📦 Error en UPDATE: %v", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			log.Printf("[ERROR] 📦 Código PostgreSQL: %s, Mensaje: %s", pqErr.Code, pqErr.Message)
+			if pqErr.Code == "23505" {
+				log.Printf("[WARN] 📦 Violación de UNIQUE constraint - Ya existe módulo con nombre '%s'", modulo.Nombre)
+				return fmt.Errorf("ya existe un módulo con el nombre '%s'", modulo.Nombre)
+			}
 		}
 		return fmt.Errorf("error al actualizar módulo: %w", err)
 	}
 
 	rowsAffected, _ := result.RowsAffected()
+	log.Printf("[DEBUG] 📦 Filas afectadas: %d", rowsAffected)
+
 	if rowsAffected == 0 {
+		log.Printf("[WARN] 📦 No se encontró módulo con ID %d para actualizar", modulo.ID)
 		return fmt.Errorf("módulo con ID %d no encontrado", modulo.ID)
 	}
+
+	log.Printf("[DEBUG] 📦 ✅ Módulo actualizado exitosamente")
 	return nil
 }
 
 // Delete - Eliminar módulo
 func (r *moduloRepository) Delete(id int) error {
-	query := `DELETE FROM modulos WHERE id=$1`
+	log.Println("[DEBUG] 📦 Repository.Delete - INICIANDO")
+	log.Printf("[DEBUG] 📦 Eliminando módulo ID: %d", id)
+
+	query := `DELETE FROM modulos WHERE id = $1`
+	log.Printf("[DEBUG] 📦 Ejecutando query: %s con ID=%d", query, id)
+
 	result, err := r.db.Exec(query, id)
 	if err != nil {
+		log.Printf("[ERROR] 📦 Error en DELETE: %v", err)
 		return fmt.Errorf("error al eliminar módulo: %w", err)
 	}
 
 	rowsAffected, _ := result.RowsAffected()
+	log.Printf("[DEBUG] 📦 Filas afectadas: %d", rowsAffected)
+
 	if rowsAffected == 0 {
+		log.Printf("[WARN] 📦 No se encontró módulo con ID %d para eliminar", id)
 		return fmt.Errorf("módulo con ID %d no encontrado", id)
 	}
+
+	log.Printf("[DEBUG] 📦 ✅ Módulo ID=%d eliminado exitosamente", id)
 	return nil
 }
 
 // FindByID - Buscar módulo por ID
 func (r *moduloRepository) FindByID(id int) (*models.Modulo, error) {
+	log.Println("[DEBUG] 📦 Repository.FindByID - INICIANDO")
+	log.Printf("[DEBUG] 📦 Buscando módulo ID: %d", id)
+
 	modulo := &models.Modulo{}
-	query := `SELECT id, nombre, nombre_mostrar, ruta, icono, categoria, orden, activo, created_at 
-              FROM modulos WHERE id=$1`
+	query := `SELECT id, nombre, descripcion, activo, created_at 
+              FROM modulos WHERE id = $1`
 
 	err := r.db.QueryRow(query, id).Scan(
 		&modulo.ID,
 		&modulo.Nombre,
-		&modulo.NombreMostrar,
-		&modulo.Ruta,
-		&modulo.Icono,
-		&modulo.Categoria,
-		&modulo.Orden,
+		&modulo.Descripcion,
 		&modulo.Activo,
 		&modulo.CreatedAt,
 	)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
+			log.Printf("[WARN] 📦 Módulo con ID %d no encontrado", id)
 			return nil, fmt.Errorf("módulo con ID %d no encontrado", id)
 		}
+		log.Printf("[ERROR] 📦 Error al buscar módulo: %v", err)
 		return nil, fmt.Errorf("error al buscar módulo: %w", err)
 	}
+
+	log.Printf("[DEBUG] 📦 ✅ Módulo encontrado: ID=%d, Nombre='%s', Activo=%v",
+		modulo.ID, modulo.Nombre, modulo.Activo)
 	return modulo, nil
 }
 
 // FindAll - Listar módulos con paginación y filtros
 func (r *moduloRepository) FindAll(filter *models.ModuloFilter) (*models.ModuloPaginatedResponse, error) {
+	log.Println("[DEBUG] 📦 Repository.FindAll - INICIANDO")
+	log.Printf("[DEBUG] 📦 Filtros: Nombre='%s', Page=%d, PageSize=%d",
+		filter.Nombre, filter.Page, filter.PageSize)
+
 	// Validar paginación
 	if filter.Page < 1 {
 		filter.Page = 1
@@ -152,11 +191,13 @@ func (r *moduloRepository) FindAll(filter *models.ModuloFilter) (*models.ModuloP
 	if filter.PageSize < 1 {
 		filter.PageSize = 10
 	}
-	// Límite máximo de página (seguridad)
 	if filter.PageSize > 100 {
 		filter.PageSize = 100
 	}
 	offset := (filter.Page - 1) * filter.PageSize
+
+	log.Printf("[DEBUG] 📦 Paginación ajustada: Page=%d, PageSize=%d, Offset=%d",
+		filter.Page, filter.PageSize, offset)
 
 	// Construir filtros WHERE dinámicos
 	where := []string{}
@@ -167,6 +208,7 @@ func (r *moduloRepository) FindAll(filter *models.ModuloFilter) (*models.ModuloP
 		where = append(where, fmt.Sprintf("nombre ILIKE $%d", argPos))
 		args = append(args, "%"+filter.Nombre+"%")
 		argPos++
+		log.Printf("[DEBUG] 📦 Filtro WHERE agregado: nombre ILIKE '%%%s%%'", filter.Nombre)
 	}
 
 	// Query para contar total
@@ -175,23 +217,32 @@ func (r *moduloRepository) FindAll(filter *models.ModuloFilter) (*models.ModuloP
 		countQuery += " WHERE " + strings.Join(where, " AND ")
 	}
 
+	log.Printf("[DEBUG] 📦 Count Query: %s", countQuery)
+	log.Printf("[DEBUG] 📦 Count Args: %v", args)
+
 	var total int
 	err := r.db.QueryRow(countQuery, args...).Scan(&total)
 	if err != nil {
+		log.Printf("[ERROR] 📦 Error al contar módulos: %v", err)
 		return nil, fmt.Errorf("error al contar módulos: %w", err)
 	}
+	log.Printf("[DEBUG] 📦 Total módulos encontrados: %d", total)
 
 	// Query para datos paginados
-	dataQuery := `SELECT id, nombre, nombre_mostrar, ruta, icono, categoria, orden, activo, created_at 
+	dataQuery := `SELECT id, nombre, descripcion, activo, created_at 
                   FROM modulos`
 	if len(where) > 0 {
 		dataQuery += " WHERE " + strings.Join(where, " AND ")
 	}
-	dataQuery += fmt.Sprintf(" ORDER BY orden ASC, id ASC LIMIT $%d OFFSET $%d", argPos, argPos+1)
+	dataQuery += fmt.Sprintf(" ORDER BY id ASC LIMIT $%d OFFSET $%d", argPos, argPos+1)
 	args = append(args, filter.PageSize, offset)
+
+	log.Printf("[DEBUG] 📦 Data Query: %s", dataQuery)
+	log.Printf("[DEBUG] 📦 Data Args: %v", args)
 
 	rows, err := r.db.Query(dataQuery, args...)
 	if err != nil {
+		log.Printf("[ERROR] 📦 Error al listar módulos: %v", err)
 		return nil, fmt.Errorf("error al listar módulos: %w", err)
 	}
 	defer rows.Close()
@@ -202,21 +253,21 @@ func (r *moduloRepository) FindAll(filter *models.ModuloFilter) (*models.ModuloP
 		err := rows.Scan(
 			&m.ID,
 			&m.Nombre,
-			&m.NombreMostrar,
-			&m.Ruta,
-			&m.Icono,
-			&m.Categoria,
-			&m.Orden,
+			&m.Descripcion,
 			&m.Activo,
 			&m.CreatedAt,
 		)
 		if err != nil {
+			log.Printf("[ERROR] 📦 Error al escanear módulo: %v", err)
 			return nil, fmt.Errorf("error al escanear módulo: %w", err)
 		}
 		modulos = append(modulos, m)
 	}
 
 	totalPages := (total + filter.PageSize - 1) / filter.PageSize
+
+	log.Printf("[DEBUG] 📦 ✅ Listado completado: %d módulos retornados, TotalPages=%d",
+		len(modulos), totalPages)
 
 	return &models.ModuloPaginatedResponse{
 		Data:       modulos,
@@ -227,81 +278,41 @@ func (r *moduloRepository) FindAll(filter *models.ModuloFilter) (*models.ModuloP
 	}, nil
 }
 
-// GetByCategoria - Obtener módulos por categoría (solo activos)
-func (r *moduloRepository) GetByCategoria(categoria string) ([]models.Modulo, error) {
-	// Validar que la categoría no esté vacía
-	if categoria == "" {
-		return nil, fmt.Errorf("la categoría no puede estar vacía")
-	}
-
-	query := `SELECT id, nombre, nombre_mostrar, ruta, icono, categoria, orden, activo, created_at 
-              FROM modulos 
-              WHERE categoria = $1 AND activo = true 
-              ORDER BY orden ASC`
-
-	rows, err := r.db.Query(query, categoria)
-	if err != nil {
-		return nil, fmt.Errorf("error al obtener módulos por categoría: %w", err)
-	}
-	defer rows.Close()
-
-	var modulos []models.Modulo
-	for rows.Next() {
-		var m models.Modulo
-		err := rows.Scan(
-			&m.ID,
-			&m.Nombre,
-			&m.NombreMostrar,
-			&m.Ruta,
-			&m.Icono,
-			&m.Categoria,
-			&m.Orden,
-			&m.Activo,
-			&m.CreatedAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("error al escanear módulo: %w", err)
-		}
-		modulos = append(modulos, m)
-	}
-
-	return modulos, nil
-}
-
 // ============================================
-// MÉTODOS ADICIONALES PARA VALIDACIONES
+// MÉTODOS ADICIONALES
 // ============================================
 
 // HasAssociatedPermissions - Verifica si el módulo tiene permisos asignados
+// HasAssociatedPermissions - Verifica si el módulo tiene permisos ACTIVOS asignados
 func (r *moduloRepository) HasAssociatedPermissions(id int) (bool, error) {
+	log.Println("[DEBUG] 📦 Repository.HasAssociatedPermissions - INICIANDO")
+	log.Printf("[DEBUG] 📦 Verificando permisos ACTIVOS asociados para módulo ID: %d", id)
+
 	var count int
-	query := `SELECT COUNT(*) FROM permisos WHERE modulo_id = $1`
+	query := `
+		SELECT COUNT(*) FROM permisos 
+		WHERE modulo_id = $1 
+		AND (puede_ver = true OR puede_crear = true OR puede_editar = true 
+		     OR puede_eliminar = true OR puede_detalle = true)
+	`
 	err := r.db.QueryRow(query, id).Scan(&count)
 	if err != nil {
+		log.Printf("[ERROR] 📦 Error verificando permisos asociados: %v", err)
 		return false, fmt.Errorf("error verificando permisos asociados: %w", err)
 	}
+
+	log.Printf("[DEBUG] 📦 Permisos ACTIVOS encontrados: %d", count)
 	return count > 0, nil
 }
 
-// GetMaxOrdenByCategoria - Obtiene el orden máximo para una categoría
-func (r *moduloRepository) GetMaxOrdenByCategoria(categoria string) (int, error) {
-	if categoria == "" {
-		return 0, fmt.Errorf("la categoría no puede estar vacía")
-	}
+// ExistsByNombre - Verifica si ya existe un módulo con el mismo nombre
+func (r *moduloRepository) ExistsByNombre(nombre string, excludeID int) (bool, error) {
+	log.Println("[DEBUG] 📦 Repository.ExistsByNombre - INICIANDO")
+	log.Printf("[DEBUG] 📦 Verificando nombre: '%s', Excluir ID: %d", nombre, excludeID)
 
-	var maxOrden int
-	query := `SELECT COALESCE(MAX(orden), 0) FROM modulos WHERE categoria = $1`
-	err := r.db.QueryRow(query, categoria).Scan(&maxOrden)
-	if err != nil {
-		return 0, fmt.Errorf("error obteniendo máximo orden: %w", err)
-	}
-	return maxOrden, nil
-}
-
-// ExistsByRuta - Verifica si ya existe un módulo con la misma ruta
-func (r *moduloRepository) ExistsByRuta(ruta string, excludeID int) (bool, error) {
-	if ruta == "" {
-		return false, fmt.Errorf("la ruta no puede estar vacía")
+	if nombre == "" {
+		log.Printf("[WARN] 📦 Nombre vacío proporcionado")
+		return false, fmt.Errorf("el nombre no puede estar vacío")
 	}
 
 	var count int
@@ -309,64 +320,21 @@ func (r *moduloRepository) ExistsByRuta(ruta string, excludeID int) (bool, error
 	var err error
 
 	if excludeID > 0 {
-		// Excluir un ID específico (para updates)
-		query = `SELECT COUNT(*) FROM modulos WHERE ruta = $1 AND id != $2`
-		err = r.db.QueryRow(query, ruta, excludeID).Scan(&count)
+		query = `SELECT COUNT(*) FROM modulos WHERE nombre = $1 AND id != $2`
+		err = r.db.QueryRow(query, nombre, excludeID).Scan(&count)
+		log.Printf("[DEBUG] 📦 Query: %s [nombre='%s', excludeID=%d]", query, nombre, excludeID)
 	} else {
-		// Sin exclusión (para creates)
-		query = `SELECT COUNT(*) FROM modulos WHERE ruta = $1`
-		err = r.db.QueryRow(query, ruta).Scan(&count)
+		query = `SELECT COUNT(*) FROM modulos WHERE nombre = $1`
+		err = r.db.QueryRow(query, nombre).Scan(&count)
+		log.Printf("[DEBUG] 📦 Query: %s [nombre='%s']", query, nombre)
 	}
 
 	if err != nil {
-		return false, fmt.Errorf("error verificando ruta única: %w", err)
-	}
-	return count > 0, nil
-}
-
-// UpdateOrder - Actualiza el orden de un módulo específico
-func (r *moduloRepository) UpdateOrder(id, orden int) error {
-	if id <= 0 {
-		return fmt.Errorf("ID inválido: %d", id)
-	}
-	if orden < 0 {
-		return fmt.Errorf("orden inválido: %d", orden)
+		log.Printf("[ERROR] 📦 Error verificando nombre único: %v", err)
+		return false, fmt.Errorf("error verificando nombre único: %w", err)
 	}
 
-	query := `UPDATE modulos SET orden = $1 WHERE id = $2`
-	result, err := r.db.Exec(query, orden, id)
-	if err != nil {
-		return fmt.Errorf("error actualizando orden: %w", err)
-	}
-
-	rowsAffected, _ := result.RowsAffected()
-	if rowsAffected == 0 {
-		return fmt.Errorf("módulo con ID %d no encontrado", id)
-	}
-	return nil
-}
-
-// Implementar el método
-func (r *moduloRepository) GetCategoriasDistinct() ([]string, error) {
-	query := `SELECT DISTINCT categoria FROM modulos ORDER BY categoria`
-	rows, err := r.db.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("error obteniendo categorías: %w", err)
-	}
-	defer rows.Close()
-
-	var categorias []string
-	for rows.Next() {
-		var cat string
-		if err := rows.Scan(&cat); err != nil {
-			return nil, fmt.Errorf("error escaneando categoría: %w", err)
-		}
-		categorias = append(categorias, cat)
-	}
-
-	if len(categorias) == 0 {
-		// Fallback a categorías por defecto
-		return []string{"seguridad", "principal1", "principal2"}, nil
-	}
-	return categorias, nil
+	exists := count > 0
+	log.Printf("[DEBUG] 📦 Resultado: existe=%v (count=%d)", exists, count)
+	return exists, nil
 }

@@ -1,7 +1,10 @@
 package config
 
 import (
+	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Env struct {
@@ -16,7 +19,12 @@ type Env struct {
 }
 
 func LoadEnv() *Env {
-	return &Env{
+	// Cargar archivo .env
+	if err := godotenv.Load(); err != nil {
+		log.Println("[WARN] No se pudo cargar archivo .env, usando variables de entorno del sistema")
+	}
+
+	env := &Env{
 		AppName:            getEnv("APP_NAME", "go-project"),
 		AppPort:            getEnv("APP_PORT", "8080"),
 		AppEnv:             getEnv("APP_ENV", "development"),
@@ -26,6 +34,12 @@ func LoadEnv() *Env {
 		RecaptchaSiteKey:   getEnv("RECAPTCHA_SITE_KEY", ""),
 		BaseURL:            getEnv("BASE_URL", "http://localhost:8080"),
 	}
+
+	// Log para verificar
+	log.Printf("[CONFIG] RecaptchaSiteKey: %s", env.RecaptchaSiteKey)
+	log.Printf("[CONFIG] RecaptchaSecretKey: %s", maskKey(env.RecaptchaSecretKey))
+
+	return env
 }
 
 func getEnv(key, fallback string) string {
@@ -36,11 +50,17 @@ func getEnv(key, fallback string) string {
 	return val
 }
 
-// Helper para obtener entorno
 func (e *Env) IsProduction() bool {
 	return e.AppEnv == "production"
 }
 
 func (e *Env) IsDevelopment() bool {
 	return e.AppEnv == "development"
+}
+
+func maskKey(key string) string {
+	if len(key) <= 8 {
+		return "***"
+	}
+	return key[:4] + "..." + key[len(key)-4:]
 }

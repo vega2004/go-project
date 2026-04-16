@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"io"
+	"log" // ← Agrega para logs
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -13,8 +14,8 @@ import (
 )
 
 const (
-	maxFileSize = 5 * 1024 * 1024 // 5MB
-	perfilDir   = "static/uploads/perfil"
+	maxFileSize = 5 * 1024 * 1024             // 5MB
+	perfilDir   = "web/static/uploads/perfil" // ✅ CORREGIDO
 )
 
 type UploadedFile struct {
@@ -54,11 +55,16 @@ func ValidateImage(file multipart.File, header *multipart.FileHeader) error {
 
 // SaveProfileImage - Guarda imagen de perfil
 func SaveProfileImage(file multipart.File, header *multipart.FileHeader) (*UploadedFile, error) {
+	log.Println("[DEBUG] SaveProfileImage - Iniciando")
+
 	if err := ValidateImage(file, header); err != nil {
+		log.Printf("[ERROR] ValidateImage falló: %v", err)
 		return nil, err
 	}
 
+	log.Printf("[DEBUG] Creando directorio: %s", perfilDir)
 	if err := os.MkdirAll(perfilDir, 0755); err != nil {
+		log.Printf("[ERROR] Error creando directorio: %v", err)
 		return nil, fmt.Errorf("error creando directorio: %v", err)
 	}
 
@@ -66,8 +72,11 @@ func SaveProfileImage(file multipart.File, header *multipart.FileHeader) (*Uploa
 	filename := fmt.Sprintf("profile_%s%s", uuid.New().String(), ext)
 	fullPath := filepath.Join(perfilDir, filename)
 
+	log.Printf("[DEBUG] Guardando archivo en: %s", fullPath)
+
 	dst, err := os.Create(fullPath)
 	if err != nil {
+		log.Printf("[ERROR] Error creando archivo: %v", err)
 		return nil, fmt.Errorf("error creando archivo: %v", err)
 	}
 	defer dst.Close()
@@ -76,8 +85,11 @@ func SaveProfileImage(file multipart.File, header *multipart.FileHeader) (*Uploa
 
 	size, err := io.Copy(dst, file)
 	if err != nil {
+		log.Printf("[ERROR] Error copiando archivo: %v", err)
 		return nil, fmt.Errorf("error guardando archivo: %v", err)
 	}
+
+	log.Printf("[DEBUG] Archivo guardado exitosamente. Tamaño: %d bytes", size)
 
 	return &UploadedFile{
 		Filename:     filename,
@@ -96,8 +108,10 @@ func DeleteFile(filePath string) error {
 
 	if strings.HasPrefix(filePath, "/static/") {
 		filePath = strings.TrimPrefix(filePath, "/static/")
-		filePath = "static/" + filePath
+		filePath = "web/static/" + filePath // ✅ CORREGIDO también
 	}
+
+	log.Printf("[DEBUG] Eliminando archivo: %s", filePath)
 
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return nil

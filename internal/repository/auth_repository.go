@@ -10,7 +10,7 @@ import (
 )
 
 // ============================================
-// INTERFAZ PRINCIPAL (definida UNA SOLA VEZ)
+// INTERFAZ PRINCIPAL
 // ============================================
 type AuthRepository interface {
 	// Métodos básicos
@@ -47,13 +47,13 @@ func NewAuthRepository(db *sql.DB) AuthRepository {
 func (r *authRepository) FindByEmail(email string) (*models.UserAuth, error) {
 	user := &models.UserAuth{}
 	query := `
-        SELECT u.id, u.name, u.email, u.phone, u.password, u.perfil_id, u.activo, u.created_at
-        FROM users u
-        WHERE u.email = $1
-    `
+		SELECT u.id, u.name, u.email, u.phone, u.password, u.perfil_id, u.activo, u.created_at
+		FROM users u
+		WHERE u.email = $1
+	`
 	err := r.db.QueryRow(query, email).Scan(
 		&user.ID, &user.Name, &user.Email, &user.Phone,
-		&user.Password, &user.RoleID, &user.Activo, &user.CreatedAt,
+		&user.Password, &user.PerfilID, &user.Activo, &user.CreatedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -70,13 +70,13 @@ func (r *authRepository) FindByEmail(email string) (*models.UserAuth, error) {
 func (r *authRepository) FindByID(id int) (*models.UserAuth, error) {
 	user := &models.UserAuth{}
 	query := `
-        SELECT u.id, u.name, u.email, u.phone, u.password, u.perfil_id, u.activo, u.created_at
-        FROM users u
-        WHERE u.id = $1
-    `
+		SELECT u.id, u.name, u.email, u.phone, u.password, u.perfil_id, u.activo, u.created_at
+		FROM users u
+		WHERE u.id = $1
+	`
 	err := r.db.QueryRow(query, id).Scan(
 		&user.ID, &user.Name, &user.Email, &user.Phone,
-		&user.Password, &user.RoleID, &user.Activo, &user.CreatedAt,
+		&user.Password, &user.PerfilID, &user.Activo, &user.CreatedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -97,21 +97,21 @@ func (r *authRepository) CreateUser(user *models.UserAuth) error {
 	}
 
 	query := `
-        INSERT INTO users (name, email, phone, password, perfil_id, activo, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-        RETURNING id, created_at
-    `
+		INSERT INTO users (name, email, phone, password, perfil_id, activo, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+		RETURNING id, created_at
+	`
 	err = r.db.QueryRow(query, user.Name, user.Email, user.Phone, string(hashedPassword),
-		user.RoleID, user.Activo).Scan(&user.ID, &user.CreatedAt)
+		user.PerfilID, user.Activo).Scan(&user.ID, &user.CreatedAt)
 	if err != nil {
 		return fmt.Errorf("error creando usuario: %w", err)
 	}
 
 	// Crear perfil de usuario
 	_, err = r.db.Exec(`
-        INSERT INTO perfiles_usuario (user_id, foto_path, updated_at)
-        VALUES ($1, '/static/uploads/perfil/default-avatar.png', NOW())
-    `, user.ID)
+		INSERT INTO perfiles_usuario (user_id, foto_path, updated_at)
+		VALUES ($1, '/static/uploads/perfil/default-avatar.png', NOW())
+	`, user.ID)
 	if err != nil {
 		// No fallamos por esto, solo logueamos
 		fmt.Printf("Warning: no se pudo crear perfil_usuario para user_id %d: %v\n", user.ID, err)
@@ -151,17 +151,16 @@ func (r *authRepository) ValidatePassword(hashedPassword, password string) bool 
 }
 
 // ============================================
-// RECORD FAILED ATTEMPT (CORREGIDO)
+// RECORD FAILED ATTEMPT
 // ============================================
 func (r *authRepository) RecordFailedAttempt(email, ipAddress string) error {
-	// Verificar que la tabla existe (opcional, para desarrollo)
 	query := `
-        INSERT INTO login_attempts (email, ip_address, attempt_time)
-        VALUES ($1, $2, NOW())
-    `
+		INSERT INTO login_attempts (email, ip_address, attempt_time)
+		VALUES ($1, $2, NOW())
+	`
 	_, err := r.db.Exec(query, email, ipAddress)
 	if err != nil {
-		// Si la tabla no existe, ignoramos el error en desarrollo
+		// Si la tabla no existe, ignoramos el error
 		fmt.Printf("Warning: no se pudo registrar intento fallido: %v\n", err)
 		return nil
 	}
@@ -169,7 +168,7 @@ func (r *authRepository) RecordFailedAttempt(email, ipAddress string) error {
 }
 
 // ============================================
-// RESET FAILED ATTEMPTS (CORREGIDO)
+// RESET FAILED ATTEMPTS
 // ============================================
 func (r *authRepository) ResetFailedAttempts(email string) error {
 	query := `DELETE FROM login_attempts WHERE email = $1`
@@ -182,15 +181,15 @@ func (r *authRepository) ResetFailedAttempts(email string) error {
 }
 
 // ============================================
-// GET FAILED ATTEMPTS (CORREGIDO)
+// GET FAILED ATTEMPTS
 // ============================================
 func (r *authRepository) GetFailedAttempts(email string, since time.Time) (int, error) {
 	var count int
 	query := `
-        SELECT COUNT(*)
-        FROM login_attempts
-        WHERE email = $1 AND attempt_time > $2
-    `
+		SELECT COUNT(*)
+		FROM login_attempts
+		WHERE email = $1 AND attempt_time > $2
+	`
 	err := r.db.QueryRow(query, email, since).Scan(&count)
 	if err != nil {
 		return 0, nil // Si hay error, asumimos 0 intentos
@@ -199,7 +198,7 @@ func (r *authRepository) GetFailedAttempts(email string, since time.Time) (int, 
 }
 
 // ============================================
-// IS BLOCKED (CORREGIDO)
+// IS BLOCKED
 // ============================================
 func (r *authRepository) IsBlocked(email string, maxAttempts int, blockDuration time.Duration) (bool, error) {
 	since := time.Now().Add(-blockDuration)

@@ -3,15 +3,11 @@ package models
 import "time"
 
 type Modulo struct {
-	ID            int       `json:"id"`
-	Nombre        string    `json:"nombre"`
-	NombreMostrar string    `json:"nombre_mostrar"`
-	Ruta          string    `json:"ruta"`
-	Icono         string    `json:"icono"`
-	Categoria     string    `json:"categoria"`
-	Orden         int       `json:"orden"`
-	Activo        bool      `json:"activo"`
-	CreatedAt     time.Time `json:"created_at"`
+	ID          int       `json:"id"`
+	Nombre      string    `json:"nombre"`
+	Descripcion string    `json:"descripcion"` // ← Nueva columna
+	Activo      bool      `json:"activo"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type ModuloFilter struct {

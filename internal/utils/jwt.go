@@ -8,14 +8,22 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// ============================================
+// JWT CLAIMS (con Perfil en lugar de Role)
+// ============================================
+
 type JWTClaims struct {
-	UserID   int    `json:"user_id"`
-	Email    string `json:"email"`
-	Name     string `json:"name"`
-	RoleID   int    `json:"role_id"`
-	RoleName string `json:"role_name"`
+	UserID       int    `json:"user_id"`
+	Email        string `json:"email"`
+	Name         string `json:"name"`
+	PerfilID     int    `json:"perfil_id"`     // ← Cambiado de RoleID
+	PerfilNombre string `json:"perfil_nombre"` // ← Cambiado de RoleName
 	jwt.RegisteredClaims
 }
+
+// ============================================
+// JWT MANAGER
+// ============================================
 
 type JWTManager struct {
 	secretKey  []byte
@@ -29,14 +37,16 @@ func NewJWTManager(secretKey string, expirationHours int) *JWTManager {
 	}
 }
 
-// Generate - Genera un nuevo token JWT
-func (m *JWTManager) Generate(userID int, email, name string, roleID int, roleName string) (string, error) {
+// ============================================
+// GENERATE - Genera nuevo token JWT
+// ============================================
+func (m *JWTManager) Generate(userID int, email, name string, perfilID int, perfilNombre string) (string, error) {
 	claims := JWTClaims{
-		UserID:   userID,
-		Email:    email,
-		Name:     name,
-		RoleID:   roleID,
-		RoleName: roleName,
+		UserID:       userID,
+		Email:        email,
+		Name:         name,
+		PerfilID:     perfilID,     // ← Cambiado de RoleID
+		PerfilNombre: perfilNombre, // ← Cambiado de RoleName
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.expiration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -49,7 +59,9 @@ func (m *JWTManager) Generate(userID int, email, name string, roleID int, roleNa
 	return token.SignedString(m.secretKey)
 }
 
-// Validate - Valida y extrae claims del token
+// ============================================
+// VALIDATE - Valida y extrae claims del token
+// ============================================
 func (m *JWTManager) Validate(tokenString string) (*JWTClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -69,7 +81,9 @@ func (m *JWTManager) Validate(tokenString string) (*JWTClaims, error) {
 	return nil, fmt.Errorf("token inválido")
 }
 
-// Refresh - Genera un nuevo token a partir de uno existente (si no expiró)
+// ============================================
+// REFRESH - Genera nuevo token a partir de uno existente
+// ============================================
 func (m *JWTManager) Refresh(tokenString string) (string, error) {
 	claims, err := m.Validate(tokenString)
 	if err != nil {
@@ -77,10 +91,12 @@ func (m *JWTManager) Refresh(tokenString string) (string, error) {
 	}
 
 	// Generar nuevo token con los mismos claims
-	return m.Generate(claims.UserID, claims.Email, claims.Name, claims.RoleID, claims.RoleName)
+	return m.Generate(claims.UserID, claims.Email, claims.Name, claims.PerfilID, claims.PerfilNombre)
 }
 
-// ExtractFromRequest - Extrae token del header Authorization
+// ============================================
+// EXTRACT FROM REQUEST - Extrae token del header Authorization
+// ============================================
 func (m *JWTManager) ExtractFromRequest(c echo.Context) (string, error) {
 	authHeader := c.Request().Header.Get("Authorization")
 	if authHeader == "" {
@@ -95,4 +111,20 @@ func (m *JWTManager) ExtractFromRequest(c echo.Context) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+// ============================================
+// GET PERFIL NOMBRE (auxiliar)
+// ============================================
+func (m *JWTManager) GetPerfilNombre(perfilID int) string {
+	switch perfilID {
+	case 1:
+		return "administrador"
+	case 2:
+		return "usuario"
+	case 3:
+		return "editor"
+	default:
+		return "usuario"
+	}
 }

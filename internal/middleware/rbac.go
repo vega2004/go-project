@@ -24,21 +24,40 @@ func (m *RBACMiddleware) CheckPermission(moduloNombre string, permiso string) ec
 		return func(c echo.Context) error {
 			userID, ok := c.Get("user_id").(int)
 			if !ok {
+				log.Printf("[RBAC] ERROR: No se pudo obtener user_id")
 				return c.Redirect(http.StatusSeeOther, "/login?error=Sesión no válida")
 			}
 
+			// ============================================
+			// LOGS DE DEPURACIÓN
+			// ============================================
+			log.Printf("[RBAC] ========== VERIFICANDO PERMISO ==========")
+			log.Printf("[RBAC] UserID: %d", userID)
+			log.Printf("[RBAC] Módulo: %s", moduloNombre)
+			log.Printf("[RBAC] Permiso: %s", permiso)
+
 			tienePermiso, err := m.permisoRepo.UserHasPermission(userID, moduloNombre, permiso)
+
+			log.Printf("[RBAC] Resultado - tienePermiso: %v", tienePermiso)
+			if err != nil {
+				log.Printf("[RBAC] Error: %v", err)
+			}
+
 			if err != nil {
 				if err == sql.ErrNoRows {
+					log.Printf("[RBAC] ❌ ACCESO DENEGADO - No hay registro de permisos")
 					return c.Redirect(http.StatusSeeOther, "/dashboard?error=No tienes permiso para acceder")
 				}
+				log.Printf("[RBAC] ❌ ERROR EN BD")
 				return c.Redirect(http.StatusSeeOther, "/maintenance?error=Error verificando permisos")
 			}
 
 			if !tienePermiso {
+				log.Printf("[RBAC] ❌ ACCESO DENEGADO - Usuario %d no tiene permiso %s en módulo %s", userID, permiso, moduloNombre)
 				return c.Redirect(http.StatusSeeOther, "/dashboard?error=No tienes permiso para esta acción")
 			}
 
+			log.Printf("[RBAC] ✅ ACCESO PERMITIDO - Usuario %d tiene permiso %s en módulo %s", userID, permiso, moduloNombre)
 			return next(c)
 		}
 	}

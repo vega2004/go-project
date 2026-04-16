@@ -1,124 +1,475 @@
-{{define "content"}}
-<div class="row">
-    <!-- Columna izquierda - Foto y datos básicos -->
-    <div class="col-md-4">
-        <div class="card shadow mb-4">
-            <div class="card-body text-center">
-                <!-- Foto de perfil -->
-                <img src="{{.FotoPath}}" alt="Avatar" class="rounded-circle img-fluid mb-3" 
-                     style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #0d6efd;">
-                
-                <h4>{{.UserName}}</h4>
-                <p class="text-muted">{{.UserEmail}}</p>
-                
-                <!-- Badge de rol -->
-                <span class="badge {{if eq .UserRole "administrador"}}bg-danger{{else if eq .UserRole "editor"}}bg-warning text-dark{{else}}bg-info{{end}} mb-3">
-                    {{if eq .UserRole "administrador"}}Administrador{{else if eq .UserRole "editor"}}Editor{{else}}Usuario{{end}}
-                </span>
-                
-                <!-- Formulario de subida de foto -->
-                <form action="/perfil/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
-                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                    <div class="mb-3">
-                        <label for="foto" class="form-label">Cambiar foto</label>
-                        <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm w-100">
-                        <i class="bi bi-cloud-upload"></i> Subir foto
-                    </button>
-                </form>
-                
-                {{if ne .FotoPath "/static/uploads/perfil/default-avatar.png"}}
-                <a href="/perfil/delete-foto" class="btn btn-danger btn-sm w-100 mt-2" 
-                   onclick="return confirm('¿Eliminar foto de perfil?')">
-                    <i class="bi bi-trash"></i> Eliminar foto
-                </a>
-                {{end}}
-            </div>
-        </div>
-    </div>
-
-    <!-- Columna derecha - Información Personal -->
-    <div class="col-md-8">
-        <!-- Datos del Perfil -->
-        <div class="card shadow mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-person-gear"></i> Información Personal</h5>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="/perfil/update" id="perfilForm">
-                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                    <div class="mb-3">
-                        <label class="form-label">Biografía</label>
-                        <textarea class="form-control" name="bio" rows="3">{{.Perfil.Bio}}</textarea>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Ubicación</label>
-                            <input type="text" class="form-control" name="ubicacion" value="{{.Perfil.Direccion}}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Teléfono Alterno</label>
-                            <input type="tel" class="form-control" name="telefono_alterno" value="{{.Perfil.TelefonoAlterno}}">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Guardar Cambios
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Cambio de Contraseña -->
-        <div class="card shadow">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0"><i class="bi bi-key"></i> Cambiar Contraseña</h5>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="/perfil/change-password" id="passwordForm">
-                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                    <div class="mb-3">
-                        <label class="form-label">Contraseña Actual</label>
-                        <input type="password" class="form-control" name="actual" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nueva Contraseña</label>
-                            <input type="password" class="form-control" name="nueva" required minlength="6">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Confirmar Contraseña</label>
-                            <input type="password" class="form-control" name="confirmar" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-shield-lock"></i> Cambiar Contraseña
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-{{end}}
-
-{{define "scripts"}}
-<script>
-    document.getElementById('passwordForm').addEventListener('submit', function(e) {
-        const nueva = document.querySelector('[name="nueva"]').value;
-        const confirmar = document.querySelector('[name="confirmar"]').value;
-        
-        if (nueva !== confirmar) {
-            e.preventDefault();
-            Swal.fire('Error', 'Las contraseñas no coinciden', 'error');
-        }
-    });
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil · Sistema de Gestión</title>
     
-    document.getElementById('uploadForm').addEventListener('submit', function(e) {
-        const file = document.getElementById('foto').files[0];
-        if (file && file.size > 5 * 1024 * 1024) {
-            e.preventDefault();
-            Swal.fire('Error', 'La imagen no puede superar los 5MB', 'error');
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #f4f7f9; }
+        
+        /* ========== NAVBAR ========== */
+        .navbar-corporate {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
         }
-    });
-</script>
-{{end}}
+        .navbar-corporate .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            color: white !important;
+        }
+        .navbar-corporate .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 8px 16px !important;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+        .navbar-corporate .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white !important;
+        }
+        .navbar-corporate .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .navbar-corporate .dropdown-item {
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .navbar-corporate .dropdown-item:hover {
+            background: linear-gradient(135deg, #4F7785 0%, #376474 100%);
+            color: white;
+        }
+        .navbar-corporate .dropdown-item.text-danger:hover {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+        
+        /* ========== BREADCRUMBS ========== */
+        .breadcrumb-corporate {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .breadcrumb-corporate .breadcrumb-item a {
+            color: #4F7785;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .breadcrumb-corporate .breadcrumb-item.active {
+            color: #152931;
+            font-weight: 600;
+        }
+        
+        /* ========== CARDS ========== */
+        .card-corporate {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            background: white;
+        }
+        .card-header-corporate {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            border: none;
+            padding: 18px 24px;
+            color: white;
+            font-weight: 600;
+        }
+        .card-header-warning {
+            background: linear-gradient(135deg, #d39e00 0%, #ffc107 100%);
+            border: none;
+            padding: 18px 24px;
+            color: #1a202c;
+            font-weight: 600;
+        }
+        
+        /* ========== AVATAR ========== */
+        .avatar-corporate {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border: 4px solid #4F7785;
+            box-shadow: 0 8px 20px rgba(21, 41, 49, 0.15);
+            transition: all 0.3s ease;
+        }
+        .avatar-corporate:hover {
+            transform: scale(1.02);
+            border-color: #152931;
+        }
+        
+        /* ========== BADGES ========== */
+        .badge-admin {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 30px;
+        }
+        .badge-editor {
+            background: linear-gradient(135deg, #4F7785 0%, #5a8a9a 100%);
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 30px;
+        }
+        .badge-user {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 30px;
+        }
+        
+        /* ========== FORM CONTROLS ========== */
+        .form-control-corporate {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background: white;
+            width: 100%;
+        }
+        .form-control-corporate:focus {
+            border-color: #4F7785;
+            box-shadow: 0 0 0 4px rgba(79, 119, 133, 0.1);
+            outline: none;
+        }
+        .form-label-corporate {
+            font-weight: 600;
+            color: #152931;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* ========== BIOGRAFÍA EN LÍNEA ========== */
+        .biografia-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            width: 100%;
+        }
+        .biografia-container .form-label-corporate {
+            min-width: 100px;
+            margin-bottom: 0;
+            padding-top: 14px;
+        }
+        .biografia-container .form-control-corporate {
+            flex: 1;
+        }
+        
+        /* ========== BUTTONS ========== */
+        .btn-corporate {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-corporate:hover {
+            background: linear-gradient(135deg, #1a3a4a 0%, #4F7785 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(21, 41, 49, 0.25);
+            color: white;
+        }
+        .btn-warning-corporate {
+            background: linear-gradient(135deg, #d39e00 0%, #ffc107 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            color: #1a202c;
+            transition: all 0.3s ease;
+        }
+        .btn-warning-corporate:hover {
+            background: linear-gradient(135deg, #e0a800 0%, #ffca2c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(211, 158, 0, 0.25);
+        }
+        .btn-danger-corporate {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-danger-corporate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.25);
+            color: white;
+        }
+        
+        /* ========== FOOTER ========== */
+        .footer-corporate {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 60px;
+        }
+        .footer-corporate .text-muted {
+            color: #4F7785 !important;
+            font-weight: 500;
+        }
+        
+        /* ========== ALERTS ========== */
+        .alert-success-corporate {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-weight: 500;
+        }
+        .alert-danger-corporate {
+            background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-weight: 500;
+        }
+        .alert .btn-close { filter: brightness(0) invert(1); }
+        
+        /* ========== ANIMATIONS ========== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-corporate { animation: fadeInUp 0.5s ease-out; }
+    </style>
+</head>
+<body>
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar navbar-expand-lg navbar-corporate">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="bi bi-building me-2"></i>Sistema de Gestión
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i> {{.UserName}}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/perfil">
+                                <i class="bi bi-person me-2"></i>Mi Perfil
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== BREADCRUMBS ========== -->
+    <div class="container mt-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-corporate p-3">
+                <li class="breadcrumb-item"><a href="/dashboard">Inicio</a></li>
+                <li class="breadcrumb-item active">Mi Perfil</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- ========== CONTENIDO PRINCIPAL ========== -->
+    <main class="container mt-4">
+        {{if .Success}}
+        <div class="alert alert-success-corporate alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{.Success}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {{end}}
+        
+        {{if .Error}}
+        <div class="alert alert-danger-corporate alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{.Error}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {{end}}
+
+        <div class="row">
+            <!-- Columna izquierda - Foto -->
+            <div class="col-md-4">
+                <div class="card-corporate mb-4">
+                    <div class="card-body text-center p-4">
+                        <img src="{{.FotoPath}}" alt="Avatar" class="rounded-circle avatar-corporate mb-3">
+                        <h4 style="color: #152931; font-weight: 700;">{{.UserName}}</h4>
+                        <p style="color: #4F7785; font-weight: 500;">{{.UserEmail}}</p>
+                        
+                        <div class="mb-3">
+                            {{if eq .UserPerfil "administrador"}}
+                            <span class="badge-admin"><i class="bi bi-shield-fill me-1"></i>Administrador</span>
+                            {{else if eq .UserPerfil "editor"}}
+                            <span class="badge-editor"><i class="bi bi-pencil-fill me-1"></i>Editor</span>
+                            {{else}}
+                            <span class="badge-user"><i class="bi bi-person-fill me-1"></i>Usuario</span>
+                            {{end}}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="foto" class="form-label-corporate">Cambiar foto</label>
+                            <input type="file" class="form-control-corporate" id="foto" name="foto" accept="image/*">
+                        </div>
+                        <button type="button" class="btn-corporate w-100" onclick="subirFoto()">
+                            <i class="bi bi-cloud-upload me-2"></i>Subir foto
+                        </button>
+                        
+                        {{if ne .FotoPath "/static/uploads/perfil/default-avatar.png"}}
+                        <a href="/perfil/delete-foto" class="btn btn-danger-corporate w-100 mt-2" 
+                           onclick="return confirm('¿Eliminar foto de perfil?')">
+                            <i class="bi bi-trash me-2"></i>Eliminar foto
+                        </a>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha - Formularios -->
+            <div class="col-md-8">
+                <!-- Información Personal -->
+                <div class="card-corporate mb-4">
+                    <div class="card-header-corporate">
+                        <h5 class="mb-0"><i class="bi bi-person-gear me-2"></i>Información Personal</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="/perfil/update" id="perfilForm">
+                            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                            
+                            <!-- BIOGRAFÍA - LABEL ALINEADO CON TEXTAREA -->
+                            <div class="mb-4 biografia-container">
+                                <label class="form-label-corporate">Biografía</label>
+                                <textarea class="form-control-corporate" name="bio" rows="3">{{.Perfil.Bio}}</textarea>
+                            </div>
+                            
+                            <!-- UBICACIÓN Y TELÉFONO EN COLUMNAS -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-corporate">Ubicación</label>
+                                    <input type="text" class="form-control-corporate" name="ubicacion" value="{{.Perfil.Direccion}}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-corporate">Teléfono Alterno</label>
+                                    <input type="tel" class="form-control-corporate" name="telefono_alterno" value="{{.Perfil.TelefonoAlterno}}">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn-corporate">
+                                <i class="bi bi-save me-2"></i>Guardar Cambios
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Cambio de Contraseña -->
+                <div class="card-corporate">
+                    <div class="card-header-warning">
+                        <h5 class="mb-0"><i class="bi bi-key-fill me-2"></i>Cambiar Contraseña</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="/perfil/change-password" id="passwordForm">
+                            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                            
+                            <!-- CONTRASEÑA ACTUAL -->
+                            <div class="mb-3">
+                                <label class="form-label-corporate">Contraseña Actual</label>
+                                <input type="password" class="form-control-corporate" name="actual" required>
+                            </div>
+                            
+                            <!-- NUEVA Y CONFIRMAR EN COLUMNAS -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-corporate">Nueva Contraseña</label>
+                                    <input type="password" class="form-control-corporate" name="nueva" required minlength="6">
+                                    <small class="text-muted mt-1 d-block">
+                                        <i class="bi bi-info-circle me-1"></i>Mínimo 6 caracteres
+                                    </small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-corporate">Confirmar Contraseña</label>
+                                    <input type="password" class="form-control-corporate" name="confirmar" required>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn-warning-corporate">
+                                <i class="bi bi-shield-lock me-2"></i>Cambiar Contraseña
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer-corporate py-4">
+        <div class="container text-center">
+            <span class="text-muted">
+                <i class="bi bi-c-circle me-1"></i> {{.CurrentYear}} Sistema de Gestión. Todos los derechos reservados.
+            </span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const csrfToken = "{{.CSRFToken}}";
+        
+        function subirFoto() {
+            const fileInput = document.getElementById('foto');
+            const file = fileInput.files[0];
+            if (!file) { Swal.fire('Error', 'Selecciona una imagen', 'error'); return; }
+            if (file.size > 5 * 1024 * 1024) { Swal.fire('Error', 'La imagen no puede superar los 5MB', 'error'); return; }
+            
+            Swal.fire({ title: 'Subiendo...', text: 'Cargando imagen', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            const formData = new FormData();
+            formData.append('foto', file); formData.append('csrf_token', csrfToken);
+            fetch('/perfil/upload', { method: 'POST', headers: { 'X-CSRF-Token': csrfToken }, body: formData })
+            .then(r => r.ok ? Swal.fire({ icon: 'success', title: '¡Foto actualizada!', text: 'Tu foto de perfil ha sido actualizada', confirmButtonText: 'OK' }).then(() => location.reload()) : Swal.fire('Error', 'Error al subir la foto', 'error'))
+            .catch(() => { Swal.close(); Swal.fire('Error', 'Error de conexión', 'error'); });
+        }
+        
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            const nueva = document.querySelector('[name="nueva"]').value;
+            const confirmar = document.querySelector('[name="confirmar"]').value;
+            if (nueva !== confirmar) { e.preventDefault(); Swal.fire('Error', 'Las contraseñas no coinciden', 'error'); }
+        });
+        
+        setTimeout(() => { document.querySelectorAll('.alert').forEach(a => new bootstrap.Alert(a).close()); }, 5000);
+    </script>
+</body>
+</html>

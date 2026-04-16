@@ -1,95 +1,381 @@
-{{define "content"}}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">
-                    <i class="bi {{if .Modulo.ID}}bi-pencil-square{{else}}bi-plus-circle{{end}}"></i> 
-                    {{.Title}}
-                </h4>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="/seguridad/modulos/{{if .Modulo.ID}}actualizar/{{.Modulo.ID}}{{else}}crear{{end}}" id="moduloForm">
-                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nombre del Módulo <span class="text-danger">*</span></label>
-                            <input type="text" name="nombre" class="form-control" 
-                                   value="{{.Modulo.Nombre}}" required minlength="3" maxlength="100">
-                            <div class="form-text">Identificador único (ej: usuarios, perfiles)</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nombre para Mostrar <span class="text-danger">*</span></label>
-                            <input type="text" name="nombre_mostrar" class="form-control" 
-                                   value="{{.Modulo.NombreMostrar}}" required>
-                            <div class="form-text">Texto que verá el usuario (ej: Usuarios, Perfiles)</div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Ruta <span class="text-danger">*</span></label>
-                            <input type="text" name="ruta" class="form-control" 
-                                   value="{{.Modulo.Ruta}}" required placeholder="/seguridad/usuarios">
-                            <div class="form-text">URL del módulo (debe comenzar con /)</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Icono</label>
-                            <input type="text" name="icono" class="form-control" 
-                                   value="{{.Modulo.Icono}}" placeholder="bi-people">
-                            <div class="form-text">Clase de Bootstrap Icon (ej: bi-people, bi-grid)</div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Categoría</label>
-                            <select name="categoria" class="form-select">
-                                <option value="seguridad" {{if eq .Modulo.Categoria "seguridad"}}selected{{end}}>Seguridad</option>
-                                <option value="principal1" {{if eq .Modulo.Categoria "principal1"}}selected{{end}}>Principal 1</option>
-                                <option value="principal2" {{if eq .Modulo.Categoria "principal2"}}selected{{end}}>Principal 2</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Orden</label>
-                            <input type="number" name="orden" class="form-control" 
-                                   value="{{.Modulo.Orden}}" min="0">
-                            <div class="form-text">Orden de aparición (menor = más arriba)</div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Estado</label>
-                            <div class="form-check mt-2">
-                                <input type="checkbox" name="activo" class="form-check-input" 
-                                       {{if .Modulo.Activo}}checked{{end}}>
-                                <label class="form-check-label">Módulo activo</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="/seguridad/modulos" class="btn btn-secondary">
-                            <i class="bi bi-x-circle"></i> Cancelar
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} · Sistema de Gestión</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{.CSRFToken}}">
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #f4f7f9; }
+        
+        /* ========== NAVBAR ========== */
+        .navbar-corporate {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+        }
+        .navbar-corporate .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            color: white !important;
+        }
+        .navbar-corporate .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 8px 16px !important;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+        .navbar-corporate .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white !important;
+        }
+        .navbar-corporate .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .navbar-corporate .dropdown-item {
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .navbar-corporate .dropdown-item:hover {
+            background: linear-gradient(135deg, #4F7785 0%, #376474 100%);
+            color: white;
+        }
+        .navbar-corporate .dropdown-item.text-danger:hover {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+        
+        /* ========== BREADCRUMBS ========== */
+        .breadcrumb-corporate {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .breadcrumb-corporate .breadcrumb-item a {
+            color: #4F7785;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .breadcrumb-corporate .breadcrumb-item.active {
+            color: #152931;
+            font-weight: 600;
+        }
+        
+        /* ========== CARDS ========== */
+        .card-corporate {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            background: white;
+        }
+        .card-header-corporate {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            border: none;
+            padding: 20px 28px;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* ========== FORM CONTROLS ========== */
+        .form-control-corporate {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background: white;
+            width: 100%;
+        }
+        .form-control-corporate:focus {
+            border-color: #4F7785;
+            box-shadow: 0 0 0 4px rgba(79, 119, 133, 0.1);
+            outline: none;
+        }
+        .form-label-corporate {
+            font-weight: 600;
+            color: #152931;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-text-corporate {
+            color: #4F7785;
+            font-size: 0.8rem;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* ========== DESCRIPCIÓN EN LÍNEA ========== */
+        .descripcion-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            width: 100%;
+        }
+        .descripcion-container .form-label-corporate {
+            min-width: 100px;
+            margin-bottom: 0;
+            padding-top: 14px;
+        }
+        .descripcion-container .form-control-corporate {
+            flex: 1;
+        }
+        
+        /* ========== CHECKBOX ========== */
+        .form-check-input:checked {
+            background-color: #4F7785;
+            border-color: #4F7785;
+        }
+        .form-check-label {
+            font-weight: 600;
+            color: #152931;
+        }
+        
+        /* ========== BUTTONS ========== */
+        .btn-corporate {
+            background: linear-gradient(135deg, #152931 0%, #376474 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 28px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-corporate:hover {
+            background: linear-gradient(135deg, #1a3a4a 0%, #4F7785 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(21, 41, 49, 0.25);
+            color: white;
+        }
+        .btn-secondary-corporate {
+            background: #6c757d;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 28px;
+            font-weight: 500;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary-corporate:hover {
+            background: #5a6268;
+            color: white;
+        }
+        
+        /* ========== ALERTS ========== */
+        .alert-success-corporate {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-weight: 500;
+        }
+        .alert-danger-corporate {
+            background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-weight: 500;
+        }
+        .alert .btn-close { filter: brightness(0) invert(1); }
+        
+        /* ========== FOOTER ========== */
+        .footer-corporate {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 60px;
+        }
+        .footer-corporate .text-muted {
+            color: #4F7785 !important;
+            font-weight: 500;
+        }
+        
+        .text-danger { color: #dc3545 !important; }
+    </style>
+</head>
+<body>
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar navbar-expand-lg navbar-corporate">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="bi bi-building me-2"></i>Sistema de Gestión
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i> {{.UserName}}
                         </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle"></i> Guardar
-                        </button>
-                    </div>
-                </form>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/perfil">
+                                <i class="bi bi-person me-2"></i>Mi Perfil
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
-    </div>
-</div>
-{{end}}
+    </nav>
 
-{{define "scripts"}}
-<script>
-document.getElementById('moduloForm').addEventListener('submit', function(e) {
-    const ruta = document.querySelector('[name="ruta"]').value.trim();
-    if (!ruta.startsWith('/')) {
-        e.preventDefault();
-        Swal.fire('Error', 'La ruta debe comenzar con /', 'error');
-    }
-});
-</script>
-{{end}}
+    <!-- ========== BREADCRUMBS ========== -->
+    <div class="container mt-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-corporate p-3">
+                <li class="breadcrumb-item"><a href="/dashboard">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="/seguridad">Seguridad</a></li>
+                <li class="breadcrumb-item"><a href="/seguridad/modulos">Módulos</a></li>
+                <li class="breadcrumb-item active">{{.Title}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- ========== CONTENIDO PRINCIPAL ========== -->
+    <main class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card-corporate">
+                    <div class="card-header-corporate">
+                        <h4 class="mb-0">
+                            {{if .Modulo.ID}}
+                                <i class="bi bi-pencil-square me-2"></i>{{.Title}}
+                            {{else}}
+                                <i class="bi bi-plus-circle me-2"></i>{{.Title}}
+                            {{end}}
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        {{if .SuccessMsg}}
+                        <div class="alert alert-success-corporate alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i> {{.SuccessMsg}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {{end}}
+                        
+                        {{if .ErrorMsg}}
+                        <div class="alert alert-danger-corporate alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{.ErrorMsg}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {{end}}
+
+                        <form method="POST" action="/seguridad/modulos/{{if .Modulo.ID}}actualizar/{{.Modulo.ID}}{{else}}crear{{end}}" id="moduloForm">
+                            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                            
+                            <!-- NOMBRE DEL MÓDULO -->
+                            <div class="mb-4">
+                                <label class="form-label-corporate">
+                                    Nombre del Módulo <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="nombre" class="form-control-corporate" 
+                                       value="{{.Modulo.Nombre}}" required minlength="3" maxlength="100"
+                                       placeholder="Ej: usuarios, perfiles, clientes">
+                                <div class="form-text-corporate">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Identificador único del módulo
+                                </div>
+                            </div>
+                            
+                            <!-- DESCRIPCIÓN - LABEL ALINEADO CON TEXTAREA -->
+                            <div class="mb-4 descripcion-container">
+                                <label class="form-label-corporate">Descripción</label>
+                                <textarea name="descripcion" class="form-control-corporate" rows="4" 
+                                          placeholder="Descripción del módulo...">{{.Modulo.Descripcion}}</textarea>
+                            </div>
+                            
+                            <!-- CHECKBOX MÓDULO ACTIVO -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input type="checkbox" name="activo" class="form-check-input" id="activoCheck"
+                                           {{if .Modulo.Activo}}checked{{end}}>
+                                    <label class="form-check-label" for="activoCheck">
+                                        <i class="bi bi-toggle-on me-1" style="color: #4F7785;"></i>
+                                        Módulo Activo
+                                    </label>
+                                </div>
+                                <div class="form-text-corporate ms-4">
+                                    Solo los módulos activos estarán disponibles para asignar a perfiles
+                                </div>
+                            </div>
+                            
+                            <!-- BOTONES -->
+                            <div class="d-flex justify-content-end gap-3 mt-4 pt-2">
+                                <a href="/seguridad/modulos" class="btn-secondary-corporate">
+                                    <i class="bi bi-x-circle me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn-corporate">
+                                    <i class="bi bi-check-circle me-2"></i>Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer-corporate py-4">
+        <div class="container text-center">
+            <span class="text-muted">
+                <i class="bi bi-c-circle me-1"></i> {{.CurrentYear}} Sistema de Gestión. Todos los derechos reservados.
+            </span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.getElementById('moduloForm').addEventListener('submit', function(e) {
+            const nombre = document.querySelector('[name="nombre"]').value.trim();
+            if (nombre.length < 3) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'El nombre debe tener al menos 3 caracteres',
+                    confirmButtonColor: '#4F7785'
+                });
+            }
+        });
+        
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

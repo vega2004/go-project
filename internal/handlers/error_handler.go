@@ -23,7 +23,7 @@ type ErrorInfo struct {
 	RequestURI     string      `json:"request_uri,omitempty"`
 	Method         string      `json:"method,omitempty"`
 	UserID         interface{} `json:"user_id,omitempty"`
-	UserRole       interface{} `json:"user_role,omitempty"`
+	UserPerfil     interface{} `json:"user_perfil,omitempty"` // ← Cambiado
 	ShowStackTrace bool        `json:"-"`
 	StackTrace     string      `json:"-"`
 }
@@ -41,7 +41,7 @@ func (h *ErrorHandler) HandleError(c echo.Context, code int, err error) error {
 
 	// Obtener información del usuario (si está autenticado)
 	userID := c.Get("user_id")
-	userRole := c.Get("user_role")
+	userPerfil := c.Get("user_perfil") // ← Cambiado de user_role
 
 	// Títulos según código de error
 	titles := map[int]string{
@@ -99,7 +99,7 @@ func (h *ErrorHandler) HandleError(c echo.Context, code int, err error) error {
 		"RequestURI":     c.Request().RequestURI,
 		"Method":         c.Request().Method,
 		"UserID":         userID,
-		"UserRole":       userRole,
+		"UserPerfil":     userPerfil, // ← Cambiado
 		"breadcrumbs": []map[string]string{
 			{"name": "Inicio", "url": "/"},
 			{"name": fmt.Sprintf("Error %d", code), "url": ""},
@@ -117,6 +117,8 @@ func (h *ErrorHandler) HandleError(c echo.Context, code int, err error) error {
 			ErrorID:    errorID,
 			RequestURI: c.Request().RequestURI,
 			Method:     c.Request().Method,
+			UserID:     userID,
+			UserPerfil: userPerfil, // ← Cambiado
 		})
 	}
 
@@ -177,7 +179,7 @@ func (h *ErrorHandler) logError(errorID string, code int, err error, c echo.Cont
 
 	// Obtener información del usuario
 	userID := c.Get("user_id")
-	userRole := c.Get("user_role")
+	userPerfil := c.Get("user_perfil") // ← Cambiado
 
 	logEntry := fmt.Sprintf(`
 ========================================
@@ -187,7 +189,7 @@ Method: %s
 IP: %s
 UserAgent: %s
 UserID: %v
-UserRole: %v
+UserPerfil: %v
 Error: %v
 Stack Trace:
 %s
@@ -201,7 +203,7 @@ Stack Trace:
 		c.RealIP(),
 		c.Request().UserAgent(),
 		userID,
-		userRole,
+		userPerfil, // ← Cambiado
 		err,
 		string(debug.Stack()),
 	)
