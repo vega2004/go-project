@@ -42,7 +42,6 @@ func ValidateRecaptcha(token, secretKey string, minScore float64, expectedAction
 		return false, fmt.Errorf("error decodificando respuesta reCAPTCHA: %w", err)
 	}
 
-	// LOGS PARA DEPURAR
 	fmt.Printf("[RECAPTCHA DEBUG] Success: %v\n", recaptchaResp.Success)
 	fmt.Printf("[RECAPTCHA DEBUG] Hostname: %s\n", recaptchaResp.Hostname)
 	fmt.Printf("[RECAPTCHA DEBUG] ErrorCodes: %v\n", recaptchaResp.ErrorCodes)
@@ -52,6 +51,7 @@ func ValidateRecaptcha(token, secretKey string, minScore float64, expectedAction
 		return false, fmt.Errorf("verificación reCAPTCHA fallida: %v", recaptchaResp.ErrorCodes)
 	}
 
+	// ✅ SOLO VALIDAR SCORE SI minScore > 0 (para v3)
 	if minScore > 0 {
 		if recaptchaResp.Score < minScore {
 			return false, fmt.Errorf("score demasiado bajo: %.2f (mínimo: %.2f)", recaptchaResp.Score, minScore)
