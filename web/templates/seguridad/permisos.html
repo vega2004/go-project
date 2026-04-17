@@ -350,11 +350,18 @@
                             <i class="bi bi-info-circle me-2"></i>Seleccione un perfil y presione "Cargar Permisos"
                         </div>
                     </div>
-                    <div class="card-footer bg-light p-3 text-end" id="btnGuardarContainer" style="display: none;">
-                        <button class="btn-success-corporate" id="btnGuardar">
-                            <i class="bi bi-save me-2"></i>Guardar Cambios
-                        </button>
-                    </div>
+                   {{$permisos := index .Permisos "Permisos"}}
+<div class="card-footer bg-light p-3 text-end" id="btnGuardarContainer" style="display: none;">
+    {{if $permisos.PuedeEditar}}
+    <button class="btn-success-corporate" id="btnGuardar">
+        <i class="bi bi-save me-2"></i>Guardar Cambios
+    </button>
+    {{else}}
+    <div class="alert-info-corporate">
+        <i class="bi bi-info-circle me-2"></i>Solo tienes permiso de lectura. No puedes guardar cambios.
+    </div>
+    {{end}}
+</div>
                 </div>
             </div>
         </div>

@@ -359,10 +359,10 @@ func main() {
 
 	// MÓDULO: PERMISOS-PERFIL
 	permGroup := protected.Group("/seguridad/permisos-perfil")
-	permGroup.Use(rbacMiddleware.RequireAdmin)
+	permGroup.Use(rbacMiddleware.CheckPermission("Permisos", "ver")) // ← CUALQUIERA CON PERMISO "ver"
 	permGroup.GET("", permisoHandler.Index)
-	permGroup.POST("/cargar", permisoHandler.LoadPermissions)
-	permGroup.POST("/guardar", permisoHandler.SavePermissions, csrfMiddleware.Protect)
+	permGroup.POST("/cargar", permisoHandler.LoadPermissions, rbacMiddleware.CheckPermission("Permisos", "ver"))
+	permGroup.POST("/guardar", permisoHandler.SavePermissions, rbacMiddleware.CheckPermission("Permisos", "editar"), csrfMiddleware.Protect)
 	log.Println("[ROUTES]   - Permisos")
 
 	// MÓDULO: USUARIOS// MÓDULO: MÓDULOS - Cambiar "modulos" por "Módulos" - Cambiar "usuarios" por "Usuarios"
