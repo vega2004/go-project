@@ -33,9 +33,16 @@ func NewPermisoHandler(ps service.PermisoService, pfs service.PerfilService, env
 }
 
 // Index - Muestra la página principal de gestión de permisos
+// Index - Muestra la página principal de gestión de permisos
 func (h *PermisoHandler) Index(c echo.Context) error {
 	// Generar token CSRF
 	h.csrfMiddleware.SetToken(c)
+
+	// ✅ Obtener permisos del contexto
+	permisos := c.Get("permisos")
+	if permisos == nil {
+		permisos = make(map[string]models.Permiso)
+	}
 
 	// Obtener lista de perfiles para el selector
 	perfiles, err := h.perfilService.GetAll(&models.PerfilFilter{Page: 1, PageSize: 100})
@@ -56,6 +63,7 @@ func (h *PermisoHandler) Index(c echo.Context) error {
 	return c.Render(http.StatusOK, "seguridad/permisos.html", map[string]interface{}{
 		"Title":      "Permisos por Perfil",
 		"Perfiles":   perfiles.Data,
+		"Permisos":   permisos, // ✅ AGREGAR ESTO
 		"SuccessMsg": c.QueryParam("success"),
 		"ErrorMsg":   c.QueryParam("error"),
 		"CSRFToken":  csrfToken,
