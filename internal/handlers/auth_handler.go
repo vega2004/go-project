@@ -126,7 +126,7 @@ func (h *AuthHandler) DoLogin(c echo.Context) error {
 	}
 
 	// ============================================
-	// WEB TRADICIONAL - CREAR SESIÓN
+	// WEB TRADICIONAL - CREAR SES
 	// ============================================
 	h.sessionManager.ClearSession(c)
 
